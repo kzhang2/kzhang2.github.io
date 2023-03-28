@@ -78,7 +78,7 @@ header {
   /* background-color: #CCCCCC; */
   border-radius: 25px;
   border: 2px solid;
-  border-color: #888888;
+  border-color: #CCCCCC;
   padding-left: 10px;
   padding-right: 10px
 }
@@ -100,7 +100,7 @@ footer {
 .subsect{
   border-radius: 25px;
   border: 2px solid;
-  border-color: #888888;
+  border-color: #CCCCCC;
   padding-top: 10px;
   padding-left: 10px;
   padding-right: 10px;
