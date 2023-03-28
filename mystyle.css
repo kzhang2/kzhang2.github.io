@@ -1,0 +1,108 @@
+.vertical-center {
+  /* min-height: 100%; */
+  /* Fallback for browsers do NOT support vh unit */
+  /* min-height: 100vh; */
+  /* These two lines are counted as one :-)       */
+  /* display: flex; */
+  width:1000px;
+  margin: auto;
+}
+
+/** {
+    border : 1px solid red;
+}*/
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 99;
+  font-display: swap;
+  src: url("./fonts/Inter-Regular.woff2?v=3.15") format("woff2"), url("./fonts/Inter-Regular.woff?v=2.15") format("woff");
+}
+
+html, body {
+  margin: 0;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 0;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+p {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+
+.centered-buttons {
+  display: grid;
+  align-items: center;
+}
+
+.black-buttons {
+  color: black; 
+}
+.black-buttons:hover {
+  text-decoration: none;
+}
+
+i {
+  padding: 5px;
+}
+
+
+blockquote {border-left:5px solid #eee; padding-left:1.5em; margin:1em 0;}
+blockquote p {text-indent: 0 !important}
+blockquote small {display:block; line-height:1.7em;}
+
+footer {
+  text-align:center;
+  margin: auto;
+  font-size: 12px;
+}
+
+hr {
+  border: 0;
+  clear:both;
+  display:block;
+  width: 96%;               
+  background-color:#888888;
+  height: 1px;
+  margin: 10px;
+}
+
+header {
+  width:350px;
+  float:left;
+  position:fixed;
+  -webkit-font-smoothing:subpixel-antialiased;
+  /* background-color: #CCCCCC; */
+  border-radius: 25px;
+  border: 2px solid;
+  border-color: #888888;
+  padding-left: 10px;
+  padding-right: 10px
+}
+
+section {
+  width:630px;
+  float:right;
+  padding-bottom:50px;
+}
+
+footer {
+  width:350px;
+  float:left;
+  position:fixed;
+  bottom:50px;
+  -webkit-font-smoothing:subpixel-antialiased;
+}
+
+.subsect{
+  border-radius: 25px;
+  border: 2px solid;
+  border-color: #888888;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+}
