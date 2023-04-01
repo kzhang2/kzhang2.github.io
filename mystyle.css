@@ -6,6 +6,10 @@
   src: url("./fonts/Inter-Regular.woff2?v=3.15") format("woff2"), url("./fonts/Inter-Regular.woff?v=2.15") format("woff");
 }
 
+ul {
+  margin-bottom: 5px;
+}
+
 p {
   font-size: 12px;
   margin-bottom: 0;
@@ -28,9 +32,8 @@ i {
 }
 
 
-blockquote {border-left:5px solid #eee; padding-left:1.5em; margin:1em 0;}
+blockquote {border-left:5px solid #eee; padding-left:1.5em; margin:1em 0; font-size: 12px;}
 blockquote p {text-indent: 0 !important}
-blockquote small {display:block; line-height:1.7em;}
 
 footer {
   text-align:center;
