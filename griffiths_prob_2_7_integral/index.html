@@ -1,0 +1,70 @@
+<html>
+	<head>
+	<link rel="stylesheet" href="styles.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<div class="content">
+			<h1> A pesky integral from Griffith's Electrodynamics </h1>
+			<p> Problem 2.7 requires the calculation of slightly pesky integral to find the electric field of a spherical shell of radius \(R\) with uniform charge density \(\sigma\) and a point distance \(z\) away from the center of the spherical shell. 
+			$$ \mathbf{E} = \frac{1}{4\pi\epsilon_0}\int_{0}^{2\pi}\int_0^{\pi}
+			\frac{z-R\cos \theta}{(z^2 + R^2 - 2Rz\cos\theta)^{3/2}}\sigma R^2\sin\theta d\theta d\phi\mathbf{\hat{r}}$$
+					The details of how to calculate this integral are not noted in the solutions manual for Griffith's textbook and many calculations of this integral posted online are poorly written, so I've posted my own here.  </p>
+			<p>
+			  First, note that the integrand is constant with respect to \(\phi\), so we have 
+
+			  $$ \mathbf{E} = \frac{1}{4\pi\epsilon_0}2\pi R^2 \sigma \mathbf{\hat{r}}
+			                  \int_0^{\pi} \frac{z-R\cos \theta}{(z^2+R^2-2Rz\cos\theta)^{3/2}}\sin \theta d\theta$$
+			 Removing the constants, we want to evaluate the integral 
+			 $$ I = 
+			                  \int_0^{\pi} \frac{(z-R\cos \theta)\sin \theta d\theta}{(z^2+R^2-2Rz\cos\theta)^{3/2}}$$
+		         Now we use the only integration technique I can recall the details of consistently: \(u\)-substition.
+			 Let \(u = z-R\cos\theta\). Then \(d\theta = du/(R\sin\theta)\), \(\cos \theta = (z-u)/R\) and instead of integrating from
+			 \(0\) to \(\pi\) we integrate from to \(z-R\) to \(z+R\) (the geometric intution being we reparameterize from integrating along the elevation angle to 
+			 integrating along the z-axis), so the integral becomes
+			 $$ 
+			 \begin{align}
+			 I &= \int_{z-R}^{z+R} \frac{u du}{R(z^2 + R^2 -2Rz(z-u)/R)^{3/2}} \\
+			 &= \int_{z-R}^{z+R} \frac{u du}{R(R^2 - z^2 +2zu)^{3/2}}
+			 \end{align}
+			 $$
+			 Then we do another substitution: let \(v = R^2-z^2+2zu\). Then \(du = dv/(2z)\), \(u = (v-R^2+z^2)/(2z)\) and instead of integrating from \(z-R\) to \(z+R\) we integrate from \((z-R)^2\) to \((z+R)^2\) (the geometric intuition being we reparameterize from integrating along the z-axis to integrating along the distance from the test charge to the current patch on the charged surface under consideration squared), so the integral becomes
+			 $$
+			 \begin{align}
+			 I &= \int_{(z-R)^2}^{(z+R)^2} \frac{v-R^2+z^2}{R(2z)(2z)v^{(3/2)}}dv \\
+			 &= \frac{1}{4Rz^2} \left(\int_{(z-R)^2}^{(z+R)^2} \frac{1}{v^{1/2}}dv + \int_{(z-R)^2}^{(z+R)^2} \frac{z^2-R^2}{v^{3/2}}dv  \right) \\
+			 &= \frac{1}{4Rz^2} \left(2v^{1/2}\bigg|_{(z-R)^2}^{(z+R)^2} + \frac{2(R^2-z^2)}{v^{1/2}}\bigg|_{(z-R)^2}^{(z+R)^2}\right) \\
+			 &= \frac{1}{4Rz^2} 2\left((z+R) \pm (z-R) + (R-z) \pm (R+z)\right)
+			 \end{align}
+			 $$
+			 If we are inside the spherical shell, then we have \(z < R\), so the integral becomes 
+		     $$
+			\begin{align}
+			I &= \frac{1}{4Rz^2} 2\left((z+R) + (z-R) + (R-z) - (R+z)\right) = 0.
+		     	\end{align}
+		     $$
+		        If we are outside the spherical shell, then we have \(z > R\), so the integral becomes 
+		     $$
+			\begin{align}
+			I &= \frac{1}{4Rz^2} 2\left((z+R) - (z-R) + (R-z) + (R+z)\right) \\
+			&= \frac{1}{4Rz^2} 2(4R) = \frac{2}{z^2}
+		     	\end{align}
+		     $$
+		     So returning to the beginning, we have that the electric field is 
+		     $$
+		     \begin{align}
+\mathbf{E} &= \frac{1}{4\pi\epsilon_0}2\pi R^2 \sigma \mathbf{\hat{r}}
+			                  \int_0^{\pi} \frac{z-R\cos \theta}{(z^2+R^2-2Rz\cos\theta)^{3/2}}\sin \theta d\theta\\
+					  &= \frac{1}{4\pi\epsilon_0}2\pi R^2\sigma \mathbf{\hat{r}}\frac{2}{z^2} = \frac{1}{4\pi\epsilon_0} \frac{Q}{z^2}\mathbf{\hat{r}},
+		     \end{align}
+		     $$
+		     substituting \(Q = 4\pi R^2\sigma\), when we are outside the shell, and \(0\) inside the shell.
+		</div>
+	</body>
+</html>

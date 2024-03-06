@@ -1,0 +1,9 @@
+[submodule "wide-angle-lens-vis"]
+	path = wide-angle-lens-vis
+	url = https://github.com/kzhang2/wide-angle-lens-vis
+[submodule "halftone-display"]
+	path = halftone-display
+	url = https://github.com/kzhang2/halftone-display
+[submodule "cs184-smoke-simulator"]
+	path = cs184-smoke-simulator
+	url = https://github.com/charlesjsun/cs184-smoke-simulator
