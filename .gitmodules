@@ -7,3 +7,9 @@
 [submodule "cs184-smoke-simulator"]
 	path = cs184-smoke-simulator
 	url = https://github.com/charlesjsun/cs184-smoke-simulator
+[submodule "dissect"]
+	path = dissect
+	url = https://github.com/kzhang2/wallace-bolyai-gerwein-visualization
+[submodule "genetic"]
+	path = genetic
+	url = https://github.com/kzhang2/cellular-automata-game
