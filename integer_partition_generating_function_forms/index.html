@@ -1,0 +1,93 @@
+<html>
+	<head>
+	<link rel="stylesheet" href="styles.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <script> 
+	  window.MathJax = {
+  tex: {
+    tags: 'ams'
+  }
+};
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<div class="content">
+			<h1> The Infinite Product Form of the Generating Function of the Integer Partition Function </h1>
+			Note that 
+			$$
+			\begin{align*}
+			5 &= 5 \\
+			&= 4+1 \\
+			&= 3+2 \\
+			&= 3+1+1 \\
+			&= 2+2+1 \\
+			&= 2+1+1+1 \\ 
+			&= 1+1+1+1+1.
+			\end{align*}
+			$$
+			Each of these sum representations of \(5\) is called a partition of \(5\).
+			The order of the summands does not matter. All that matters is the quantity of each type (the number itself, like \(1\) or \(2\)) of summand. 
+			We say that \(p(5) = 7\), where \(p\) is called the Integer Partition Function. 
+
+			<p> 
+			Define the generating function of \(p\) as \(F(x) = \sum_{n=0}^{\infty}p(n)x^n\). Though the generating function is a (symbolic) infinite sum, it also has an infinite product representation.
+			Our goal is to show that \(F(x) = \prod_{n=0}^{\infty}(1-x^n)^{-1}\). We proceed by working backwards from the product reprentation, doing some algebraic manipulations:
+			$$
+			\begin{align}
+			F(x) &= \prod_{n=1}^{\infty}(1-x^n)^{-1}	\\
+			&= \prod_{n=1}^{\infty}\left((1-x)\sum_{i=0}^{n-1}x^i\right)^{-1} \\
+			&= \prod_{n=1}^{\infty} \frac{\sum_{j=0}^{\infty}x^j}{\sum_{i=0}^{n-1}x^i} \\
+			&= \prod_{n=1}^{\infty} \sum_{i=0}^{\infty} x^{ni}
+			\end{align}
+			$$
+			Let's break down these algebraic steps. 
+			<ol>
+				<li>From \((1)\) to \((2)\) we factored the polynomial \(1-x^n\). </li>
+				<li>From \((2)\) to \((3)\) we expanded \((1-x)^{-1}\) into its infinite series expansion, \(\sum_{j=0}^{\infty}x^j = 1+x+x^2+x^3+\dots\) </li>
+				<li>From \((3)\) to \((4)\) is a little tricky. The product term when \(n=1\) is simple (just \(\sum_{j=0}^{\infty}x^j\)), so let's look at the \(n=2\) term. 
+					For \(n=2\), we have that the product term is \(\frac{\sum_{j=0}^{\infty}x^j}{1+x}\). Let's try to evaluate this quotient and see what happens:
+					$$
+					\begin{align*}
+					\frac{\sum_{j=0}^{\infty}x^j}{1+x} &= \frac{1+x+x^2+x^3+\dots}{1+x} \\
+					&= \frac{1+x}{1+x} + \frac{x^2+x^3}{1+x} + \dots \\
+					&= 1 + x^2 + \dots.
+					\end{align*}
+					$$
+					Thus, we see the product term for \(n=2\) is \(\sum_{i=0}^{\infty}x^{2i}\), so in general the product term is \(\sum_{i=0}^{\infty}x^{ni}\).
+			</ol>
+			Now let's try to figure out what the coefficients of the series of line \((4)\) are, now that we've gotten rid of all of the annoying fractions. 
+			Expanded, it looks like this:
+			$$
+			(1+x+x^2+x^3+x^4+x^5+\dots)(1+x^2+x^4+\dots)(1+x^3+\dots)(1+x^4+\dots)(1+x^5+\dots)\dots
+			$$
+			Let's focus on a particular degree. What is the coefficient of \(x^5\)?
+			Here are the cases for how we can get \(x^5\) by multiplying the product terms:
+			<ol>
+				<li> We choose \(x^5\) from the \(n=5\) product term, and \(1\) from all the other product terms. </li>
+				<li> We choose \(x^4\) from the \(n=4\) product term, \(x\) from the \(n=1\) product term, and \(1\) from all the other product terms. </li>
+				<li> We choose \(x^3\) from the \(n=3\) product term, \(x^2\) from the \(n=2\) product term, and \(1\) from all the other product terms. </li>
+				<li> We choose \(x^3\) from the \(n=3\) product term, \(x^2\) from the \(n=1\) product term, and \(1\) from all the other product terms. </li>
+				<li> We choose \(x^4\) from the \(n=2\) product term, \(x\) from the \(n=1\) product term, and \(1\) from all the other product terms. </li> 
+				<li> We choose \(x^2\) from the \(n=2\) product term, \(x^3\) from the \(n=1\) product term, and \(1\) from all the other product terms. </li>
+				<li> We choose \(x^5\) from the \(n=1\) product term, and \(1\) from all the other product terms. </li>
+			</ol>
+			Does this seem familiar? It should, because there's a one-to-one correspondence between the above list and the decomposition of \(5\) into partitions that we started with at the top of this post. 
+			More explicitly, if we chose \(x^d\) from product term \(n\) to try to make \(x^m\), this corresponds to having \(d/n\) \(n\)'s in our partition sum representation of \(m\).
+			This finishes the "proof" that the two forms (infinite sum and infinite product) of the generating function of the integer partition function are equivalent ∎. 
+			</p>
+			<p>
+			Something interesting to note is that the Riemann Zeta Function is a series which has a similar product representation to the partition function, but in terms of the primes (discovered by Euler). I believe this is what first suggested to mathematicians that the Zeta Function would have anything to do with the distribution of the prime numbers. </p>
+			<p>
+			A fun related problem: what is the probability that two random large numbers are coprime? </p>
+		</div>
+			<br>
+			<br>
+			<br>
+	</body>
+</html>
