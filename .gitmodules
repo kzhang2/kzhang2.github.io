@@ -1,15 +1,15 @@
 [submodule "wide-angle-lens-vis"]
 	path = wide-angle-lens-vis
-	url = https://github.com/kzhang2/wide-angle-lens-vis
+	url = git@github.com:kzhang2/wide-angle-lens-vis
 [submodule "halftone-display"]
 	path = halftone-display
-	url = https://github.com/kzhang2/halftone-display
+	url = git@github.com:kzhang2/halftone-display
 [submodule "cs184-smoke-simulator"]
 	path = cs184-smoke-simulator
-	url = https://github.com/charlesjsun/cs184-smoke-simulator
+	url = git@github.com:charlesjsun/cs184-smoke-simulator
 [submodule "dissect"]
 	path = dissect
-	url = https://github.com/kzhang2/wallace-bolyai-gerwein-visualization
+	url = git@github.com:kzhang2/wallace-bolyai-gerwein-visualization
 [submodule "genetic"]
 	path = genetic
-	url = https://github.com/kzhang2/cellular-automata-game
+	url = git@github.com:kzhang2/cellular-automata-game
