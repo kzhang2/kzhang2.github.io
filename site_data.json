@@ -99,6 +99,68 @@
       "image": "consistent_denoising_sample.jpg"
     },
     {
+      "title": "Z-Splat: Z-Axis Gaussian Splatting for Camera-Sonar Fusion",
+      "authors": [
+        { "name": "Ziyuan Qu", "url": "https://www.linkedin.com/in/quintonq/" },
+        {
+          "name": "Omkar Vengurlekar",
+          "url": "https://www.linkedin.com/in/omkar-veng/"
+        },
+        { "name": "Mohamad Qadri", "url": "https://www.cs.cmu.edu/~mqadri/" },
+        { "name": "Kevin Zhang", "url": "" },
+        { "name": "Michael Kaess", "url": "https://www.cs.cmu.edu/~kaess/" },
+        {
+          "name": "Christopher Metzler",
+          "url": "https://www.cs.umd.edu/~metzler/"
+        },
+        {
+          "name": "Suren Jayasuriya",
+          "url": "https://sites.google.com/asu.edu/imaging-lyceum"
+        },
+        {
+          "name": "Adithya Pediredla",
+          "url": "https://sites.google.com/view/adithyapediredla/"
+        }
+      ],
+      "conference": "IEEE Transactions on Pattern Analysis and Machine Intelligence (Special Issue of ICCP) 2024",
+      "paper_url": "https://arxiv.org/abs/2404.04687",
+      "image": "z_splat_sample.png"
+    },
+    {
+      "title": "Temporally Consistent Atmospheric Turbulence Mitigation with Neural Representations",
+      "authors": [
+        { "name": "Haoming Cai*", "url": "https://www.haomingcai.com/" },
+        { "name": "Jingxi Chen*", "url": "https://codingrex.github.io/" },
+        { "name": "Brandon Y. Feng", "url": "https://brandonyfeng.github.io/" },
+        {
+          "name": "Weiyun Jiang",
+          "url": "https://www.linkedin.com/in/wyjiang/"
+        },
+        { "name": "Mingyang Xie", "url": "https://mingyangx.github.io/" },
+        { "name": "Kevin Zhang", "url": "" },
+        {
+          "name": "Cornelia Fermuller",
+          "url": "https://users.umiacs.umd.edu/~fer/"
+        },
+        {
+          "name": "Yiannis Aloimonos",
+          "url": "https://users.umiacs.umd.edu/~yiannis/"
+        },
+        {
+          "name": "Ashok Veeraraghavan",
+          "url": "https://computationalimaging.rice.edu/"
+        },
+        {
+          "name": "Christopher Metzler",
+          "url": "https://www.cs.umd.edu/~metzler/"
+        }
+      ],
+      "conference": "Arxiv 2024",
+      "paper_url": "https://arxiv.org/abs/2312.04679",
+      "website_url": "https://convrt-2024.github.io/",
+      "image": "00_Pub_23_ConVRT.png"
+    },
+    {
       "title": "AONeuS: A Neural Rendering Framework for Acoustic-Optical Sensor Fusion",
       "authors": [
         { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
@@ -174,7 +236,7 @@
         { "name": "Kevin Zhang", "url": "" },
         {
           "name": "Mingyang Xie",
-          "url": "https://www.cs.umd.edu/people/mingyang"
+          "url": "https://mingyangx.github.io/"
         },
         { "name": "Maharshi Gor", "url": "https://mgor.info/" },
         {
