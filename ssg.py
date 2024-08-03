@@ -20,7 +20,7 @@ def generate_personal_info_html(info):
     for position in info['previous_positions']:
         collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' for c in position.get('collaborators', [])])
         previous_positions_html += f'''
-        <li><p>{position["role"]} from <a href="{position["link"]}">{position["organization"]}</a>,</p></li>
+        <li><p>{position["role"]} at <a href="{position["link"]}">{position["organization"]}</a>,</p></li>
         <li><p>collaborated with {collaborators_html}.</p></li>
         '''
 
@@ -62,12 +62,15 @@ def generate_publications_html(publications):
             f'<a href="{paper.get("video_url", "#")}">[Video]</a>' if paper.get("video_url") else ''
         ])
 
+        # Apply the background style if the paper is marked as important
+        background_style = 'background-color:#ffffd0;' if paper.get("important", False) else ''
+
         publications_html += f'''
         <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px;">
             <div class="col-md-3">
                 <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
             </div>
-            <div class="col-md-9">
+            <div class="col-md-9" style="{background_style}">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>

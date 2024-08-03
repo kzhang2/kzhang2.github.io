@@ -117,7 +117,8 @@
       "conference": "SIGGRAPH 2024 (conference track full paper)",
       "paper_url": "https://arxiv.org/abs/2402.03309",
       "website_url": "https://aoneus.github.io/",
-      "image": "aoneus_teaser_3_2.jpg"
+      "image": "aoneus_teaser_3_2.jpg",
+      "important": true
     },
     {
       "title": "Seeing the World through Your Eyes",
@@ -136,7 +137,8 @@
       "website_url": "https://world-from-eyes.github.io/",
       "press_url": "https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090",
       "twitter_url": "https://twitter.com/akanazawa/status/1669530277289562112",
-      "image": "eye_pic.png"
+      "image": "eye_pic.png",
+      "important": true
     },
     {
       "title": "PAniC-3D: Stylized Single-view 3D Reconstruction from Portraits of Anime Characters",
