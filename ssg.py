@@ -10,7 +10,7 @@ def load_metadata(file_path):
 def generate_personal_info_html(info):
     current_positions_html = ''
     for position in info['current_positions']:
-        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' for c in position.get('collaborators', [])])
+        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' if i < len(position.get('collaborators'))-1 else f'and <a href="{c["link"]}">{c["name"]}</a>' for i, c in enumerate(position.get('collaborators', []))])
         current_positions_html += f'''
         <li><p>{position["role"]} at <a href="{position["link"]}">{position["organization"]}</a>, {position.get("location", "")}</p></li>
         <li><p>working with {collaborators_html},</p></li>
@@ -18,7 +18,7 @@ def generate_personal_info_html(info):
 
     previous_positions_html = ''
     for position in info['previous_positions']:
-        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' for c in position.get('collaborators', [])])
+        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' if i < len(position.get('collaborators'))-1 else f'and <a href="{c["link"]}">{c["name"]}</a>' for i, c in enumerate(position.get('collaborators', []))])
         previous_positions_html += f'''
         <li><p>{position["role"]} at <a href="{position["link"]}">{position["organization"]}</a>,</p></li>
         <li><p>collaborated with {collaborators_html}.</p></li>

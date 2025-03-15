@@ -4,7 +4,21 @@
     "profile_image": "nature_headshot.jpg",
     "current_positions": [
       {
-        "role": "Intern",
+        "role": "a 4th Year CS PhD Student",
+        "organization": "University of Maryland, College Park",
+        "link": "https://www.cs.umd.edu/people/kzhang24",
+        "collaborators": [
+          {
+            "name": "Christopher Metzler",
+            "link": "https://www.cs.umd.edu/~metzler/"
+          },
+          { "name": "Jia-Bin Huang", "link": "https://jbhuang0604.github.io/" }
+        ]
+      }
+    ],
+    "previous_positions": [
+      {
+        "role": "interned",
         "organization": "Adobe Research",
         "location": "SF",
         "link": "https://research.adobe.com/",
@@ -23,20 +37,6 @@
           }
         ]
       },
-      {
-        "role": "3rd Year CS PhD Student",
-        "organization": "University of Maryland, College Park",
-        "link": "https://www.cs.umd.edu/people/kzhang24",
-        "collaborators": [
-          {
-            "name": "Christopher Metzler",
-            "link": "https://www.cs.umd.edu/~metzler/"
-          },
-          { "name": "Jia-Bin Huang", "link": "https://jbhuang0604.github.io/" }
-        ]
-      }
-    ],
-    "previous_positions": [
       {
         "role": "BA in Computer Science and Pure Mathematics (Double Major)",
         "organization": "University of California, Berkeley",
@@ -77,8 +77,8 @@
         "icon": "fa-brands fa-x-twitter"
       }
     ],
-    "cv_url": "kevin_zhang_CV_2024_05.pdf",
-    "cv_date": "2024-05-03"
+    "cv_url": "CV_kevin_zhang_11_2024.pdf",
+    "cv_date": "2024-11-16"
   },
   "publications": [
     {
@@ -95,7 +95,7 @@
         }
       ],
       "conference": "IEEE TIP 2024",
-      "paper_url": "https://arxiv.org/abs/2310.20064",
+      "paper_url":"https://ieeexplore.ieee.org/document/10729723",
       "image": "consistent_denoising_sample.jpg"
     },
     {
@@ -155,7 +155,7 @@
           "url": "https://www.cs.umd.edu/~metzler/"
         }
       ],
-      "conference": "Arxiv 2024",
+      "conference": "NeurIPS 2024",
       "paper_url": "https://arxiv.org/abs/2312.04679",
       "website_url": "https://convrt-2024.github.io/",
       "image": "00_Pub_23_ConVRT.png"
@@ -361,6 +361,16 @@
       "title": "Smoke on Manifolds",
       "image": "smoke.gif",
       "url": "cs184-smoke-simulator"
+    },
+    {
+      "title": "Halftone Display",
+      "image": "htd.gif",
+      "url": "halftone-display"
+    },
+    {
+      "title": "Wide Angle Lens Visualizations",
+      "image": "walv.gif",
+      "url": "wide-angle-lens-vis"
     }
   ],
   "inspiration": [
