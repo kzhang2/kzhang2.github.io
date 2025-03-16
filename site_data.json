@@ -1,7 +1,7 @@
 {
   "personal_info": {
     "name": "Kevin W. Zhang",
-    "profile_image": "nature_headshot.jpg",
+    "profile_image": "static/nature_headshot.jpg",
     "current_positions": [
       {
         "role": "a 4th Year CS PhD Student",
@@ -82,6 +82,26 @@
   },
   "publications": [
     {
+      "title": "MaDCoW: Marginal Distortion Correction for Wide-Angle Photography with Arbitrary Objects",
+      "authors": [
+        { "name": "Kevin Zhang", "url": "" },
+        { "name": "Jia-Bin Huang", "url": "https://jbhuang0604.github.io/" },
+        { "name": "Jose Echevarria", "url": "https://www.jiechevarria.com/" },
+        {
+          "name": "Stephen DiVerdi",
+          "url": "https://www.stephendiverdi.com/"
+        },
+        {
+          "name": "Aaron Hertzmann",
+          "url": "https://www.dgp.toronto.edu/~hertzman/"
+        }
+      ],
+      "conference": "CVPR 2025",
+      "paper_url": "https://kevinwzhang.com",
+      "image": "static/madcow.png",
+      "important": true
+    },
+    {
       "title": "A Scalable Training Strategy for Blind Multi-Distribution Noise Removal",
       "authors": [
         { "name": "Kevin Zhang", "url": "" },
@@ -96,7 +116,7 @@
       ],
       "conference": "IEEE TIP 2024",
       "paper_url":"https://ieeexplore.ieee.org/document/10729723",
-      "image": "consistent_denoising_sample.jpg"
+      "image": "static/consistent_denoising_sample.jpg"
     },
     {
       "title": "Z-Splat: Z-Axis Gaussian Splatting for Camera-Sonar Fusion",
@@ -124,7 +144,7 @@
       ],
       "conference": "IEEE Transactions on Pattern Analysis and Machine Intelligence (Special Issue of ICCP) 2024",
       "paper_url": "https://arxiv.org/abs/2404.04687",
-      "image": "z_splat_sample.png"
+      "image": "static/z_splat_sample.png"
     },
     {
       "title": "Temporally Consistent Atmospheric Turbulence Mitigation with Neural Representations",
@@ -158,7 +178,7 @@
       "conference": "NeurIPS 2024",
       "paper_url": "https://arxiv.org/abs/2312.04679",
       "website_url": "https://convrt-2024.github.io/",
-      "image": "00_Pub_23_ConVRT.png"
+      "image": "static/00_Pub_23_ConVRT.png"
     },
     {
       "title": "AONeuS: A Neural Rendering Framework for Acoustic-Optical Sensor Fusion",
@@ -179,7 +199,7 @@
       "conference": "SIGGRAPH 2024 (conference track full paper)",
       "paper_url": "https://arxiv.org/abs/2402.03309",
       "website_url": "https://aoneus.github.io/",
-      "image": "aoneus_teaser_3_2.jpg",
+      "image": "static/aoneus_teaser_3_2.jpg",
       "important": true
     },
     {
@@ -199,7 +219,7 @@
       "website_url": "https://world-from-eyes.github.io/",
       "press_url": "https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090",
       "twitter_url": "https://twitter.com/akanazawa/status/1669530277289562112",
-      "image": "eye_pic.png",
+      "image": "static/eye_pic.png",
       "important": true
     },
     {
@@ -228,7 +248,7 @@
       "conference": "CVPR 2023",
       "paper_url": "https://openaccess.thecvf.com/content/CVPR2023/html/Chen_PAniC-3D_Stylized_Single-View_3D_Reconstruction_From_Portraits_of_Anime_Characters_CVPR_2023_paper.html",
       "code_url": "https://github.com/ShuhongChen/panic3d-anime-reconstruction",
-      "image": "proj_panic.png"
+      "image": "static/proj_panic.png"
     },
     {
       "title": "MetaDIP: Accelerating Deep Image Prior with Meta Learning",
@@ -254,7 +274,7 @@
       ],
       "conference": "arXiv, 2022",
       "paper_url": "https://arxiv.org/abs/2209.08452",
-      "image": "meta_dip_preview.jpg"
+      "image": "static/meta_dip_preview.jpg"
     },
     {
       "title": "Memory-efficient Learning for High-Dimensional MRI Reconstruction",
@@ -286,7 +306,7 @@
       "conference": "MICCAI 2021",
       "paper_url": "https://miccai2021.org/openaccess/paperlinks/2021/09/01/305-Paper2251.html",
       "code_url": "https://github.com/mikgroup/MEL_MRI",
-      "image": "miccai_2021_preview.jpg"
+      "image": "static/miccai_2021_preview.jpg"
     },
     {
       "title": "Memory-efficient Learning for Large-scale Computational Imaging",
@@ -311,7 +331,7 @@
       "conference": "IEEE TCI 2020",
       "paper_url": "https://ieeexplore.ieee.org/document/9204455",
       "code_url": "https://github.com/mikgroup/MELD",
-      "image": "meld.png"
+      "image": "static/meld.png"
     },
     {
       "title": "Memory-Efficient Learning for Unrolled 3D MRI Reconstructions",
@@ -331,7 +351,7 @@
       "conference": "ISMRM Workshop on Data Sampling and Reconstruction, 2020",
       "paper_url": "https://www.ismrm.org/workshops/2020/Data/#:~:text=Memory%2DEfficient%20Learning%20for%20Unrolled%203D%20MRI%20Reconstructions",
       "video_url": "https://www.youtube.com/watch?v=AypmyOlqVK8",
-      "image": "3d_mri.png"
+      "image": "static/3d_mri.png"
     },
     {
       "title": "3D fluorescence deconvolution with deep priors",
@@ -343,33 +363,33 @@
       ],
       "conference": "SPIE BiOS 2020",
       "paper_url": "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11245/112450N/3D-fluorescence-deconvolution-with-deep-priors-Conference-Presentation/10.1117/12.2545041.short?webSyncID=ce46e9e6-ec7a-49da-b6a0-cbad059329ad&sessionGUID=883c9d90-2bc9-993c-ed26-8bead49a28535",
-      "image": "spie.png"
+      "image": "static/spie.png"
     }
   ],
   "projects": [
     {
       "title": "Tangram Generator",
-      "image": "tangram.gif",
+      "image": "static/tangram.gif",
       "url": "dissect"
     },
     {
       "title": "Life Simulator",
-      "image": "conway.gif",
+      "image": "static/conway.gif",
       "url": "genetic"
     },
     {
       "title": "Smoke on Manifolds",
-      "image": "smoke.gif",
+      "image": "static/smoke.gif",
       "url": "cs184-smoke-simulator"
     },
     {
       "title": "Halftone Display",
-      "image": "htd.gif",
+      "image": "static/htd.gif",
       "url": "halftone-display"
     },
     {
       "title": "Wide Angle Lens Visualizations",
-      "image": "walv.gif",
+      "image": "static/walv.gif",
       "url": "wide-angle-lens-vis"
     }
   ],

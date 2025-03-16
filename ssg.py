@@ -49,10 +49,23 @@ def generate_personal_info_html(info):
     '''
     return personal_info_html
 
-# Generate HTML for publications
+# Helper function to highlight "Oral" in conference name
+def highlight_oral(conference_text):
+    if "(Oral" in conference_text:
+        return conference_text.replace("(Oral, ", "(<b style='color: red;'>Oral</b>, ")
+    return conference_text
+
+# Generate HTML for publications with featured papers first and others in a dropdown
 def generate_publications_html(publications):
-    publications_html = ''
-    for paper in publications:
+    # Separate important/featured publications from others
+    featured_papers = [paper for paper in publications if paper.get("important", False)]
+    other_papers = [paper for paper in publications if not paper.get("important", False)]
+    
+    # Generate HTML for featured publications
+    featured_html = '''
+    <h5><b>Select Publications</b></h5>
+    '''
+    for paper in featured_papers:
         authors_html = ', '.join([f'<a href="{author["url"]}">{author["name"]}</a>' if author["url"] else f'<b>{author["name"]}</b>' for author in paper['authors']])
         additional_links = ' '.join([
             f'<a href="{paper.get("website_url", "#")}">[Website]</a>' if paper.get("website_url") else '',
@@ -62,15 +75,45 @@ def generate_publications_html(publications):
             f'<a href="{paper.get("video_url", "#")}">[Video]</a>' if paper.get("video_url") else ''
         ])
 
-        # Apply the background style if the paper is marked as important
-        background_style = 'background-color:#ffffd0;' if paper.get("important", False) else ''
+        featured_html += f'''
+        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+            <div class="col-md-3">
+                <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
+            </div>
+            <div class="col-md-9" style="text-align: left;">
+                <span class="text-group">
+                    <b>{paper["title"]}</b>
+                </span>
+                <span class="text-group">
+                    {authors_html}
+                </span>
+                <span class="text-group">
+                    {highlight_oral(paper["conference"])}
+                </span>
+                <br>
+                <a href="{paper["paper_url"]}" target="_blank">[Paper]</a> {additional_links}
+            </div>
+        </div>
+        '''
+    
+    # Generate HTML for other publications in a dropdown
+    other_html = ''
+    for paper in other_papers:
+        authors_html = ', '.join([f'<a href="{author["url"]}">{author["name"]}</a>' if author["url"] else f'<b>{author["name"]}</b>' for author in paper['authors']])
+        additional_links = ' '.join([
+            f'<a href="{paper.get("website_url", "#")}">[Website]</a>' if paper.get("website_url") else '',
+            f'<a href="{paper.get("press_url", "#")}">[Press]</a>' if paper.get("press_url") else '',
+            f'<a href="{paper.get("twitter_url", "#")}">[Twitter]</a>' if paper.get("twitter_url") else '',
+            f'<a href="{paper.get("code_url", "#")}">[Code]</a>' if paper.get("code_url") else '',
+            f'<a href="{paper.get("video_url", "#")}">[Video]</a>' if paper.get("video_url") else ''
+        ])
 
-        publications_html += f'''
+        other_html += f'''
         <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px;">
             <div class="col-md-3">
                 <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
             </div>
-            <div class="col-md-9" style="{background_style}">
+            <div class="col-md-9">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -85,18 +128,54 @@ def generate_publications_html(publications):
             </div>
         </div>
         '''
-    return publications_html
+    
+    # Combine featured and other publications with a dropdown for others
+    dropdown_html = f'''
+    <div class="featured-publications">
+        {featured_html}
+    </div>
+    
+    <div class="dropdown-container" style="margin-top: 30px; margin-bottom: 20px;">
+        <button class="btn btn-outline-secondary" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
+            Show Additional Publications
+        </button>
+        <div class="collapse" id="otherPublications">
+            <div class="card card-body" style="border: none; padding: 0; text-align: left;">
+                <h5 style="margin-top: 20px;"><b>Additional Publications</b></h5>
+                {other_html}
+            </div>
+        </div>
+    </div>
+    '''
+    
+    return dropdown_html
 
 # Generate HTML for projects
 def generate_projects_html(projects):
-    projects_html = ''
+    # Generate HTML for projects with dropdown
+    projects_html = '''
+    <div class="dropdown-container" style="margin-top: 20px; margin-bottom: 20px;">
+        <button class="btn btn-outline-secondary" type="button" id="projectsButton" data-toggle="collapse" data-target="#sideProjects" aria-expanded="false" aria-controls="sideProjects">
+            Show Side Projects
+        </button>
+        <div class="collapse" id="sideProjects">
+            <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+    '''
+    
     for project in projects:
         projects_html += f'''
-        <div class="p2" style="padding-bottom: 10px; padding-top: 10px; text-align: center;">
-            <img src="{project["image"]}" width="75%" style="display: block; margin: 0 auto;">
-            <a class="btn btn-secondary w-2" href="{project["url"]}" style="margin-top: 20px; margin-bottom: 20px;">{project["title"]}</a>
-        </div>
+                <div class="p2" style="padding-bottom: 10px; padding-top: 10px; text-align: center;">
+                    <img src="{project["image"]}" width="75%" style="display: block; margin: 0 auto;">
+                    <a class="btn btn-secondary w-2" href="{project["url"]}" style="margin-top: 20px; margin-bottom: 20px;">{project["title"]}</a>
+                </div>
         '''
+    
+    projects_html += '''
+            </div>
+        </div>
+    </div>
+    '''
+    
     return projects_html
 
 # Generate HTML for the inspiration section
@@ -121,6 +200,20 @@ def generate_html_page(data):
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
         <link rel="stylesheet" type="text/css" href="mystyle.css">
         <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <style>
+            /* Add some custom styles for the dropdown button */
+            #otherPublicationsButton {
+                display: block;
+                margin: 0 auto;
+                transition: all 0.3s ease;
+            }
+            #otherPublicationsButton:hover {
+                background-color: #f0f0f0;
+            }
+            .dropdown-container {
+                text-align: center;
+            }
+        </style>
     </head>
     <body>
         <div class="vertical-center">
@@ -136,13 +229,11 @@ def generate_html_page(data):
     <section>
         <div class="subsect">
             <h4><b>Publications</b> (* indicates equal contribution)</h4>
-            <hr>
             {publications_html}
         </div>
         <br>
         <div class="subsect">
             <h4><b>Side Projects</b></h4>
-            <hr>
             <p>I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</p>
             {projects_html}
             <br>
@@ -157,6 +248,27 @@ def generate_html_page(data):
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+        <script>
+            // Add event listener to change button text when dropdowns are toggled
+            $(document).ready(function() {
+                $('#otherPublicationsButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Additional Publications');
+                    } else {
+                        $(this).text('Show Additional Publications');
+                    }
+                });
+                
+                $('#projectsButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Side Projects');
+                    } else {
+                        $(this).text('Show Side Projects');
+                    }
+                });
+            });
+            });
+        </script>
     </body>
     </html>
     '''
