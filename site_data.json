@@ -366,6 +366,20 @@
       "image": "static/spie.png"
     }
   ],
+    "articles": [
+      {
+        "title": "Integer Partition Generating Function Forms",
+        "description": "Motivated by a question from a friend about a statement from a book on number theory.",
+        "date": "2024-05-21-tues",
+        "url": "integer_partition_generating_function_forms/index.html"
+      },
+      {
+        "title": "On an Integral from Griffith's Problem 2.7",
+        "description": "A fun problem from Griffith's book on electrodynamics.",
+        "date": "2024-03-06-wed",
+        "url": "griffiths_prob_2_7_integral/index.html"
+      }
+    ],
   "projects": [
     {
       "title": "Tangram Generator",

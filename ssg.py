@@ -178,6 +178,44 @@ def generate_projects_html(projects):
     
     return projects_html
 
+def generate_articles_html(articles):
+    if not articles:
+        return ''
+        
+    articles_html = '<h4><b>Articles</b></h4>'
+    for article in articles:
+        # Handle optional image
+        image_html = ''
+        if article.get("image"):
+            image_html = f'''
+            <div class="col-md-3">
+                <img class="img-fluid" src="{article["image"]}" style="border:0px solid black" alt="">
+            </div>
+            '''
+            col_width = "col-md-9"
+        else:
+            col_width = "col-md-12"
+
+        articles_html += f'''
+        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+            {image_html}
+            <div class="{col_width}" style="text-align: left;">
+                <span class="text-group">
+                    <b>{article["title"]}</b>
+                </span>
+                <span class="text-group">
+                    <small>{article.get("date", "")}</small>
+                </span>
+                <span class="text-group">
+                    {article["description"]}
+                </span>
+                <br>
+                <a href="{article["url"]}" target="_blank">[View Article]</a>
+            </div>
+        </div>
+        '''
+    return articles_html
+
 # Generate HTML for the inspiration section
 def generate_inspiration_html(inspiration):
     inspiration_html = ' '.join([f'<a href="{inspire["link"]}">{inspire["name"]}</a>' for inspire in inspiration])
@@ -202,12 +240,12 @@ def generate_html_page(data):
         <link rel="icon" type="image/x-icon" href="favicon.ico">
         <style>
             /* Add some custom styles for the dropdown button */
-            #otherPublicationsButton {
+            #otherPublicationsButton, #projectsButton {
                 display: block;
                 margin: 0 auto;
                 transition: all 0.3s ease;
             }
-            #otherPublicationsButton:hover {
+            #otherPublicationsButton:hover, #projectsButton:hover {
                 background-color: #f0f0f0;
             }
             .dropdown-container {
@@ -221,6 +259,7 @@ def generate_html_page(data):
 
     personal_info_html = generate_personal_info_html(data['personal_info'])
     publications_html = generate_publications_html(data['publications'])
+    articles_html = generate_articles_html(data.get('articles', []))
     projects_html = generate_projects_html(data['projects'])
     inspiration_html = generate_inspiration_html(data['inspiration'])
 
@@ -232,6 +271,7 @@ def generate_html_page(data):
             {publications_html}
         </div>
         <br>
+        {articles_html and f'<div class="subsect">{articles_html}</div><br>' or ''}
         <div class="subsect">
             <h4><b>Side Projects</b></h4>
             <p>I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</p>
@@ -266,7 +306,6 @@ def generate_html_page(data):
                         $(this).text('Show Side Projects');
                     }
                 });
-            });
             });
         </script>
     </body>
