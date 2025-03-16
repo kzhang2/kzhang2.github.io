@@ -82,6 +82,29 @@
   },
   "publications": [
     {
+      "title": "Acoustic Neural 3D Reconstruction Under Pose Drift",
+      "authors": [
+        { "name": "Tianxiang Lin*", "url": "https://www.cs.cmu.edu/~tianxian/" },
+        { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
+        { "name": "Kevin Zhang", "url": "" },
+        {
+          "name": "Adithya Pediredla",
+          "url": "https://sites.google.com/view/adithyapediredla/"
+        },
+        {
+          "name": "Christopher Metzler",
+          "url": "https://www.cs.umd.edu/~metzler/"
+        },
+        {
+          "name": "Michael Kaess",
+          "url": "https://www.cs.cmu.edu/~kaess/"
+        }
+      ],
+      "conference": "arXiv, 2025",
+      "paper_url": "https://arxiv.org/abs/2503.08930",
+      "image": "static/neusis_pose.png"
+    },
+    {
       "title": "MaDCoW: Marginal Distortion Correction for Wide-Angle Photography with Arbitrary Objects",
       "authors": [
         { "name": "Kevin Zhang", "url": "" },

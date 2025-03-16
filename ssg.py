@@ -63,7 +63,7 @@ def generate_publications_html(publications):
     
     # Generate HTML for featured publications
     featured_html = '''
-    <h5><b>Select Publications</b></h5>
+    <h5 style="text-align: left;"><b>Select Publications</b></h5>
     '''
     for paper in featured_papers:
         authors_html = ', '.join([f'<a href="{author["url"]}">{author["name"]}</a>' if author["url"] else f'<b>{author["name"]}</b>' for author in paper['authors']])
@@ -109,11 +109,11 @@ def generate_publications_html(publications):
         ])
 
         other_html += f'''
-        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px;">
+        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
             <div class="col-md-3">
                 <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
             </div>
-            <div class="col-md-9">
+            <div class="col-md-9" style="text-align: left;">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -121,7 +121,7 @@ def generate_publications_html(publications):
                     {authors_html}
                 </span>
                 <span class="text-group">
-                    {paper["conference"]}
+                    {highlight_oral(paper["conference"])}
                 </span>
                 <br>
                 <a href="{paper["paper_url"]}" target="_blank">[Paper]</a> {additional_links}
@@ -141,7 +141,7 @@ def generate_publications_html(publications):
         </button>
         <div class="collapse" id="otherPublications">
             <div class="card card-body" style="border: none; padding: 0; text-align: left;">
-                <h5 style="margin-top: 20px;"><b>Additional Publications</b></h5>
+                <h5 style="margin-top: 20px; text-align: left;"><b>Additional Publications</b></h5>
                 {other_html}
             </div>
         </div>
