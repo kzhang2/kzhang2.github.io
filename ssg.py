@@ -291,6 +291,10 @@ def generate_html_page(data):
         <script>
             // Add event listener to change button text when dropdowns are toggled
             $(document).ready(function() {
+                // Initialize button text
+                $('#otherPublicationsButton').text('Show Additional Publications');
+                $('#projectsButton').text('Show Side Projects');
+                
                 $('#otherPublicationsButton').click(function() {
                     if($(this).attr('aria-expanded') === 'false') {
                         $(this).text('Hide Additional Publications');
