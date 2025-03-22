@@ -206,8 +206,8 @@
     {
       "title": "AONeuS: A Neural Rendering Framework for Acoustic-Optical Sensor Fusion",
       "authors": [
-        { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
         { "name": "Kevin Zhang*", "url": "" },
+        { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
         { "name": "Akshay Hinduja", "url": "https://akshayhinduja.github.io/" },
         { "name": "Michael Kaess", "url": "https://www.cs.cmu.edu/~kaess/" },
         {
@@ -228,8 +228,8 @@
     {
       "title": "Seeing the World through Your Eyes",
       "authors": [
-        { "name": "Hadi AlZayer*", "url": "https://hadizayer.github.io/" },
         { "name": "Kevin Zhang*", "url": "" },
+        { "name": "Hadi AlZayer*", "url": "https://hadizayer.github.io/" },
         { "name": "Brandon Feng", "url": "https://brandonyfeng.github.io/" },
         {
           "name": "Christopher Metzler",
