@@ -18,16 +18,19 @@ p {
 .centered-buttons {
   display: grid;
   align-items: center;
+  margin-top: 20px;
 }
 
 .black-buttons {
   color: black; 
+  margin-right: 15px;
 }
 .black-buttons:hover {
   text-decoration: none;
 }
-
-
+.black-buttons:last-child {
+  margin-right: 0;
+}
 
 blockquote {border-left:5px solid #eee; padding-left:1.5em; margin:1em 0; font-size: 12px;}
 blockquote p {text-indent: 0 !important}
@@ -63,11 +66,11 @@ hr {
     /* min-height: 100vh; */
     /* These two lines are counted as one :-)       */
     /* display: flex; */
-    max-width:1000px;
+    max-width:800px;
     margin: auto;
   }
   header {
-    max-width:999px;
+    max-width:800px;
     -webkit-font-smoothing:subpixel-antialiased;
     /* background-color: #CCCCCC; */
     /*border-radius: 25px;*/
@@ -81,14 +84,14 @@ hr {
   }
   
   section {
-    max-width:999px;
+    max-width:800px;
     padding-bottom:50px;
     margin-left: 10px;
     margin-right: 10px;
   }
   
   footer {
-    max-width:999px;
+    max-width:800px;
     bottom:50px;
     -webkit-font-smoothing:subpixel-antialiased;
     margin-left: 10px;
@@ -111,33 +114,31 @@ hr {
     /* min-height: 100vh; */
     /* These two lines are counted as one :-)       */
     /* display: flex; */
-    max-width:1000px;
+    max-width:800px;
     margin: auto;
   }
   header {
-    width:350px;
-    float:left;
-    position:fixed;
+    max-width:800px;
+    margin: auto;
+    margin-bottom: 30px;
     -webkit-font-smoothing:subpixel-antialiased;
     /* background-color: #CCCCCC; */
     /* border-radius: 25px; */
     /* border: 2px solid; */
     border-color: #CCCCCC;
     padding-left: 10px;
-    padding-right: 10px
+    padding-right: 10px;
   }
   
   section {
-    width:630px;
-    float:right;
+    max-width:800px;
+    margin: auto;
     padding-bottom:50px;
   }
   
   footer {
-    width:350px;
-    float:left;
-    position:fixed;
-    bottom:50px;
+    max-width:800px;
+    margin: auto;
     -webkit-font-smoothing:subpixel-antialiased;
   }
 }
@@ -159,9 +160,14 @@ hr {
 }
 
 #profile_pic {
-  display: block;
-  margin: auto;
-  max-width: 50%;
-  max-height: 50%;
   border-radius: 30px;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.col-md-3.text-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

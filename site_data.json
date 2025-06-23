@@ -1,7 +1,7 @@
 {
   "personal_info": {
     "name": "Kevin W. Zhang",
-    "profile_image": "static/nature_headshot.jpg",
+    "profile_image": "static/headshot.jpg",
     "current_positions": [
       {
         "role": "a 4th Year CS PhD Student",
@@ -80,6 +80,20 @@
     "cv_url": "static/CV_Kevin_Zhang_2025_03.pdf",
     "cv_date": "2025-03-22"
   },
+  "updates": [
+    {
+      "description": "Acoustic Neural 3D Reconstruction Under Pose Drift accepted to IROS 2025. Congratulations to Tianxiang and Mohamad!",
+      "date": "2025-06"
+    },
+    {
+      "description": "Presented our work on MaDCoW at CVPR 2025.",
+      "date": "2025-06"
+    },
+    {
+      "description": "Started a research internship on Marc Levoy's computational imaging team at Adobe.",
+      "date": "2025-05"
+    }
+  ],
   "publications": [
     {
       "title": "Acoustic Neural 3D Reconstruction Under Pose Drift",
@@ -100,7 +114,7 @@
           "url": "https://www.cs.cmu.edu/~kaess/"
         }
       ],
-      "conference": "arXiv, 2025",
+      "conference": "IROS 2025",
       "paper_url": "https://arxiv.org/abs/2503.08930",
       "image": "static/neusis_pose.png"
     },
@@ -120,7 +134,7 @@
         }
       ],
       "conference": "CVPR 2025",
-      "paper_url": "https://kevinwzhang.com",
+      "paper_url": "https://openaccess.thecvf.com/content/CVPR2025/html/Zhang_MaDCoW_Marginal_Distortion_Correction_for_Wide-Angle_Photography_with_Arbitrary_Objects_CVPR_2025_paper.html",
       "image": "static/madcow.png",
       "important": true
     },
@@ -165,7 +179,7 @@
           "url": "https://sites.google.com/view/adithyapediredla/"
         }
       ],
-      "conference": "IEEE Transactions on Pattern Analysis and Machine Intelligence (Special Issue of ICCP) 2024",
+      "conference": "IEEE TPAMI 2024",
       "paper_url": "https://arxiv.org/abs/2404.04687",
       "image": "static/z_splat_sample.png"
     },

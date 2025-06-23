@@ -29,21 +29,26 @@ def generate_personal_info_html(info):
     personal_info_html = f'''
     <header>
         <h1>{info["name"]}</h1>
-        <img id="profile_pic" src="{info["profile_image"]}">
-        <br>
-        <b>is currently</b>
-        <ul>{current_positions_html}</ul>
-        <ul>
-            <li><p>who applies computer vision and computer graphics techniques to computational imaging/sensing research,</p></li>
-        </ul>
-        <b>and previously</b>
-        <ul>{previous_positions_html}</ul>
-        <div style="text-align: center;">
-            <p style="margin: auto;"><a href="{info["cv_url"]}">CV</a>, as of {info["cv_date"]}.</p>
+        <div class="row align-items-center">
+            <div class="col-md-9">
+                <b>is currently</b>
+                <ul>{current_positions_html}</ul>
+                <ul>
+                    <li><p>who applies computer vision and computer graphics techniques to computational imaging/sensing research,</p></li>
+                </ul>
+                <b>and previously</b>
+                <ul>{previous_positions_html}</ul>
+            </div>
+            <div class="col-md-3 text-center">
+                <img id="profile_pic" src="{info["profile_image"]}">
+            </div>
         </div>
-        <br>
-        <div class="d-flex flex-column centered-buttons">
-            <div class="p2">{links_html}</div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="d-flex flex-column centered-buttons">
+                    <div class="p2">{links_html} <a href="{info["cv_url"]}" class="black-buttons"><i class="ai ai-cv fa-3x"></i></a></div>
+                </div>
+            </div>
         </div>
     </header>
     '''
@@ -84,9 +89,11 @@ def generate_publications_html(publications):
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
+                <br>
                 <span class="text-group">
                     {authors_html}
                 </span>
+                <br>
                 <span class="text-group">
                     {highlight_oral(paper["conference"])}
                 </span>
@@ -117,9 +124,11 @@ def generate_publications_html(publications):
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
+                <br>
                 <span class="text-group">
                     {authors_html}
                 </span>
+                <br>
                 <span class="text-group">
                     {highlight_oral(paper["conference"])}
                 </span>
@@ -203,9 +212,11 @@ def generate_articles_html(articles):
                 <span class="text-group">
                     <b>{article["title"]}</b>
                 </span>
+                <br>
                 <span class="text-group">
                     <small>{article.get("date", "")}</small>
                 </span>
+                <br>
                 <span class="text-group">
                     {article["description"]}
                 </span>
@@ -215,6 +226,42 @@ def generate_articles_html(articles):
         </div>
         '''
     return articles_html
+
+def generate_updates_html(updates):
+    if not updates:
+        return ''
+        
+    updates_html = '<h4><b>Updates</b></h4>'
+    for update in updates:
+        # Convert date to YYYY-MM format
+        date_str = update.get("date", "")
+        if date_str:
+            try:
+                # Parse the date and format as YYYY-MM
+                from datetime import datetime
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                formatted_date = date_obj.strftime("%Y-%m")
+            except:
+                formatted_date = date_str
+        else:
+            formatted_date = ""
+            
+        updates_html += f'''
+        <div class="row no-gutters align-items-start" style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
+            <div class="col-md-2" style="text-align: left;">
+                <span class="text-group">
+                    <small>{formatted_date}</small>
+                </span>
+            </div>
+            <div class="col-md-10" style="text-align: left;">
+                <span class="text-group">
+                    {update["description"]}
+                </span>
+                {f'<br><a href="{update["url"]}" target="_blank">[Read More]</a>' if update.get("url") else ''}
+            </div>
+        </div>
+        '''
+    return updates_html
 
 # Generate HTML for the inspiration section
 def generate_inspiration_html(inspiration):
@@ -258,6 +305,7 @@ def generate_html_page(data):
     '''
 
     personal_info_html = generate_personal_info_html(data['personal_info'])
+    updates_html = generate_updates_html(data.get('updates', []))
     publications_html = generate_publications_html(data['publications'])
     articles_html = generate_articles_html(data.get('articles', []))
     projects_html = generate_projects_html(data['projects'])
@@ -265,6 +313,7 @@ def generate_html_page(data):
 
     html_body = f'''
     {personal_info_html}
+    {updates_html and f'<section><div class="subsect">{updates_html}</div></section>' or ''}
     <section>
         <div class="subsect">
             <h4><b>Publications</b> (* indicates equal contribution)</h4>
