@@ -1,60 +1,8 @@
 {
   "personal_info": {
     "name": "Kevin W. Zhang",
+    "bio": "I am a 4th year CS PhD student at the <a href=\"https://www.cs.umd.edu/people/kzhang24\">University of Maryland, College Park</a>, working with <a href=\"https://www.cs.umd.edu/~metzler/\">Christopher Metzler</a> and <a href=\"https://jbhuang0604.github.io/\">Jia-Bin Huang</a> on computer vision and computational imaging research. Previously, I interned at <a href=\"https://research.adobe.com/\">Adobe Research</a> in SF working with <a href=\"https://www.dgp.toronto.edu/~hertzman/\">Aaron Hertzmann</a>, and completed my BA in Computer Science and Pure Mathematics at <a href=\"https://ls.berkeley.edu/home\">UC Berkeley</a> working with <a href=\"http://www.laurawaller.com/\">Laura Waller</a> and <a href=\"http://people.eecs.berkeley.edu/~mlustig/\">Michael Lustig</a>.",
     "profile_image": "static/headshot.jpg",
-    "current_positions": [
-      {
-        "role": "a 4th Year CS PhD Student",
-        "organization": "University of Maryland, College Park",
-        "link": "https://www.cs.umd.edu/people/kzhang24",
-        "collaborators": [
-          {
-            "name": "Christopher Metzler",
-            "link": "https://www.cs.umd.edu/~metzler/"
-          },
-          { "name": "Jia-Bin Huang", "link": "https://jbhuang0604.github.io/" }
-        ]
-      }
-    ],
-    "previous_positions": [
-      {
-        "role": "interned",
-        "organization": "Adobe Research",
-        "location": "SF",
-        "link": "https://research.adobe.com/",
-        "collaborators": [
-          {
-            "name": "Aaron Hertzmann",
-            "link": "https://www.dgp.toronto.edu/~hertzman/"
-          },
-          {
-            "name": "Jose Echevarria",
-            "link": "https://www.jiechevarria.com/"
-          },
-          {
-            "name": "Stephen DiVerdi",
-            "link": "https://www.stephendiverdi.com/"
-          }
-        ]
-      },
-      {
-        "role": "BA in Computer Science and Pure Mathematics (Double Major)",
-        "organization": "University of California, Berkeley",
-        "link": "https://cal.berkeley.edu/kevinzhang0",
-        "collaborators": [
-          { "name": "Michael Kellman", "link": "https://kellman.github.io/" },
-          {
-            "name": "Jon Tamir",
-            "link": "https://users.ece.utexas.edu/~jtamir/"
-          },
-          { "name": "Laura Waller", "link": "http://www.laurawaller.com/" },
-          {
-            "name": "Michael Lustig",
-            "link": "http://people.eecs.berkeley.edu/~mlustig/"
-          }
-        ]
-      }
-    ],
     "links": [
       {
         "platform": "GitHub",
@@ -251,7 +199,7 @@
         },
         { "name": "Jia-bin Huang", "url": "https://jbhuang0604.github.io/" }
       ],
-      "conference": "CVPR 2024 (Oral, 3.3% of accepted papers)",
+      "conference": "CVPR 2024 (Oral, top 0.78% of submitted papers)",
       "paper_url": "https://arxiv.org/abs/2306.09348",
       "website_url": "https://world-from-eyes.github.io/",
       "press_url": "https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090",

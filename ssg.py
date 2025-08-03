@@ -8,45 +8,21 @@ def load_metadata(file_path):
 
 # Generate HTML for personal info
 def generate_personal_info_html(info):
-    current_positions_html = ''
-    for position in info['current_positions']:
-        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' if i < len(position.get('collaborators'))-1 else f'and <a href="{c["link"]}">{c["name"]}</a>' for i, c in enumerate(position.get('collaborators', []))])
-        current_positions_html += f'''
-        <li><p>{position["role"]} at <a href="{position["link"]}">{position["organization"]}</a>, {position.get("location", "")}</p></li>
-        <li><p>working with {collaborators_html},</p></li>
-        '''
-
-    previous_positions_html = ''
-    for position in info['previous_positions']:
-        collaborators_html = ', '.join([f'<a href="{c["link"]}">{c["name"]}</a>' if i < len(position.get('collaborators'))-1 else f'and <a href="{c["link"]}">{c["name"]}</a>' for i, c in enumerate(position.get('collaborators', []))])
-        previous_positions_html += f'''
-        <li><p>{position["role"]} at <a href="{position["link"]}">{position["organization"]}</a>,</p></li>
-        <li><p>collaborated with {collaborators_html}.</p></li>
-        '''
-
-    links_html = ' '.join([f'<a href="{link["url"]}" class="black-buttons"><i class="{link["icon"]} fa-3x"></i></a>' for link in info['links']])
+    links_html = ' '.join([f'<a href="{link["url"]}" class="black-buttons"><i class="{link["icon"]} fa-2x"></i></a>' for link in info['links']])
 
     personal_info_html = f'''
     <header>
-        <h1>{info["name"]}</h1>
         <div class="row align-items-center">
-            <div class="col-md-9">
-                <b>is currently</b>
-                <ul>{current_positions_html}</ul>
-                <ul>
-                    <li><p>who applies computer vision and computer graphics techniques to computational imaging/sensing research,</p></li>
-                </ul>
-                <b>and previously</b>
-                <ul>{previous_positions_html}</ul>
-            </div>
-            <div class="col-md-3 text-center">
+            <div class="col-md-4 text-center">
                 <img id="profile_pic" src="{info["profile_image"]}">
             </div>
-        </div>
-        <div class="row">
-            <div class="col-12 text-center">
-                <div class="d-flex flex-column centered-buttons">
-                    <div class="p2">{links_html} <a href="{info["cv_url"]}" class="black-buttons"><i class="ai ai-cv fa-3x"></i></a></div>
+            <div class="col-md-8">
+                <h1>{info["name"]}</h1>
+                <span class="text-group">
+                    {info["bio"]}
+                </span>
+                <div style="margin-top: 10px;">
+                    <div class="p2">{links_html} <a href="{info["cv_url"]}" class="black-buttons"><i class="ai ai-cv fa-2x"></i></a></div>
                 </div>
             </div>
         </div>
@@ -69,6 +45,7 @@ def generate_publications_html(publications):
     # Generate HTML for featured publications
     featured_html = '''
     <h5 style="text-align: left;"><b>Select Publications</b></h5>
+    <div class="card card-body" style="border: none; padding: 0; text-align: left;">
     '''
     for paper in featured_papers:
         authors_html = ', '.join([f'<a href="{author["url"]}">{author["name"]}</a>' if author["url"] else f'<b>{author["name"]}</b>' for author in paper['authors']])
@@ -102,6 +79,10 @@ def generate_publications_html(publications):
             </div>
         </div>
         '''
+    
+    featured_html += '''
+    </div>
+    '''
     
     # Generate HTML for other publications in a dropdown
     other_html = ''
@@ -140,9 +121,7 @@ def generate_publications_html(publications):
     
     # Combine featured and other publications with a dropdown for others
     dropdown_html = f'''
-    <div class="featured-publications">
-        {featured_html}
-    </div>
+    {featured_html}
     
     <div class="dropdown-container" style="margin-top: 30px; margin-bottom: 20px;">
         <button class="btn btn-outline-secondary" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
@@ -150,7 +129,7 @@ def generate_publications_html(publications):
         </button>
         <div class="collapse" id="otherPublications">
             <div class="card card-body" style="border: none; padding: 0; text-align: left;">
-                <h5 style="margin-top: 20px; text-align: left;"><b>Additional Publications</b></h5>
+                <h5 style="text-align: left;"><b>Additional Publications</b></h5>
                 {other_html}
             </div>
         </div>
@@ -265,7 +244,7 @@ def generate_updates_html(updates):
 
 # Generate HTML for the inspiration section
 def generate_inspiration_html(inspiration):
-    inspiration_html = ' '.join([f'<a href="{inspire["link"]}">{inspire["name"]}</a>' for inspire in inspiration])
+    inspiration_html = ', '.join([f'<a href="{inspire["link"]}">{inspire["name"]}</a>' for inspire in inspiration])
     return f'<p>Site design inspired by {inspiration_html}.</p>'
 
 # Generate the full HTML page
@@ -298,6 +277,17 @@ def generate_html_page(data):
             .dropdown-container {
                 text-align: center;
             }
+            .text-group {
+                line-height: 1.6;
+            }
+            section {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+            header {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
         </style>
     </head>
     <body>
@@ -313,21 +303,18 @@ def generate_html_page(data):
 
     html_body = f'''
     {personal_info_html}
-    {updates_html and f'<section><div class="subsect">{updates_html}</div></section>' or ''}
+    {updates_html and f'<section>{updates_html}</section>' or ''}
     <section>
-        <div class="subsect">
-            <h4><b>Publications</b> (* indicates equal contribution)</h4>
-            {publications_html}
-        </div>
+        <h4><b>Publications</b> (* indicates equal contribution)</h4>
+        {publications_html}
+    </section>
+    {articles_html and f'<section>{articles_html}</section>' or ''}
+    <section>
+        <h4><b>Side Projects</b></h4>
+        <span class="text-group">I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</span>
+        {projects_html}
         <br>
-        {articles_html and f'<div class="subsect">{articles_html}</div><br>' or ''}
-        <div class="subsect">
-            <h4><b>Side Projects</b></h4>
-            <p>I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</p>
-            {projects_html}
-            <br>
-            {inspiration_html}
-        </div>
+        {inspiration_html}
     </section>
     '''
 

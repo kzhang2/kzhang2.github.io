@@ -163,11 +163,15 @@ hr {
   border-radius: 30px;
   height: 100%;
   object-fit: cover;
-  width: 100%;
+  width: 175px;
 }
 
 .col-md-3.text-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+h1 {
+  font-size: 2rem;
 }

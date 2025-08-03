@@ -26,6 +26,17 @@
             .dropdown-container {
                 text-align: center;
             }
+            .text-group {
+                line-height: 1.6;
+            }
+            section {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+            header {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
         </style>
     </head>
     <body>
@@ -33,40 +44,23 @@
     
     
     <header>
-        <h1>Kevin W. Zhang</h1>
         <div class="row align-items-center">
-            <div class="col-md-9">
-                <b>is currently</b>
-                <ul>
-        <li><p>a 4th Year CS PhD Student at <a href="https://www.cs.umd.edu/people/kzhang24">University of Maryland, College Park</a>, </p></li>
-        <li><p>working with <a href="https://www.cs.umd.edu/~metzler/">Christopher Metzler</a>, and <a href="https://jbhuang0604.github.io/">Jia-Bin Huang</a>,</p></li>
-        </ul>
-                <ul>
-                    <li><p>who applies computer vision and computer graphics techniques to computational imaging/sensing research,</p></li>
-                </ul>
-                <b>and previously</b>
-                <ul>
-        <li><p>interned at <a href="https://research.adobe.com/">Adobe Research</a>,</p></li>
-        <li><p>collaborated with <a href="https://www.dgp.toronto.edu/~hertzman/">Aaron Hertzmann</a>, <a href="https://www.jiechevarria.com/">Jose Echevarria</a>, and <a href="https://www.stephendiverdi.com/">Stephen DiVerdi</a>.</p></li>
-        
-        <li><p>BA in Computer Science and Pure Mathematics (Double Major) at <a href="https://cal.berkeley.edu/kevinzhang0">University of California, Berkeley</a>,</p></li>
-        <li><p>collaborated with <a href="https://kellman.github.io/">Michael Kellman</a>, <a href="https://users.ece.utexas.edu/~jtamir/">Jon Tamir</a>, <a href="http://www.laurawaller.com/">Laura Waller</a>, and <a href="http://people.eecs.berkeley.edu/~mlustig/">Michael Lustig</a>.</p></li>
-        </ul>
-            </div>
-            <div class="col-md-3 text-center">
+            <div class="col-md-4 text-center">
                 <img id="profile_pic" src="static/headshot.jpg">
             </div>
-        </div>
-        <div class="row">
-            <div class="col-12 text-center">
-                <div class="d-flex flex-column centered-buttons">
-                    <div class="p2"><a href="https://github.com/kzhang2" class="black-buttons"><i class="fab fa-github fa-3x"></i></a> <a href="https://scholar.google.com/citations?user=Sm16yZ4AAAAJ&hl=en" class="black-buttons"><i class="ai ai-google-scholar-square fa-3x"></i></a> <a href="https://www.linkedin.com/in/kevin-zhang-4baa79a3/" class="black-buttons"><i class="fab fa-linkedin-in fa-3x"></i></a> <a href="https://x.com/kevinzhang25" class="black-buttons"><i class="fa-brands fa-x-twitter fa-3x"></i></a> <a href="static/CV_Kevin_Zhang_2025_03.pdf" class="black-buttons"><i class="ai ai-cv fa-3x"></i></a></div>
+            <div class="col-md-8">
+                <h1>Kevin W. Zhang</h1>
+                <span class="text-group">
+                    I am a 4th year CS PhD student at the <a href="https://www.cs.umd.edu/people/kzhang24">University of Maryland, College Park</a>, working with <a href="https://www.cs.umd.edu/~metzler/">Christopher Metzler</a> and <a href="https://jbhuang0604.github.io/">Jia-Bin Huang</a> on computer vision and computational imaging research. Previously, I interned at <a href="https://research.adobe.com/">Adobe Research</a> in SF working with <a href="https://www.dgp.toronto.edu/~hertzman/">Aaron Hertzmann</a>, and completed my BA in Computer Science and Pure Mathematics at <a href="https://ls.berkeley.edu/home">UC Berkeley</a> working with <a href="http://www.laurawaller.com/">Laura Waller</a> and <a href="http://people.eecs.berkeley.edu/~mlustig/">Michael Lustig</a>.
+                </span>
+                <div style="margin-top: 10px;">
+                    <div class="p2"><a href="https://github.com/kzhang2" class="black-buttons"><i class="fab fa-github fa-2x"></i></a> <a href="https://scholar.google.com/citations?user=Sm16yZ4AAAAJ&hl=en" class="black-buttons"><i class="ai ai-google-scholar-square fa-2x"></i></a> <a href="https://www.linkedin.com/in/kevin-zhang-4baa79a3/" class="black-buttons"><i class="fab fa-linkedin-in fa-2x"></i></a> <a href="https://x.com/kevinzhang25" class="black-buttons"><i class="fa-brands fa-x-twitter fa-2x"></i></a> <a href="static/CV_Kevin_Zhang_2025_03.pdf" class="black-buttons"><i class="ai ai-cv fa-2x"></i></a></div>
                 </div>
             </div>
         </div>
     </header>
     
-    <section><div class="subsect"><h4><b>Updates</b></h4>
+    <section><h4><b>Updates</b></h4>
         <div class="row no-gutters align-items-start" style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
             <div class="col-md-2" style="text-align: left;">
                 <span class="text-group">
@@ -108,14 +102,13 @@
                 
             </div>
         </div>
-        </div></section>
+        </section>
     <section>
-        <div class="subsect">
-            <h4><b>Publications</b> (* indicates equal contribution)</h4>
-            
-    <div class="featured-publications">
+        <h4><b>Publications</b> (* indicates equal contribution)</h4>
         
+    
     <h5 style="text-align: left;"><b>Select Publications</b></h5>
+    <div class="card card-body" style="border: none; padding: 0; text-align: left;">
     
         <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
             <div class="col-md-3">
@@ -173,7 +166,7 @@
                 </span>
                 <br>
                 <span class="text-group">
-                    CVPR 2024 (<b style='color: red;'>Oral</b>, 3.3% of accepted papers)
+                    CVPR 2024 (<b style='color: red;'>Oral</b>, top 0.78% of submitted papers)
                 </span>
                 <br>
                 <a href="https://arxiv.org/abs/2306.09348" target="_blank">[Paper]</a> <a href="https://world-from-eyes.github.io/">[Website]</a> <a href="https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090">[Press]</a> <a href="https://twitter.com/akanazawa/status/1669530277289562112">[Twitter]</a>  
@@ -182,13 +175,14 @@
         
     </div>
     
+    
     <div class="dropdown-container" style="margin-top: 30px; margin-bottom: 20px;">
         <button class="btn btn-outline-secondary" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
             Show Additional Publications
         </button>
         <div class="collapse" id="otherPublications">
             <div class="card card-body" style="border: none; padding: 0; text-align: left;">
-                <h5 style="margin-top: 20px; text-align: left;"><b>Additional Publications</b></h5>
+                <h5 style="text-align: left;"><b>Additional Publications</b></h5>
                 
         <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
             <div class="col-md-3">
@@ -404,9 +398,8 @@
         </div>
     </div>
     
-        </div>
-        <br>
-        <div class="subsect"><h4><b>Articles</b></h4>
+    </section>
+    <section><h4><b>Articles</b></h4>
         <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
             
             <div class="col-md-12" style="text-align: left;">
@@ -444,11 +437,11 @@
                 <a href="griffiths_prob_2_7_integral/index.html" target="_blank">[View Article]</a>
             </div>
         </div>
-        </div><br>
-        <div class="subsect">
-            <h4><b>Side Projects</b></h4>
-            <p>I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</p>
-            
+        </section>
+    <section>
+        <h4><b>Side Projects</b></h4>
+        <span class="text-group">I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</span>
+        
     <div class="dropdown-container" style="margin-top: 20px; margin-bottom: 20px;">
         <button class="btn btn-outline-secondary" type="button" id="projectsButton" data-toggle="collapse" data-target="#sideProjects" aria-expanded="false" aria-controls="sideProjects">
             Show Side Projects
@@ -485,9 +478,8 @@
         </div>
     </div>
     
-            <br>
-            <p>Site design inspired by <a href="https://haozhi.io/">Haozhi Qi</a> <a href="https://github.com/orderedlist/minimal">orderedlist</a>.</p>
-        </div>
+        <br>
+        <p>Site design inspired by <a href="https://haozhi.io/">Haozhi Qi</a>, <a href="https://github.com/orderedlist/minimal">orderedlist</a>.</p>
     </section>
     
         </div>
