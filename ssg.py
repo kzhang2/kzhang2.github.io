@@ -58,11 +58,11 @@ def generate_publications_html(publications):
         ])
 
         featured_html += f'''
-        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+        <div class="row align-items-center publication-row">
             <div class="col-md-3">
-                <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
+                <img class="img-fluid publication-image" src="{paper["image"]}" alt="">
             </div>
-            <div class="col-md-9" style="text-align: left;">
+            <div class="col-md-9 content-column">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -97,11 +97,11 @@ def generate_publications_html(publications):
         ])
 
         other_html += f'''
-        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+        <div class="row align-items-center publication-row">
             <div class="col-md-3">
-                <img class="img-fluid" src="{paper["image"]}" style="border:0px solid black" alt="">
+                <img class="img-fluid publication-image" src="{paper["image"]}" alt="">
             </div>
-            <div class="col-md-9" style="text-align: left;">
+            <div class="col-md-9 content-column">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -155,7 +155,7 @@ def generate_projects_html(projects):
         projects_html += f'''
                     <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                         <div class="text-center">
-                            <img src="{project["image"]}" class="img-fluid" style="max-height: 200px; width: auto; margin-bottom: 15px;">
+                            <img src="{project["image"]}" class="img-fluid project-image">
                             <div>
                                 <a class="btn btn-secondary btn-sm" href="{project["url"]}">{project["title"]}</a>
                             </div>
@@ -183,7 +183,7 @@ def generate_articles_html(articles):
         if article.get("image"):
             image_html = f'''
             <div class="col-md-3">
-                <img class="img-fluid" src="{article["image"]}" style="border:0px solid black" alt="">
+                <img class="img-fluid article-image" src="{article["image"]}" alt="">
             </div>
             '''
             col_width = "col-md-9"
@@ -191,9 +191,9 @@ def generate_articles_html(articles):
             col_width = "col-md-12"
 
         articles_html += f'''
-        <div class="row align-items-center" style="margin-top: 20px; margin-bottom: 20px; text-align: left;">
+        <div class="row align-items-center publication-row">
             {image_html}
-            <div class="{col_width}" style="text-align: left;">
+            <div class="{col_width} content-column">
                 <span class="text-group">
                     <b>{article["title"]}</b>
                 </span>
@@ -232,13 +232,13 @@ def generate_updates_html(updates):
             formatted_date = ""
             
         updates_html += f'''
-        <div class="row no-gutters align-items-start" style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
-            <div class="col-md-2" style="text-align: left;">
+        <div class="row no-gutters align-items-start updates-row">
+            <div class="col-md-2 content-column">
                 <span class="text-group">
                     <small>{formatted_date}</small>
                 </span>
             </div>
-            <div class="col-md-10" style="text-align: left;">
+            <div class="col-md-10 content-column">
                 <span class="text-group">
                     {update["description"]}
                 </span>

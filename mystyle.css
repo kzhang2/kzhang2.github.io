@@ -201,3 +201,33 @@ header {
   margin-bottom: 10px;
   padding-bottom: 10px;
 }
+
+/* Publication and Article Images */
+.publication-image, .article-image {
+  border: 0px solid black;
+  border-radius: 15px;
+}
+
+/* Project Images */
+.project-image {
+  max-height: 200px;
+  width: auto;
+  margin-bottom: 15px;
+}
+
+/* Layout Classes */
+.publication-row {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.updates-row {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.content-column {
+  text-align: left;
+}
