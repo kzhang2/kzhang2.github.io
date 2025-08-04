@@ -23,6 +23,11 @@
         "platform": "X",
         "url": "https://x.com/kevinzhang25",
         "icon": "fa-brands fa-x-twitter"
+      },
+      {
+        "platform": "Goodreads",
+        "url": "https://www.goodreads.com/user/show/41379284-kevin-zhang",
+        "icon": "fab fa-goodreads-g"
       }
     ],
     "cv_url": "static/CV_Kevin_Zhang_2025_03.pdf",
@@ -365,12 +370,14 @@
         "url": "griffiths_prob_2_7_integral/index.html"
       }
     ],
-  "projects": [
-    {
-      "title": "Tangram Generator",
-      "image": "static/tangram.gif",
-      "url": "dissect"
-    },
+  "projects": {
+    "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
+    "items": [
+      {
+        "title": "Tangram Generator",
+        "image": "static/tangram.gif",
+        "url": "dissect"
+      },
     {
       "title": "Life Simulator",
       "image": "static/conway.gif",
@@ -386,12 +393,33 @@
       "image": "static/htd.gif",
       "url": "halftone-display"
     },
-    {
-      "title": "Wide Angle Lens Visualizations",
-      "image": "static/walv.gif",
-      "url": "wide-angle-lens-vis"
+      {
+        "title": "Wide Angle Lens Visualizations",
+        "image": "static/walv.gif",
+        "url": "wide-angle-lens-vis"
+      }
+    ]
+  },
+  "reading_list": {
+    "preamble": "A sample of inspirational works.",
+    "themes": {
+      "Strange Loops": [
+        { "title": "Gödel, Escher, Bach" },
+        { "title": "Don Quixote" },
+        { "title": "Aṣṭādhyāyī" }
+      ],
+      "Existential": [
+        { "title": "Steppenwolf" },
+        { "title": "The Catcher in the Rye" },
+        { "title": "One Hundred Years of Solitude" }
+      ],
+      "Speculative": [
+        { "title": "The Dispossessed" },
+        { "title": "Brave New World" },
+        { "title": "Exhalations" }
+      ]
     }
-  ],
+  },
   "inspiration": [
     { "name": "Haozhi Qi", "link": "https://haozhi.io/" },
     { "name": "orderedlist", "link": "https://github.com/orderedlist/minimal" }

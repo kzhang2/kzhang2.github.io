@@ -140,8 +140,12 @@ def generate_publications_html(publications):
 
 # Generate HTML for projects
 def generate_projects_html(projects):
+    preamble = projects.get('preamble', '')
+    project_items = projects.get('items', [])
+    
     # Generate HTML for projects with dropdown using grid layout
-    projects_html = '''
+    projects_html = f'''
+    <span class="text-group">{preamble}</span>
     <div class="dropdown-container" style="margin-top: 20px; margin-bottom: 20px;">
         <button class="btn btn-outline-secondary" type="button" id="projectsButton" data-toggle="collapse" data-target="#sideProjects" aria-expanded="false" aria-controls="sideProjects">
             Show Side Projects
@@ -151,7 +155,7 @@ def generate_projects_html(projects):
                 <div class="row">
     '''
     
-    for project in projects:
+    for project in project_items:
         projects_html += f'''
                     <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                         <div class="text-center">
@@ -248,6 +252,26 @@ def generate_updates_html(updates):
         '''
     return updates_html
 
+def generate_reading_list_html(reading_list):
+    if not reading_list:
+        return ''
+    
+    preamble = reading_list.get('preamble', '')
+    themes = reading_list.get('themes', {})
+        
+    reading_list_html = f'<h4><b>Reading List</b></h4>'
+    if preamble:
+        reading_list_html += f'<span class="text-group">{preamble}</span><br>'
+    
+    for theme, books in themes.items():
+        reading_list_html += f'<h5 style="text-align: left;"><b>{theme}</b></h5>'
+        reading_list_html += '<ul>'
+        for book in books:
+            reading_list_html += f'<li>{book["title"]}</li>'
+        reading_list_html += '</ul>'
+    
+    return reading_list_html
+
 # Generate HTML for the inspiration section
 def generate_inspiration_html(inspiration):
     inspiration_html = ', '.join([f'<a href="{inspire["link"]}">{inspire["name"]}</a>' for inspire in inspiration])
@@ -280,6 +304,7 @@ def generate_html_page(data):
     publications_html = generate_publications_html(data['publications'])
     articles_html = generate_articles_html(data.get('articles', []))
     projects_html = generate_projects_html(data['projects'])
+    reading_list_html = generate_reading_list_html(data.get('reading_list', {}))
     inspiration_html = generate_inspiration_html(data['inspiration'])
 
     html_body = f'''
@@ -292,8 +317,10 @@ def generate_html_page(data):
     {articles_html and f'<section>{articles_html}</section>' or ''}
     <section>
         <h4><b>Side Projects</b></h4>
-        <span class="text-group">I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</span>
         {projects_html}
+    </section>
+    {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
+    <section>
         <br>
         {inspiration_html}
     </section>
