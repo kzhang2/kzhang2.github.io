@@ -143,33 +143,26 @@ def generate_projects_html(projects):
     preamble = projects.get('preamble', '')
     project_items = projects.get('items', [])
     
-    # Generate HTML for projects with dropdown using grid layout
+    # Generate HTML for projects using grid layout
     projects_html = f'''
     <span class="text-group">{preamble}</span>
-    <div class="dropdown-container" style="margin-top: 20px; margin-bottom: 20px;">
-        <button class="btn btn-outline-secondary" type="button" id="projectsButton" data-toggle="collapse" data-target="#sideProjects" aria-expanded="false" aria-controls="sideProjects">
-            Show Side Projects
-        </button>
-        <div class="collapse" id="sideProjects">
-            <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
-                <div class="row">
+    <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+        <div class="row">
     '''
     
     for project in project_items:
         projects_html += f'''
-                    <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
-                        <div class="text-center">
-                            <img src="{project["image"]}" class="img-fluid project-image">
-                            <div>
-                                <a class="btn btn-secondary btn-sm" href="{project["url"]}">{project["title"]}</a>
-                            </div>
-                        </div>
+            <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                <div class="text-center">
+                    <img src="{project["image"]}" class="img-fluid project-image">
+                    <div>
+                        <a class="btn btn-secondary btn-sm" href="{project["url"]}">{project["title"]}</a>
                     </div>
+                </div>
+            </div>
         '''
     
     projects_html += '''
-                </div>
-            </div>
         </div>
     </div>
     '''
@@ -261,14 +254,31 @@ def generate_reading_list_html(reading_list):
         
     reading_list_html = f'<h4><b>Reading List</b></h4>'
     if preamble:
-        reading_list_html += f'<span class="text-group">{preamble}</span><br>'
+        reading_list_html += f'<span class="text-group">{preamble}</span>'
+    
+    # Generate HTML for themes using grid layout similar to projects
+    reading_list_html += f'''
+    <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+        <div class="row">
+    '''
     
     for theme, books in themes.items():
-        reading_list_html += f'<h5 style="text-align: left;"><b>{theme}</b></h5>'
-        reading_list_html += '<ul>'
-        for book in books:
-            reading_list_html += f'<li>{book["title"]}</li>'
-        reading_list_html += '</ul>'
+        books_list = ''.join([f'<div style="text-align: center; margin-bottom: 8px;">{book["title"]}</div>' for book in books])
+        reading_list_html += f'''
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
+                <div class="card h-100" style="border: none; padding: 15px;">
+                    <h6 style="text-align: center; margin-bottom: 15px;"><b>{theme}</b></h6>
+                    <div style="margin-bottom: 0;">
+                        {books_list}
+                    </div>
+                </div>
+            </div>
+        '''
+    
+    reading_list_html += '''
+        </div>
+    </div>
+    '''
     
     return reading_list_html
 
@@ -337,21 +347,12 @@ def generate_html_page(data):
             $(document).ready(function() {
                 // Initialize button text
                 $('#otherPublicationsButton').text('Show Additional Publications');
-                $('#projectsButton').text('Show Side Projects');
                 
                 $('#otherPublicationsButton').click(function() {
                     if($(this).attr('aria-expanded') === 'false') {
                         $(this).text('Hide Additional Publications');
                     } else {
                         $(this).text('Show Additional Publications');
-                    }
-                });
-                
-                $('#projectsButton').click(function() {
-                    if($(this).attr('aria-expanded') === 'false') {
-                        $(this).text('Hide Side Projects');
-                    } else {
-                        $(this).text('Show Side Projects');
                     }
                 });
             });
