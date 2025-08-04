@@ -140,7 +140,7 @@ def generate_publications_html(publications):
 
 # Generate HTML for projects
 def generate_projects_html(projects):
-    # Generate HTML for projects with dropdown
+    # Generate HTML for projects with dropdown using grid layout
     projects_html = '''
     <div class="dropdown-container" style="margin-top: 20px; margin-bottom: 20px;">
         <button class="btn btn-outline-secondary" type="button" id="projectsButton" data-toggle="collapse" data-target="#sideProjects" aria-expanded="false" aria-controls="sideProjects">
@@ -148,17 +148,23 @@ def generate_projects_html(projects):
         </button>
         <div class="collapse" id="sideProjects">
             <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+                <div class="row">
     '''
     
     for project in projects:
         projects_html += f'''
-                <div class="p2" style="padding-bottom: 10px; padding-top: 10px; text-align: center;">
-                    <img src="{project["image"]}" width="75%" style="display: block; margin: 0 auto;">
-                    <a class="btn btn-secondary w-2" href="{project["url"]}" style="margin-top: 20px; margin-bottom: 20px;">{project["title"]}</a>
-                </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+                        <div class="text-center">
+                            <img src="{project["image"]}" class="img-fluid" style="max-height: 200px; width: auto; margin-bottom: 15px;">
+                            <div>
+                                <a class="btn btn-secondary btn-sm" href="{project["url"]}">{project["title"]}</a>
+                            </div>
+                        </div>
+                    </div>
         '''
     
     projects_html += '''
+                </div>
             </div>
         </div>
     </div>
@@ -264,31 +270,6 @@ def generate_html_page(data):
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
         <link rel="stylesheet" type="text/css" href="mystyle.css">
         <link rel="icon" type="image/x-icon" href="favicon.ico">
-        <style>
-            /* Add some custom styles for the dropdown button */
-            #otherPublicationsButton, #projectsButton {
-                display: block;
-                margin: 0 auto;
-                transition: all 0.3s ease;
-            }
-            #otherPublicationsButton:hover, #projectsButton:hover {
-                background-color: #f0f0f0;
-            }
-            .dropdown-container {
-                text-align: center;
-            }
-            .text-group {
-                line-height: 1.6;
-            }
-            section {
-                margin-bottom: 10px;
-                padding-bottom: 10px;
-            }
-            header {
-                margin-bottom: 10px;
-                padding-bottom: 10px;
-            }
-        </style>
     </head>
     <body>
         <div class="vertical-center">
