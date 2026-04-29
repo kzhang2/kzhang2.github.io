@@ -374,9 +374,16 @@
     </div>
     
     </section>
+    <section>
+        <div class="dropdown-container" style="margin-bottom: 20px;">
+            <button class="btn btn-outline-secondary" type="button" id="funSectionButton" data-toggle="collapse" data-target="#funSection" aria-expanded="false" aria-controls="funSection">
+                Show Fun
+            </button>
+        </div>
+        <div class="collapse" id="funSection">
     <section><h4><b>Articles</b></h4>
         <div class="row align-items-center publication-row">
-            
+
             <div class="col-md-12 content-column">
                 <span class="text-group">
                     <b>Integer Partition Generating Function Forms</b>
@@ -393,9 +400,9 @@
                 <a href="integer_partition_generating_function_forms/index.html" target="_blank">[View Article]</a>
             </div>
         </div>
-        
+
         <div class="row align-items-center publication-row">
-            
+
             <div class="col-md-12 content-column">
                 <span class="text-group">
                     <b>On an Integral from Griffith's Problem 2.7</b>
@@ -415,11 +422,11 @@
         </section>
     <section>
         <h4><b>Side Projects</b></h4>
-        
+
     <span class="text-group">I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.</span>
     <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
         <div class="row">
-    
+
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
                     <img src="static/tangram.gif" class="img-fluid project-image">
@@ -428,7 +435,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
                     <img src="static/conway.gif" class="img-fluid project-image">
@@ -437,7 +444,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
                     <img src="static/smoke.gif" class="img-fluid project-image">
@@ -446,7 +453,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
                     <img src="static/htd.gif" class="img-fluid project-image">
@@ -455,7 +462,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
                     <img src="static/walv.gif" class="img-fluid project-image">
@@ -464,15 +471,15 @@
                     </div>
                 </div>
             </div>
-        
+
         </div>
     </div>
-    
+
     </section>
     <section><h4><b>Reading List</b></h4><span class="text-group">A sample of inspirational works.</span>
     <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
         <div class="row">
-    
+
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                 <div class="card h-100" style="border: none; padding: 15px;">
                     <h6 style="text-align: center; margin-bottom: 15px;"><b>Strange Loops</b></h6>
@@ -481,7 +488,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                 <div class="card h-100" style="border: none; padding: 15px;">
                     <h6 style="text-align: center; margin-bottom: 15px;"><b>Existential</b></h6>
@@ -490,7 +497,7 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
                 <div class="card h-100" style="border: none; padding: 15px;">
                     <h6 style="text-align: center; margin-bottom: 15px;"><b>Speculative</b></h6>
@@ -499,9 +506,11 @@
                     </div>
                 </div>
             </div>
-        
+
         </div>
     </div>
+    </section>
+        </div>
     </section>
     <section>
         <br>
@@ -524,6 +533,15 @@
                         $(this).text('Hide Additional Publications');
                     } else {
                         $(this).text('Show Additional Publications');
+                    }
+                });
+
+                $('#funSectionButton').text('Show Fun');
+                $('#funSectionButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Fun');
+                    } else {
+                        $(this).text('Show Fun');
                     }
                 });
             });
