@@ -1,0 +1,77 @@
+    body { margin: 0; background: #111; overflow: hidden; }
+    canvas { display: block; }
+    #info {
+      position: absolute; top: 12px; left: 12px;
+      color: #ccc; font-family: monospace; font-size: 13px;
+      pointer-events: none; line-height: 1.7;
+    }
+    #legend {
+      position: absolute; top: 12px; right: 12px;
+      color: #ccc; font-family: monospace; font-size: 12px;
+      pointer-events: none; line-height: 1.8;
+    }
+    #stage-menu {
+      position: absolute; top: 12px; left: 12px;
+      width: 320px; max-height: calc(100vh - 24px);
+      padding: 10px;
+      background: rgba(18, 18, 22, 0.92);
+      border: 1px solid #2f2f38;
+      border-radius: 6px;
+      overflow-y: auto;
+      color: #ccc; font-family: monospace; font-size: 11px;
+      z-index: 5;
+    }
+    #stage-menu .title {
+      color: #8ab; font-size: 12px; margin-bottom: 8px;
+    }
+    #stage-menu .hint {
+      color: #777; margin-bottom: 8px; line-height: 1.5;
+    }
+    #stage-menu.hidden {
+      display: none;
+    }
+    .stage-jump {
+      width: 100%;
+      margin: 0 0 4px;
+      padding: 6px 8px;
+      text-align: left;
+      background: #1b1b20;
+      border: 1px solid #353540;
+      color: #bbb;
+      border-radius: 4px;
+      font: 11px monospace;
+      cursor: pointer;
+    }
+    .stage-jump:hover { background: #262630; }
+    .stage-jump.active {
+      background: #203645;
+      border-color: #42708a;
+      color: #d8f0ff;
+    }
+    .stage-jump:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+    .swatch {
+      display: inline-block; width: 12px; height: 12px;
+      vertical-align: middle; margin-right: 5px; border-radius: 2px;
+    }
+    .label {
+      position: absolute; text-align: center;
+      pointer-events: none; transform: translate(-50%, 0);
+      font-family: monospace;
+    }
+    .label .name  { color: #fff; font-size: 14px; font-weight: bold; }
+    .label .faces { color: #aaa; font-size: 11px; margin-top: 3px; }
+    .label .role  { color: #7bc; font-size: 11px; margin-top: 2px; }
+    #controls {
+      position: absolute; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    button {
+      background: #333; color: #eee; border: 1px solid #555;
+      padding: 8px 18px; font-family: monospace; font-size: 13px;
+      cursor: pointer; border-radius: 4px;
+    }
+    button:hover { background: #444; }

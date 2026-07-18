@@ -1,0 +1,3430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Conway-Radin-Sadun Dissection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stage-menu">
+  <div class="title">Debug Stages</div>
+  <div class="hint">Jump directly to any settled stage.</div>
+  <div id="stage-list"></div>
+</div>
+<div id="info">Steps 1–2 — Three Solids · P3A Pyramids<br>drag to rotate · scroll to zoom</div>
+<div id="controls">
+  <button id="btnBack" style="visibility:hidden">← Assemble icosahedron</button>
+  <button id="btnNext">Explode icosahedron →</button>
+  <button id="btnPlayAll">Play All</button>
+  <button id="btnToggleDebug">Hide Debug Panel</button>
+</div>
+<div id="legend">
+  <div><span class="swatch" style="background:#5599dd"></span>triangular face</div>
+  <div><span class="swatch" style="background:#e8963a"></span>pentagonal face</div>
+</div>
+<div id="labels"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { buildExtrudedRectToRectDissection } from './rect2rect_core.mjs';
+
+const phi = (1 + Math.sqrt(5)) / 2;
+const TARGET_R = 2; // display circumradius for all three solids
+
+// ---------------------------------------------------------------------------
+// Geometry helpers
+// ---------------------------------------------------------------------------
+
+function v3(x, y, z) { return new THREE.Vector3(x, y, z); }
+
+const vadd   = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const vsub   = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const vscale = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+const vdot   = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const vcross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
+const vnorm  = a => Math.sqrt(vdot(a, a));
+const vunit  = a => vscale(a, 1 / vnorm(a));
+
+function centroid(pts) {
+  return vscale(pts.reduce(vadd, [0, 0, 0]), 1 / pts.length);
+}
+
+function convexHullFaces(pts) {
+  const n = pts.length;
+  const cen = centroid(pts);
+  const faces = [];
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      for (let k = j + 1; k < n; k++) {
+        const ab = vsub(pts[j], pts[i]);
+        const ac = vsub(pts[k], pts[i]);
+        const nm = vcross(ab, ac);
+        if (vnorm(nm) < 1e-10) continue;
+
+        let allSame = true;
+        let side = 0;
+        for (let m = 0; m < n; m++) {
+          if (m === i || m === j || m === k) continue;
+          const d = vdot(nm, vsub(pts[m], pts[i]));
+          if (Math.abs(d) < 1e-9) continue;
+          if (side === 0) side = Math.sign(d);
+          else if (Math.sign(d) !== side) { allSame = false; break; }
+        }
+        if (!allSame) continue;
+
+        const dc = vdot(nm, vsub(cen, pts[i]));
+        faces.push(dc > 0 ? [i, k, j] : [i, j, k]);
+      }
+    }
+  }
+  return faces;
+}
+
+function buildMesh(pts, color, opacity = 0.75) {
+  const faces = convexHullFaces(pts);
+  const pos = [];
+  for (const [i, j, k] of faces) pos.push(...pts[i], ...pts[j], ...pts[k]);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+    color,
+    emissive: new THREE.Color(color).multiplyScalar(0.12),
+    shininess: 50,
+    transparent: true,
+    opacity,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  }));
+}
+
+function buildWireframe(pts, color, opacity = 1) {
+  const faces = convexHullFaces(pts);
+  const edgeSet = new Set();
+  const pos = [];
+  for (const [i, j, k] of faces) {
+    for (const [a, b] of [[i, j], [j, k], [i, k]]) {
+      const key = Math.min(a, b) + '_' + Math.max(a, b);
+      if (edgeSet.has(key)) continue;
+      edgeSet.add(key);
+      pos.push(...pts[a], ...pts[b]);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color,
+    transparent: opacity < 1,
+    opacity,
+  }));
+}
+
+function buildPolyMesh(pts, faces, color, opacity = 0.75) {
+  const pos = [];
+  for (const face of faces) {
+    for (let i = 1; i < face.length - 1; i++) {
+      pos.push(...pts[face[0]], ...pts[face[i]], ...pts[face[i + 1]]);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+    color,
+    emissive: new THREE.Color(color).multiplyScalar(0.12),
+    shininess: 50,
+    transparent: true,
+    opacity,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  }));
+}
+
+function buildPolyWire(pts, faces, color, opacity = 1) {
+  const edgeSet = new Set();
+  const pos = [];
+  for (const face of faces) {
+    for (let i = 0; i < face.length; i++) {
+      const a = face[i], b = face[(i + 1) % face.length];
+      const key = Math.min(a, b) + '_' + Math.max(a, b);
+      if (edgeSet.has(key)) continue;
+      edgeSet.add(key);
+      pos.push(...pts[a], ...pts[b]);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color,
+    transparent: opacity < 1,
+    opacity,
+  }));
+}
+
+function buildPolyPieceGroup(pts, faces, color, wireColor, opacity = 0.78) {
+  const mesh = buildPolyMesh(pts, faces, color.getHex(), opacity);
+  const wire = buildPolyWire(pts, faces, wireColor.getHex(), opacity);
+  const group = new THREE.Group();
+  group.add(mesh, wire);
+  return group;
+}
+
+function buildPieceGroup(pts, color, wireColor, opacity = 0.78) {
+  const mesh = buildMesh(pts, color.getHex(), opacity);
+  const wire = buildWireframe(pts, wireColor.getHex(), opacity);
+  const group = new THREE.Group();
+  group.add(mesh, wire);
+  return group;
+}
+
+function tint(color, lightnessShift) {
+  const c = new THREE.Color(color);
+  const hsl = { h: 0, s: 0, l: 0 };
+  c.getHSL(hsl);
+  c.setHSL(hsl.h, hsl.s, Math.max(0, Math.min(1, hsl.l + lightnessShift)));
+  return c;
+}
+
+function rotateAboutAxis(P, axisA, axisB, theta) {
+  const n = vunit(vsub(axisB, axisA));
+  const r = vsub(P, axisA);
+  const c = Math.cos(theta);
+  const s = Math.sin(theta);
+  const d = vdot(n, r);
+  const cr = vcross(n, r);
+  return vadd(axisA, [
+    r[0] * c + cr[0] * s + n[0] * d * (1 - c),
+    r[1] * c + cr[1] * s + n[1] * d * (1 - c),
+    r[2] * c + cr[2] * s + n[2] * d * (1 - c),
+  ]);
+}
+
+function sliceAtHeight(pts, h) {
+  const eps = 1e-9;
+  const hits = [];
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i + 1; j < pts.length; j++) {
+      const pi = pts[i];
+      const pj = pts[j];
+      let p = null;
+      if (Math.abs(pi[1] - h) < eps) p = [...pi];
+      else if (Math.abs(pj[1] - h) < eps) p = [...pj];
+      else if ((pi[1] - h) * (pj[1] - h) < 0) {
+        const t = (h - pi[1]) / (pj[1] - pi[1]);
+        p = [pi[0] + t * (pj[0] - pi[0]), h, pi[2] + t * (pj[2] - pi[2])];
+      }
+      if (p && !hits.some(q => Math.hypot(q[0] - p[0], q[2] - p[2]) < eps)) hits.push(p);
+    }
+  }
+  const cen = centroid(hits);
+  hits.sort((a, b) =>
+    Math.atan2(a[2] - cen[2], a[0] - cen[0]) -
+    Math.atan2(b[2] - cen[2], b[0] - cen[0]));
+  return hits;
+}
+
+function pointOnSegment(P, A, B, eps = 1e-6) {
+  const AB = vsub(B, A);
+  const AP = vsub(P, A);
+  if (vnorm(vcross(AB, AP)) > eps * Math.max(1, vnorm(AB))) return false;
+  const t = vdot(AP, AB) / Math.max(vdot(AB, AB), eps);
+  return t > -eps && t < 1 + eps;
+}
+
+function bounds(pts) {
+  return {
+    mins: [0, 1, 2].map(i => Math.min(...pts.map(p => p[i]))),
+    maxs: [0, 1, 2].map(i => Math.max(...pts.map(p => p[i]))),
+  };
+}
+
+function makeOrthonormalBasis(p0, p1, p2) {
+  const u = vunit(vsub(p1, p0));
+  let v = vsub(p2, p0);
+  v = vsub(v, vscale(u, vdot(v, u)));
+  v = vunit(v);
+  const w = vunit(vcross(u, v));
+  v = vunit(vcross(w, u));
+  return { u, v, w };
+}
+
+function projectPointToBasis(p, basis) {
+  return [vdot(p, basis.u), vdot(p, basis.v), vdot(p, basis.w)];
+}
+
+function pointFromBasisCoords(coords, basis) {
+  return vadd(
+    vscale(basis.u, coords[0]),
+    vadd(vscale(basis.v, coords[1]), vscale(basis.w, coords[2]))
+  );
+}
+
+function buildBlockLayout(canonicalBounds) {
+  const spans = [
+    canonicalBounds.maxs[0] - canonicalBounds.mins[0],
+    canonicalBounds.maxs[1] - canonicalBounds.mins[1],
+    canonicalBounds.maxs[2] - canonicalBounds.mins[2],
+  ];
+  const order = [0, 1, 2].sort((a, b) => spans[a] - spans[b]);
+  const counts = [1, 1, 1];
+  counts[order[0]] = 3;
+  counts[order[1]] = 2;
+  counts[order[2]] = 1;
+  const slots = [];
+  for (let i = 0; i < counts[0]; i++) {
+    for (let j = 0; j < counts[1]; j++) {
+      for (let k = 0; k < counts[2]; k++) {
+        slots.push([i, j, k]);
+      }
+    }
+  }
+  return {
+    spans,
+    counts,
+    order,
+    slots,
+    dims: [
+      counts[0] * spans[0],
+      counts[1] * spans[1],
+      counts[2] * spans[2],
+    ],
+  };
+}
+
+function basisQuaternion(basis) {
+  const mat = new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(...basis.u),
+    new THREE.Vector3(...basis.v),
+    new THREE.Vector3(...basis.w)
+  );
+  return new THREE.Quaternion().setFromRotationMatrix(mat);
+}
+
+function quaternionToBasis(quat) {
+  return {
+    u: [1, 0, 0].map((_, i) => new THREE.Vector3(1, 0, 0).applyQuaternion(quat).toArray()[i]),
+    v: [1, 0, 0].map((_, i) => new THREE.Vector3(0, 1, 0).applyQuaternion(quat).toArray()[i]),
+    w: [1, 0, 0].map((_, i) => new THREE.Vector3(0, 0, 1).applyQuaternion(quat).toArray()[i]),
+  };
+}
+
+function setObjectOpacity(obj, opacity) {
+  obj.traverse(child => {
+    if (child.material) {
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach(mat => {
+        if ('opacity' in mat) {
+          mat.transparent = true;
+          mat.opacity = opacity;
+        }
+      });
+    }
+  });
+}
+
+function buildBoxWireGroup(origin, dims, colorHex, opacity = 0.45) {
+  const [ox, oy, oz] = origin;
+  const [dx, dy, dz] = dims;
+  const pts = [
+    [ox, oy, oz], [ox + dx, oy, oz], [ox + dx, oy + dy, oz], [ox, oy + dy, oz],
+    [ox, oy, oz + dz], [ox + dx, oy, oz + dz], [ox + dx, oy + dy, oz + dz], [ox, oy + dy, oz + dz],
+  ];
+  const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const pos = [];
+  edges.forEach(([a, b]) => pos.push(...pts[a], ...pts[b]));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color: colorHex,
+    transparent: true,
+    opacity,
+  }));
+}
+
+function bezierValue(p0, p1, p2, t) {
+  const s = 1 - t;
+  return s * s * p0 + 2 * s * t * p1 + t * t * p2;
+}
+
+function wrapAngle(angle) {
+  let a = angle;
+  while (a <= -Math.PI) a += 2 * Math.PI;
+  while (a > Math.PI) a -= 2 * Math.PI;
+  return a;
+}
+
+function lerpAngle(a, b, t) {
+  const start = wrapAngle(a || 0);
+  const delta = wrapAngle((b || 0) - start);
+  return wrapAngle(start + delta * t);
+}
+
+function lerpTransform3D(a, b, t) {
+  return {
+    angle: THREE.MathUtils.lerp(a.angle || 0, b.angle || 0, t),
+    tx: THREE.MathUtils.lerp(a.tx || 0, b.tx || 0, t),
+    ty: THREE.MathUtils.lerp(a.ty || 0, b.ty || 0, t),
+    tz: THREE.MathUtils.lerp(a.tz || 0, b.tz || 0, t),
+  };
+}
+
+function pathTransform3D(piece, t) {
+  const start = piece.sourceTransform3D;
+  const end = piece.targetTransform3D;
+  const legacyMid = lerpTransform3D(piece.sourcePathHint3D || start, piece.targetPathHint3D || end, 0.5);
+  const control = {
+    tx: 2 * legacyMid.tx - 0.5 * (start.tx + end.tx),
+    ty: 2 * legacyMid.ty - 0.5 * (start.ty + end.ty),
+    tz: 2 * (legacyMid.tz || 0) - 0.5 * ((start.tz || 0) + (end.tz || 0)),
+  };
+  return {
+    angle: lerpAngle(start.angle || 0, end.angle || 0, t),
+    tx: bezierValue(start.tx, control.tx, end.tx, t),
+    ty: bezierValue(start.ty, control.ty, end.ty, t),
+    tz: bezierValue(start.tz || 0, control.tz, end.tz || 0, t),
+  };
+}
+
+function applyPlanarTransform(node, tform, axis = 'z') {
+  if (axis === 'z') {
+    node.position.set(tform.tx || 0, tform.ty || 0, tform.tz || 0);
+    node.quaternion.setFromAxisAngle(_zAxis, tform.angle || 0);
+  } else if (axis === 'x') {
+    node.position.set(tform.tz || 0, tform.tx || 0, tform.ty || 0);
+    node.quaternion.setFromAxisAngle(_xAxis, tform.angle || 0);
+  }
+}
+
+// Scale a vertex array so all verts lie on a sphere of radius TARGET_R
+function normalize(verts) {
+  const r = verts[0].length();
+  return verts.map(v => v.clone().multiplyScalar(TARGET_R / r));
+}
+
+// Find all faces of a convex centrosymmetric polyhedron.
+// Uses the "sorted half-edge" algorithm: at each vertex, neighbors are sorted
+// CCW around the outward normal; the face traversal takes the most-CW turn at each step.
+function findFaces(verts, edgeLenSq) {
+  const n = verts.length;
+  const tol = edgeLenSq * 0.03;
+  const adj = Array.from({length: n}, () => []);
+
+  for (let i = 0; i < n; i++)
+    for (let j = i+1; j < n; j++)
+      if (Math.abs(verts[i].distanceToSquared(verts[j]) - edgeLenSq) < tol) {
+        adj[i].push(j); adj[j].push(i);
+      }
+
+  // Sort each vertex's neighbors CCW when viewed from outside (outward normal = v.normalize())
+  const sorted = verts.map((v, j) => {
+    const N = v.clone().normalize();
+    const nbrs = adj[j];
+    if (!nbrs.length) return [];
+    const ref = verts[nbrs[0]].clone().sub(v);
+    ref.addScaledVector(N, -ref.dot(N)).normalize();
+    const perp = new THREE.Vector3().crossVectors(N, ref);
+    return nbrs.slice().sort((a, b) => {
+      const da = verts[a].clone().sub(v); da.addScaledVector(N, -da.dot(N));
+      const db = verts[b].clone().sub(v); db.addScaledVector(N, -db.dot(N));
+      return Math.atan2(da.dot(perp), da.dot(ref)) - Math.atan2(db.dot(perp), db.dot(ref));
+    });
+  });
+
+  // For directed edge i→j, next vertex k in CCW face = prev of i in j's CCW neighbor list
+  const next = new Map();
+  for (let j = 0; j < n; j++) {
+    const sn = sorted[j];
+    for (let idx = 0; idx < sn.length; idx++) {
+      const i = sn[idx];
+      const k = sn[(idx - 1 + sn.length) % sn.length];
+      next.set(i * n + j, k);
+    }
+  }
+
+  const visited = new Set();
+  const faces = [];
+  for (let i = 0; i < n; i++) {
+    for (const j of adj[i]) {
+      if (visited.has(i * n + j)) continue;
+      const face = [];
+      let a = i, b = j;
+      for (let step = 0; step < n + 5; step++) {
+        const key = a * n + b;
+        if (visited.has(key)) break;
+        visited.add(key);
+        face.push(a);
+        const c = next.get(key);
+        if (c === undefined) break;
+        a = b; b = c;
+      }
+      if (face.length >= 3) faces.push(face);
+    }
+  }
+  return faces;
+}
+
+// Build a Three.js Group for a solid: colored faces + black edge overlay
+function buildSolid(verts, faces, colorFn) {
+  const group = new THREE.Group();
+  const edgePos = [];
+
+  for (const face of faces) {
+    const color = colorFn(face.length);
+    const positions = [];
+
+    // Fan triangulation; fix winding so normal points away from origin
+    for (let k = 1; k < face.length - 1; k++) {
+      const a = verts[face[0]], b = verts[face[k]], c = verts[face[k+1]];
+      const cen = a.clone().add(b).add(c).divideScalar(3);
+      const nrm = b.clone().sub(a).cross(c.clone().sub(a));
+      if (nrm.dot(cen) < 0)
+        positions.push(a.x,a.y,a.z,  c.x,c.y,c.z,  b.x,b.y,b.z);
+      else
+        positions.push(a.x,a.y,a.z,  b.x,b.y,b.z,  c.x,c.y,c.z);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+    group.add(new THREE.Mesh(geo,
+      new THREE.MeshPhongMaterial({ color, shininess: 50, side: THREE.DoubleSide })));
+
+    // Collect edges for wireframe
+    for (let k = 0; k < face.length; k++) {
+      const a = verts[face[k]], b = verts[face[(k+1) % face.length]];
+      edgePos.push(a.x,a.y,a.z, b.x,b.y,b.z);
+    }
+  }
+
+  const edgeGeo = new THREE.BufferGeometry();
+  edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePos, 3));
+  group.add(new THREE.LineSegments(edgeGeo,
+    new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.3, transparent: true })));
+
+  return group;
+}
+
+// ---------------------------------------------------------------------------
+// Build vertex sets
+// ---------------------------------------------------------------------------
+
+// Icosahedron — all permutations of (0, ±1, ±φ)
+const icoRaw = [];
+for (const s1 of [-1,1]) for (const s2 of [-1,1]) {
+  icoRaw.push(v3(0,    s1,    s2*phi));
+  icoRaw.push(v3(s1,   s2*phi, 0));
+  icoRaw.push(v3(s2*phi, 0,   s1));
+}
+// Scale ico and ido by the SAME factor so they share edge length 2*ICO_IDO_SCALE.
+// Both have raw edge = 2; scaling equally keeps their P3A bases flush with ido faces.
+const ICO_IDO_SCALE = TARGET_R / (2 * phi); // ≈ 0.618 — normalises ido to circumradius TARGET_R
+const ICO_R = Math.sqrt(2 + phi) * ICO_IDO_SCALE; // ≈ 1.176
+
+const icoVerts = icoRaw.map(v => v.clone().multiplyScalar(ICO_IDO_SCALE));
+const icoEdgeSq = 4 * ICO_IDO_SCALE ** 2;
+
+// Dodecahedron — (±1,±1,±1) and (0,±1/φ,±φ) + cyclic permutations
+const dodRaw = [];
+for (const sx of [-1,1]) for (const sy of [-1,1]) for (const sz of [-1,1])
+  dodRaw.push(v3(sx, sy, sz));
+for (const s1 of [-1,1]) for (const s2 of [-1,1]) {
+  dodRaw.push(v3(0,       s1/phi, s2*phi));
+  dodRaw.push(v3(s2*phi,  0,      s1/phi));
+  dodRaw.push(v3(s1/phi,  s2*phi, 0));
+}
+// circumradius = √3,  edge² = 8−4φ = (2/φ)² — same edge as the scaled ico/ido
+// Use raw (unscaled) so all three solids share edge length 2/φ, required for P5 pieces to fit.
+const dodVerts = dodRaw;
+const dodEdgeSq = 8 - 4 * phi;
+
+// Icosidodecahedron — V[i]+V[j] for each icosahedron edge (using raw coords, edge = 2)
+// Also build edge→idoIdx map for Step 3 face correspondence
+function edgeKey(a, b) { return Math.min(a,b) + '_' + Math.max(a,b); }
+const idoRaw = [];
+const edgeToIdoIdx = new Map();
+const idoToIcoEdge = []; // idoToIcoEdge[k] = [i,j]: idoRaw[k] = icoRaw[i]+icoRaw[j]
+for (let i = 0; i < icoRaw.length; i++)
+  for (let j = i+1; j < icoRaw.length; j++)
+    if (Math.abs(icoRaw[i].distanceToSquared(icoRaw[j]) - 4) < 0.01) {
+      edgeToIdoIdx.set(edgeKey(i, j), idoRaw.length);
+      idoToIcoEdge.push([i, j]);
+      idoRaw.push(icoRaw[i].clone().add(icoRaw[j]));
+    }
+// circumradius = 2φ,  edge = 2
+const idoVerts = normalize(idoRaw);
+const idoEdgeSq = 4 * (TARGET_R / (2 * phi)) ** 2;
+
+// ---------------------------------------------------------------------------
+// Find faces
+// ---------------------------------------------------------------------------
+
+const icoFaces = findFaces(icoVerts, icoEdgeSq);
+const dodFaces = findFaces(dodVerts, dodEdgeSq);
+const idoFaces = findFaces(idoVerts, idoEdgeSq);
+
+// Verify (check browser console)
+console.log('Icosahedron:',       icoFaces.length, 'faces, sizes:', [...new Set(icoFaces.map(f=>f.length))]);
+console.log('Dodecahedron:',      dodFaces.length, 'faces, sizes:', [...new Set(dodFaces.map(f=>f.length))]);
+console.log('Icosidodecahedron:', idoFaces.length, 'faces, sizes:', [...new Set(idoFaces.map(f=>f.length))]);
+
+// ---------------------------------------------------------------------------
+// Scene
+// ---------------------------------------------------------------------------
+
+const TRI  = new THREE.Color(0x5599dd); // blue  — triangles
+const PENT = new THREE.Color(0xe8963a); // amber — pentagons
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x151520);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 15);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+const d1 = new THREE.DirectionalLight(0xffffff, 1.1); d1.position.set(5, 8, 6);  scene.add(d1);
+const d2 = new THREE.DirectionalLight(0xffffff, 0.4); d2.position.set(-4,-3,-5); scene.add(d2);
+
+const SPACING = 5.5;
+const colorFn = n => n === 3 ? TRI : PENT;
+
+// ---------------------------------------------------------------------------
+// Icosahedron — built as 20 P3A pyramids (Step 2)
+// Each pyramid: apex at local origin, base = one triangular face
+// ---------------------------------------------------------------------------
+
+function buildIcoPyramids(verts, faces) {
+  const O = new THREE.Vector3();
+  return faces.map((face, idx) => {
+    const [ia, ib, ic] = face;
+    const a = verts[ia], b = verts[ib], c = verts[ic];
+
+    const explodeDir = a.clone().add(b).add(c).divideScalar(3).normalize();
+
+    // Side face: outward normal must point away from the opposite base vertex
+    function sideFace(p, q, opp) {
+      const n = p.clone().cross(q); // O is origin so p−O = p
+      return n.dot(opp) > 0 ? [O, q, p] : [O, p, q];
+    }
+
+    // Base: ensure outward winding (normal away from origin)
+    const cen = a.clone().add(b).add(c).divideScalar(3);
+    const baseN = b.clone().sub(a).cross(c.clone().sub(a));
+    const base = baseN.dot(cen) < 0 ? [a, c, b] : [a, b, c];
+
+    const tris = [base, sideFace(a, b, c), sideFace(b, c, a), sideFace(c, a, b)];
+    const positions = [];
+    for (const [p, q, r] of tris)
+      positions.push(p.x,p.y,p.z, q.x,q.y,q.z, r.x,r.y,r.z);
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL(idx / 20, 0.72, 0.52),
+      flatShading: true, shininess: 40, side: THREE.DoubleSide,
+    }));
+    return { mesh, explodeDir };
+  });
+}
+
+// Build 12 P5 pentagonal pyramids from the ido.
+// Each ido pentagon was formed by the 5 edges around one ico vertex v; that vertex
+// is the correct apex (gives the shallow pyramid matching Hafner's P5 piece).
+// Apex at icoVerts[apexIdx]; base = the 5 ido pentagon vertices.
+function buildIdoPyramids(verts, faces, icoV, icoEdgeMap) {
+  return faces.filter(f => f.length === 5).map((face, idx) => {
+    const pts = face.map(i => verts[i]);
+    const cen = new THREE.Vector3();
+    pts.forEach(p => cen.add(p));
+    cen.divideScalar(pts.length);
+    const explodeDir = cen.clone().normalize();
+
+    // Find the ico vertex shared by all 5 ido edges of this pentagon
+    const counts = new Map();
+    for (const j of face)
+      for (const k of icoEdgeMap[j])
+        counts.set(k, (counts.get(k) || 0) + 1);
+    let apexIdx = -1;
+    for (const [k, c] of counts) if (c === 5) { apexIdx = k; break; }
+    const apex = icoV[apexIdx];
+
+    const positions = [];
+    // 5 side triangles: apex + each base edge
+    for (let k = 0; k < pts.length; k++) {
+      const p = pts[k], q = pts[(k+1) % pts.length];
+      const nrm = new THREE.Vector3().crossVectors(p.clone().sub(apex), q.clone().sub(apex));
+      if (nrm.dot(cen.clone().sub(apex)) < 0)
+        positions.push(apex.x,apex.y,apex.z, q.x,q.y,q.z, p.x,p.y,p.z);
+      else
+        positions.push(apex.x,apex.y,apex.z, p.x,p.y,p.z, q.x,q.y,q.z);
+    }
+    // Base pentagon (fan from pts[0])
+    const baseNrm = new THREE.Vector3().crossVectors(
+      pts[1].clone().sub(pts[0]), pts[2].clone().sub(pts[0])
+    );
+    for (let k = 1; k < pts.length - 1; k++) {
+      const [a, b, c] = [pts[0], pts[k], pts[k+1]];
+      if (baseNrm.dot(cen.clone().sub(apex)) > 0)
+        positions.push(a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z);
+      else
+        positions.push(a.x,a.y,a.z, c.x,c.y,c.z, b.x,b.y,b.z);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL(idx / 12, 0.65, 0.52),
+      flatShading: true, shininess: 40, side: THREE.DoubleSide,
+    }));
+    mesh.visible = false;
+    return { mesh, explodeDir, apexLocal: apex.clone() };
+  });
+}
+
+// Build static cavity wall meshes: 5 inward-facing side triangles per P5 cavity.
+// These stay fixed on idoGroup while the pyramid flies out, so the ido looks like
+// a solid with defined pyramid-shaped indentations rather than open holes.
+// Identical geometry to the P5 pyramid side faces but fixed and rendered inward.
+function buildCavityWalls(verts, faces, icoV, icoEdgeMap) {
+  return faces.filter(f => f.length === 5).map((face) => {
+    const pts = face.map(i => verts[i]);
+    const cen = new THREE.Vector3();
+    pts.forEach(p => cen.add(p));
+    cen.divideScalar(pts.length);
+
+    const counts = new Map();
+    for (const j of face)
+      for (const k of icoEdgeMap[j])
+        counts.set(k, (counts.get(k) || 0) + 1);
+    let apexIdx = -1;
+    for (const [k, c] of counts) if (c === 5) { apexIdx = k; break; }
+    const apex = icoV[apexIdx];
+
+    const positions = [];
+    for (let k = 0; k < pts.length; k++) {
+      const p = pts[k], q = pts[(k+1) % pts.length];
+      // Same winding as the P5 pyramid side faces (outward normal = visible from outside)
+      const nrm = new THREE.Vector3().crossVectors(p.clone().sub(apex), q.clone().sub(apex));
+      if (nrm.dot(cen.clone().sub(apex)) < 0)
+        positions.push(apex.x,apex.y,apex.z, q.x,q.y,q.z, p.x,p.y,p.z);
+      else
+        positions.push(apex.x,apex.y,apex.z, p.x,p.y,p.z, q.x,q.y,q.z);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: PENT,
+      flatShading: true, shininess: 40,
+      polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    }));
+    mesh.visible = false;
+    return mesh;
+  });
+}
+
+// Build 20 prolate golden rhombohedra — one per ico face.
+// For ico face [ia,ib,ic] with icoVerts u,v,w:
+//   8 vertices: O=0, U=u, V=v, W=w, UV=u+v, UW=u+w, VW=v+w, UVW=u+v+w
+// Adjacent ico verts satisfy u·v = ICO_R²/φ → face angle = arccos(1/φ) → golden rhombus ✓
+// u+v = idoVerts[edge(a,b)]  (verified by idoRaw construction)  ✓
+// Together the 20 rhombohedra fill the hexecontahedron exactly.
+function buildProlateRhombohedra(faces, verts) {
+  return faces.map((face, idx) => {
+    const [ia, ib, ic] = face;
+    const u = verts[ia], v = verts[ib], w = verts[ic];
+
+    const O   = new THREE.Vector3(0, 0, 0);
+    const U   = u.clone();
+    const V   = v.clone();
+    const W   = w.clone();
+    const UV  = u.clone().add(v);
+    const UW  = u.clone().add(w);
+    const VW  = v.clone().add(w);
+    const UVW = u.clone().add(v).add(w);
+
+    const solidCen = UVW.clone().multiplyScalar(0.5); // midpoint of long diagonal
+
+    // 6 rhombic faces as quads — winding corrected by comparing normal to centroid→solidCen
+    const quads = [
+      [O, U, UV, V],
+      [O, V, VW, W],
+      [O, W, UW, U],
+      [UVW, VW, V, UV],
+      [UVW, UW, W, VW],
+      [UVW, UV, U, UW],
+    ];
+
+    const positions = [];
+    for (const [a, b, c, d] of quads) {
+      const fc = a.clone().add(b).add(c).add(d).divideScalar(4);
+      const n = new THREE.Vector3().crossVectors(b.clone().sub(a), c.clone().sub(a));
+      if (n.dot(fc.clone().sub(solidCen)) >= 0) {
+        positions.push(a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z);
+        positions.push(a.x,a.y,a.z, c.x,c.y,c.z, d.x,d.y,d.z);
+      } else {
+        positions.push(a.x,a.y,a.z, c.x,c.y,c.z, b.x,b.y,b.z);
+        positions.push(a.x,a.y,a.z, d.x,d.y,d.z, c.x,c.y,c.z);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL(idx / 20, 0.72, 0.52),
+      flatShading: true, shininess: 40, side: THREE.DoubleSide, transparent: true, opacity: 1,
+    }));
+    mesh.visible = false;
+
+    return {
+      mesh,
+      explodeDir: UVW.clone().normalize(),
+      verts: [O, U, V, W, UV, UW, VW, UVW],
+      type: 'prolate',
+      center: solidCen.clone(),
+    };
+  });
+}
+
+// Build 10 oblate golden rhombohedra — one per selected ico face (negated vectors).
+// Where prolate has {0, u, v, w, u+v, u+w, v+w, u+v+w}, oblate has {0, -u, -v, -w, ...}.
+// Both poles (at 0 and at -(u+v+w)) are obtuse — the mirror of the prolate.
+function buildOblateRhombohedra(faces, verts) {
+  return faces.map((face, idx) => {
+    const [ia, ib, ic] = face;
+    // Negate to get the oblate counterpart
+    const u = verts[ia].clone().negate();
+    const v = verts[ib].clone().negate();
+    const w = verts[ic].clone().negate();
+
+    const O   = new THREE.Vector3(0, 0, 0);
+    const U   = u.clone();
+    const V   = v.clone();
+    const W   = w.clone();
+    const UV  = u.clone().add(v);
+    const UW  = u.clone().add(w);
+    const VW  = v.clone().add(w);
+    const UVW = u.clone().add(v).add(w);
+
+    const solidCen = UVW.clone().multiplyScalar(0.5);
+
+    const quads = [
+      [O, U, UV, V],
+      [O, V, VW, W],
+      [O, W, UW, U],
+      [UVW, VW, V, UV],
+      [UVW, UW, W, VW],
+      [UVW, UV, U, UW],
+    ];
+
+    const positions = [];
+    for (const [a, b, c, d] of quads) {
+      const fc = a.clone().add(b).add(c).add(d).divideScalar(4);
+      const n = new THREE.Vector3().crossVectors(b.clone().sub(a), c.clone().sub(a));
+      if (n.dot(fc.clone().sub(solidCen)) >= 0) {
+        positions.push(a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z);
+        positions.push(a.x,a.y,a.z, c.x,c.y,c.z, d.x,d.y,d.z);
+      } else {
+        positions.push(a.x,a.y,a.z, c.x,c.y,c.z, b.x,b.y,b.z);
+        positions.push(a.x,a.y,a.z, d.x,d.y,d.z, c.x,c.y,c.z);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL((idx + 0.5) / 10, 0.65, 0.55),
+      flatShading: true, shininess: 40, side: THREE.DoubleSide, transparent: true, opacity: 1,
+    }));
+    mesh.visible = false;
+
+    return {
+      mesh,
+      explodeDir: UVW.clone().normalize(),
+      verts: [O, U, V, W, UV, UW, VW, UVW],
+      type: 'oblate',
+      center: solidCen.clone(),
+    };
+  });
+}
+
+const hexRhomboGroup = new THREE.Group();
+const prolateRhombs = buildProlateRhombohedra(icoFaces, icoVerts);
+prolateRhombs.forEach(({ mesh }) => hexRhomboGroup.add(mesh));
+// hexRhomboGroup stays at origin (same center as the hexecontahedron)
+scene.add(hexRhomboGroup);
+
+const hexRectGroup = new THREE.Group();
+hexRectGroup.visible = false;
+scene.add(hexRectGroup);
+const hexRectPackages = prolateRhombs.map(rhombo => buildRectangularPrismPackage(rhombo));
+hexRectPackages.forEach(({ group }) => hexRectGroup.add(group));
+
+const EXPLODE_DIST      = 1.2;
+const HEX_EXPLODE_DIST  = 2.5;
+const RT_EXPLODE_DIST   = 1.8;
+const HILL_EXPLODE_DIST = 0.45;
+
+const hexDissectionGroup = new THREE.Group();
+hexDissectionGroup.visible = false;
+scene.add(hexDissectionGroup);
+const hexDissectionPackages = prolateRhombs.map(rhombo => buildHexDissectionPackage(rhombo));
+hexDissectionPackages.forEach(({ group }) => hexDissectionGroup.add(group));
+const hexAssembledBlockQuat = basisQuaternion(hexDissectionPackages[0].assembledBlockFrame);
+const hexMacroUnitDims = hexDissectionPackages[0].assembledBlockDims;
+const hexMacroOrigin = [
+  -2.5 * hexMacroUnitDims[0],
+  -1.0 * hexMacroUnitDims[1],
+  -1.0 * hexMacroUnitDims[2],
+];
+const hexMacroSlots = [];
+for (let z = 0; z < 2; z++) {
+  for (let y = 0; y < 2; y++) {
+    for (let x = 0; x < 5; x++) {
+      hexMacroSlots.push([x, y, z]);
+    }
+  }
+}
+
+// RT decomposition via zonotope algorithm.
+// RT = Minkowski sum of 6 icosahedral-diagonal generators → C(6,3)=20 rhombohedra.
+// Generators: one vertex from each antipodal pair of icoVerts (raw indices computed above).
+//   G[0]=(0,1,φ)=icoV[9], G[1]=(0,-1,φ)=icoV[3], G[2]=(1,φ,0)=icoV[10],
+//   G[3]=(-1,φ,0)=icoV[4], G[4]=(φ,0,1)=icoV[11], G[5]=(φ,0,-1)=icoV[5]
+function buildZonoRhombohedra(icoV) {
+  const G = [icoV[9], icoV[3], icoV[10], icoV[4], icoV[11], icoV[5]];
+  // Centering offset = sum(G)/2
+  const cz = G.reduce((s, g) => s.clone().add(g), new THREE.Vector3()).multiplyScalar(0.5);
+
+  const heights = [1, 2, 4, 8, 16, 32];
+  const Ga = G.map(v => [v.x, v.y, v.z]);
+
+  function mdet(r0, r1, r2) {
+    return r0[0]*(r1[1]*r2[2]-r1[2]*r2[1])
+         - r0[1]*(r1[0]*r2[2]-r1[2]*r2[0])
+         + r0[2]*(r1[0]*r2[1]-r1[1]*r2[0]);
+  }
+  function solve3(r0, r1, r2, b) {
+    const D = mdet(r0, r1, r2);
+    const rows = [r0, r1, r2];
+    return [0,1,2].map(c => {
+      const M = rows.map((r, ri) => r.map((v, ci) => ci === c ? b[ri] : v));
+      return mdet(...M) / D;
+    });
+  }
+  function namedVertsFromOrigin(verts8, originIdx) {
+    return [
+      verts8[originIdx],
+      verts8[originIdx ^ 4],
+      verts8[originIdx ^ 2],
+      verts8[originIdx ^ 1],
+      verts8[originIdx ^ 6],
+      verts8[originIdx ^ 5],
+      verts8[originIdx ^ 3],
+      verts8[originIdx ^ 7],
+    ];
+  }
+  function canonicalizeByDiagonal(verts8, pickLongest) {
+    const oppositePairs = [0, 1, 2, 3].map(i => [i, i ^ 7]);
+    let chosenPair = oppositePairs[0];
+    let chosenLen = verts8[chosenPair[0]].distanceToSquared(verts8[chosenPair[1]]);
+    for (const pair of oppositePairs.slice(1)) {
+      const len = verts8[pair[0]].distanceToSquared(verts8[pair[1]]);
+      if ((pickLongest && len > chosenLen) || (!pickLongest && len < chosenLen)) {
+        chosenLen = len;
+        chosenPair = pair;
+      }
+    }
+    const [a, b] = chosenPair;
+    const detA = vdot(
+      vsub([verts8[a ^ 4].x, verts8[a ^ 4].y, verts8[a ^ 4].z], [verts8[a].x, verts8[a].y, verts8[a].z]),
+      vcross(
+        vsub([verts8[a ^ 2].x, verts8[a ^ 2].y, verts8[a ^ 2].z], [verts8[a].x, verts8[a].y, verts8[a].z]),
+        vsub([verts8[a ^ 1].x, verts8[a ^ 1].y, verts8[a ^ 1].z], [verts8[a].x, verts8[a].y, verts8[a].z])
+      )
+    );
+    const originIdx = detA >= 0 ? a : b;
+    return namedVertsFromOrigin(verts8, originIdx);
+  }
+  const GzRaw = [[0,1,phi],[0,-1,phi],[1,phi,0],[-1,phi,0],[phi,0,1],[phi,0,-1]];
+
+  const triples = [];
+  for (let i = 0; i < 6; i++) for (let j = i+1; j < 6; j++) for (let k = j+1; k < 6; k++)
+    triples.push([i, j, k]);
+
+  const FACE_QUADS = [
+    [0,1,3,2], [4,6,7,5], [0,4,5,1], [2,3,7,6], [0,2,6,4], [1,5,7,3],
+  ];
+
+  return triples.map((triple, idx) => {
+    const [i, j, k] = triple;
+    const [gi, gj, gk] = [G[i], G[j], G[k]];
+
+    // Lifting vector via Cramer's rule: solve Ga[i,j,k] * u = heights[i,j,k]
+    const u = solve3(Ga[i], Ga[j], Ga[k], [heights[i], heights[j], heights[k]]);
+
+    // Offset = sum of complement generators where dot(Gm, u) < heights[m]
+    const offset = new THREE.Vector3();
+    for (let m = 0; m < 6; m++) {
+      if (m === i || m === j || m === k) continue;
+      const dot = Ga[m][0]*u[0] + Ga[m][1]*u[1] + Ga[m][2]*u[2];
+      if (dot - heights[m] < 0) offset.add(G[m]);
+    }
+
+    // 8 vertices (centered)
+    const verts8 = [];
+    for (let ei = 0; ei < 2; ei++) for (let ej = 0; ej < 2; ej++) for (let ek = 0; ek < 2; ek++) {
+      verts8.push(
+        offset.clone().addScaledVector(gi, ei).addScaledVector(gj, ej).addScaledVector(gk, ek).sub(cz)
+      );
+    }
+
+    const solidCen = verts8.reduce((s, v) => s.clone().add(v), new THREE.Vector3()).multiplyScalar(1/8);
+    const explodeDir = solidCen.clone().normalize();
+
+    // Build mesh — 6 rhombic faces, each split into 2 triangles, winding vs solidCen
+    const positions = [];
+    for (const [A, B, C, D] of FACE_QUADS) {
+      const [va, vb, vc, vd] = [verts8[A], verts8[B], verts8[C], verts8[D]];
+      const fc = va.clone().add(vb).add(vc).add(vd).multiplyScalar(0.25);
+      const nm = new THREE.Vector3().crossVectors(vb.clone().sub(va), vc.clone().sub(va));
+      if (nm.dot(fc.clone().sub(solidCen)) >= 0) {
+        positions.push(va.x,va.y,va.z, vb.x,vb.y,vb.z, vc.x,vc.y,vc.z);
+        positions.push(va.x,va.y,va.z, vc.x,vc.y,vc.z, vd.x,vd.y,vd.z);
+      } else {
+        positions.push(va.x,va.y,va.z, vc.x,vc.y,vc.z, vb.x,vb.y,vb.z);
+        positions.push(va.x,va.y,va.z, vd.x,vd.y,vd.z, vc.x,vc.y,vc.z);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+
+    // Classify oblate vs prolate via determinant of raw (unscaled) generators
+    const vol = Math.abs(mdet(GzRaw[i], GzRaw[j], GzRaw[k]));
+    const type = Math.abs(vol - (2*phi + 2)) < 1e-6 ? 'prolate'
+               : Math.abs(vol - (2*phi))     < 1e-6 ? 'oblate'
+               : (() => { throw new Error(`Unexpected vol ${vol} for triple [${i},${j},${k}]`); })();
+
+    // Oblate: warm orange spectrum; Prolate: cool blue spectrum
+    const hue = type === 'oblate' ? (idx * 0.015 + 0.04) % 0.12 : (idx * 0.015 + 0.57) % 0.15 + 0.57;
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+      color: new THREE.Color().setHSL(hue, 0.72, 0.52),
+      flatShading: true, shininess: 40, side: THREE.DoubleSide, transparent: true, opacity: 1,
+    }));
+    mesh.visible = false;
+
+    const namedVerts = type === 'prolate'
+      ? canonicalizeByDiagonal(verts8, true)
+      : canonicalizeByDiagonal(verts8, false);
+
+    return { mesh, explodeDir, type, verts8, verts: namedVerts, center: solidCen.clone() };
+  });
+}
+
+function computeHillPrismStages(tet) {
+  const [A0, B0, C0, D0] = tet.pts;
+  const ey = vunit(vsub(A0, D0));
+
+  let ex = vsub(B0, D0);
+  ex = vsub(ex, vscale(ey, vdot(ex, ey)));
+  if (vnorm(ex) < 1e-9) {
+    ex = vsub(C0, D0);
+    ex = vsub(ex, vscale(ey, vdot(ex, ey)));
+  }
+  ex = vunit(ex);
+  const ez = vunit(vcross(ey, ex));
+  const origin = D0;
+
+  const toLocal = p => {
+    const d = vsub(p, origin);
+    return [vdot(d, ex), vdot(d, ey), vdot(d, ez)];
+  };
+  const toWorld = p => vadd(origin, vadd(vscale(ex, p[0]), vadd(vscale(ey, p[1]), vscale(ez, p[2]))));
+
+  const [A, B, C, D] = [A0, B0, C0, D0].map(toLocal);
+  const hB = B[1];
+  const hC = C[1];
+  const triB = sliceAtHeight([A, B, C, D], hB);
+  const triC = sliceAtHeight([A, B, C, D], hC);
+  const topOthers = triB.filter(p => Math.hypot(p[0] - B[0], p[2] - B[2]) > 1e-6);
+  const botOthers = triC.filter(p => Math.hypot(p[0] - C[0], p[2] - C[2]) > 1e-6);
+  const F = topOthers.find(p => pointOnSegment(p, A, C));
+  const E = topOthers.find(p => p !== F);
+  const G = botOthers.find(p => pointOnSegment(p, B, D));
+  const H = botOthers.find(p => p !== G);
+
+  if (!E || !F || !G || !H) throw new Error(`Failed to classify Hill prism vertices for ${tet.name}`);
+
+  const K = vsub(vscale(F, 2), E);
+  const L = vsub(vscale(G, 2), H);
+  const topPiece = [
+    rotateAboutAxis(A, F, B, -Math.PI),
+    B,
+    rotateAboutAxis(E, F, B, -Math.PI),
+    F,
+  ].map(toWorld);
+  const midPiece = [B, E, F, C, G, H].map(toWorld);
+  const botPiece = [
+    rotateAboutAxis(D, C, G, Math.PI),
+    C,
+    rotateAboutAxis(H, C, G, Math.PI),
+    G,
+  ].map(toWorld);
+  const I = vscale(vadd(B, E), 0.5);
+  const J = vscale(vadd(B, K), 0.5);
+  const M = vscale(vadd(C, L), 0.5);
+  const topCapStart = [A, B, E, F].map(toWorld);
+  const topCapEnd = topPiece;
+  const midPieceWorld = midPiece;
+  const botCapStart = [D, C, H, G].map(toWorld);
+  const botCapEnd = botPiece;
+  const IRot = rotateAboutAxis(I, J, M, -Math.PI);
+  const GRot = rotateAboutAxis(G, J, M, -Math.PI);
+  const N = vscale(vadd(J, IRot), 0.5);
+  const P = vscale(vadd(M, GRot), 0.5);
+  const shift = vsub(E, K);
+  const outerShellLocal = [E, I, J, K, H, G, M, C];
+  const rotatedPrismLocal = [K, J, IRot, C, M, GRot];
+  const subPrismLocal = [K, N, IRot, C, P, GRot];
+  const subComplementLocal = [J, K, N, M, C, P];
+  const translatedSubPrismLocal = subPrismLocal.map(p => vadd(p, shift));
+
+  return {
+    topPiece,
+    midPiece,
+    botPiece,
+    innerPrism: [B, I, J, L, G, M].map(toWorld),
+    outerShell: outerShellLocal.map(toWorld),
+    rotatedPrism: rotatedPrismLocal.map(toWorld),
+    subPrism: subPrismLocal.map(toWorld),
+    subComplement: subComplementLocal.map(toWorld),
+    translatedSubPrism: translatedSubPrismLocal.map(toWorld),
+    topCapStart,
+    topCapEnd,
+    midPieceWorld,
+    botCapStart,
+    botCapEnd,
+    topAxisWorld: [toWorld(F), toWorld(B)],
+    botAxisWorld: [toWorld(C), toWorld(G)],
+    prismTurnAxisWorld: [toWorld(J), toWorld(M)],
+    subPrismShiftWorld: vsub(toWorld(E), toWorld(K)),
+    outerShellLocal,
+    subComplementLocal,
+    translatedSubPrismLocal,
+  };
+}
+
+function buildTriPrismDissection(tet) {
+  const { topPiece, midPiece, botPiece } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const group = new THREE.Group();
+  group.add(
+    buildPieceGroup(topPiece, tint(base, 0.14), tint(base, 0.30), 0.82),
+    buildPieceGroup(midPiece, tint(base, -0.04), tint(base, 0.18), 0.38),
+    buildPieceGroup(botPiece, tint(base, 0.02), tint(base, 0.24), 0.82),
+  );
+  return group;
+}
+
+function buildTriPrismAnimator(tet) {
+  const {
+    topCapStart, midPieceWorld, botCapStart,
+    topAxisWorld, botAxisWorld,
+  } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const top = buildPieceGroup(topCapStart, tint(base, 0.14), tint(base, 0.30), 0.82);
+  const mid = buildPieceGroup(midPieceWorld, tint(base, -0.04), tint(base, 0.18), 0.38);
+  const bot = buildPieceGroup(botCapStart, tint(base, 0.02), tint(base, 0.24), 0.82);
+  const topMesh = top.children[0];
+  const topWire = top.children[1];
+  const botMesh = bot.children[0];
+  const botWire = bot.children[1];
+  const topFaces = convexHullFaces(topCapStart);
+  const botFaces = convexHullFaces(botCapStart);
+  const topEdges = [];
+  const botEdges = [];
+  {
+    const edgeSet = new Set();
+    for (const [i, j, k] of topFaces) {
+      for (const [a, b] of [[i, j], [j, k], [i, k]]) {
+        const key = Math.min(a, b) + '_' + Math.max(a, b);
+        if (!edgeSet.has(key)) { edgeSet.add(key); topEdges.push([a, b]); }
+      }
+    }
+  }
+  {
+    const edgeSet = new Set();
+    for (const [i, j, k] of botFaces) {
+      for (const [a, b] of [[i, j], [j, k], [i, k]]) {
+        const key = Math.min(a, b) + '_' + Math.max(a, b);
+        if (!edgeSet.has(key)) { edgeSet.add(key); botEdges.push([a, b]); }
+      }
+    }
+  }
+  const topPos = topMesh.geometry.getAttribute('position');
+  const topWirePos = topWire.geometry.getAttribute('position');
+  const botPos = botMesh.geometry.getAttribute('position');
+  const botWirePos = botWire.geometry.getAttribute('position');
+
+  function setRotT(t) {
+    const thetaTop = -Math.PI * t;
+    const thetaBot = Math.PI * t;
+    const topPts = topCapStart.map((p, idx) =>
+      idx === 1 || idx === 3 ? p : rotateAboutAxis(p, topAxisWorld[0], topAxisWorld[1], thetaTop)
+    );
+    const botPts = botCapStart.map((p, idx) =>
+      idx === 1 || idx === 3 ? p : rotateAboutAxis(p, botAxisWorld[0], botAxisWorld[1], thetaBot)
+    );
+    let n = 0;
+    for (const [i, j, k] of topFaces) {
+      for (const idx of [i, j, k]) topPos.setXYZ(n++, topPts[idx][0], topPts[idx][1], topPts[idx][2]);
+    }
+    n = 0;
+    for (const [a, b] of topEdges) {
+      topWirePos.setXYZ(n++, topPts[a][0], topPts[a][1], topPts[a][2]);
+      topWirePos.setXYZ(n++, topPts[b][0], topPts[b][1], topPts[b][2]);
+    }
+    n = 0;
+    for (const [i, j, k] of botFaces) {
+      for (const idx of [i, j, k]) botPos.setXYZ(n++, botPts[idx][0], botPts[idx][1], botPts[idx][2]);
+    }
+    n = 0;
+    for (const [a, b] of botEdges) {
+      botWirePos.setXYZ(n++, botPts[a][0], botPts[a][1], botPts[a][2]);
+      botWirePos.setXYZ(n++, botPts[b][0], botPts[b][1], botPts[b][2]);
+    }
+    topPos.needsUpdate = topWirePos.needsUpdate = true;
+    botPos.needsUpdate = botWirePos.needsUpdate = true;
+    topMesh.geometry.computeVertexNormals();
+    botMesh.geometry.computeVertexNormals();
+  }
+
+  setRotT(0);
+  const group = new THREE.Group();
+  group.add(top, mid, bot);
+  return { group, setRotT };
+}
+
+function buildCutInnerPrismDissection(tet) {
+  const { innerPrism, outerShell } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const group = new THREE.Group();
+  group.add(
+    buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42),
+    buildPolyPieceGroup(innerPrism, prismFaces, tint(base, 0.18), tint(base, 0.36), 0.90),
+  );
+  return group;
+}
+
+function buildParallelogramPrismDissection(tet) {
+  const { outerShell, rotatedPrism } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const group = new THREE.Group();
+  group.add(
+    buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42),
+    buildPolyPieceGroup(rotatedPrism, prismFaces, tint(base, 0.18), tint(base, 0.36), 0.90),
+  );
+  return group;
+}
+
+function buildParallelogramPrismAnimator(tet) {
+  const { outerShell, innerPrism, prismTurnAxisWorld } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const shell = buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42);
+  const prism = buildPolyPieceGroup(innerPrism, prismFaces, tint(base, 0.18), tint(base, 0.36), 0.90);
+  const prismMesh = prism.children[0];
+  const prismWire = prism.children[1];
+  const prismPos = prismMesh.geometry.getAttribute('position');
+  const wirePos = prismWire.geometry.getAttribute('position');
+  const innerFaces = convexHullFaces(innerPrism);
+  const innerEdges = [];
+  {
+    const edgeSet = new Set();
+    for (const [i, j, k] of innerFaces) {
+      for (const [a, b] of [[i, j], [j, k], [i, k]]) {
+        const key = Math.min(a, b) + '_' + Math.max(a, b);
+        if (!edgeSet.has(key)) { edgeSet.add(key); innerEdges.push([a, b]); }
+      }
+    }
+  }
+  function setTurnT(t) {
+    const pts = innerPrism.map(p => rotateAboutAxis(p, prismTurnAxisWorld[0], prismTurnAxisWorld[1], -Math.PI * t));
+    let n = 0;
+    for (const [i, j, k] of innerFaces) {
+      for (const idx of [i, j, k]) prismPos.setXYZ(n++, pts[idx][0], pts[idx][1], pts[idx][2]);
+    }
+    n = 0;
+    for (const [a, b] of innerEdges) {
+      wirePos.setXYZ(n++, pts[a][0], pts[a][1], pts[a][2]);
+      wirePos.setXYZ(n++, pts[b][0], pts[b][1], pts[b][2]);
+    }
+    prismPos.needsUpdate = true;
+    wirePos.needsUpdate = true;
+    prismMesh.geometry.computeVertexNormals();
+  }
+  setTurnT(0);
+  const group = new THREE.Group();
+  group.add(shell, prism);
+  return { group, setTurnT };
+}
+
+function buildSecondPrismCutDissection(tet) {
+  const { outerShell, subPrism, subComplement } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const group = new THREE.Group();
+  group.add(
+    buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42),
+    buildPolyPieceGroup(subComplement, prismFaces, tint(base, 0.08), tint(base, 0.28), 0.78),
+    buildPolyPieceGroup(subPrism, prismFaces, tint(base, 0.22), tint(base, 0.42), 0.92),
+  );
+  return group;
+}
+
+function buildRectangularPrismDissection(tet) {
+  const { outerShell, subComplement, translatedSubPrism } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const group = new THREE.Group();
+  group.add(
+    buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42),
+    buildPolyPieceGroup(subComplement, prismFaces, tint(base, 0.08), tint(base, 0.28), 0.78),
+    buildPolyPieceGroup(translatedSubPrism, prismFaces, tint(base, 0.24), tint(base, 0.44), 0.92),
+  );
+  return group;
+}
+
+function buildRectangularPrismAnimator(tet) {
+  const { outerShell, subComplement, subPrism, subPrismShiftWorld } = computeHillPrismStages(tet);
+  const base = new THREE.Color(tet.color);
+  const shellFaces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [3, 0, 4, 7]];
+  const prismFaces = [[0, 2, 1], [3, 4, 5], [0, 1, 4, 3], [1, 2, 5, 4], [2, 0, 3, 5]];
+  const shell = buildPolyPieceGroup(outerShell, shellFaces, tint(base, -0.05), tint(base, 0.16), 0.42);
+  const complement = buildPolyPieceGroup(subComplement, prismFaces, tint(base, 0.08), tint(base, 0.28), 0.78);
+  const prism = buildPolyPieceGroup(subPrism, prismFaces, tint(base, 0.24), tint(base, 0.44), 0.92);
+  function setSlideT(t) {
+    prism.position.set(
+      subPrismShiftWorld[0] * t,
+      subPrismShiftWorld[1] * t,
+      subPrismShiftWorld[2] * t
+    );
+  }
+  setSlideT(0);
+  const group = new THREE.Group();
+  group.add(shell, complement, prism);
+  return { group, setSlideT };
+}
+
+function getBlockDissectionPoints(slot, blockOrigin, canonicalStages, canonicalBounds) {
+  const shellPoints = canonicalStages.outerShellLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const complementPoints = canonicalStages.subComplementLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const prismPoints = canonicalStages.translatedSubPrismLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const spanX = canonicalBounds.maxs[0] - canonicalBounds.mins[0];
+  const spanY = canonicalBounds.maxs[1] - canonicalBounds.mins[1];
+  const spanZ = canonicalBounds.maxs[2] - canonicalBounds.mins[2];
+  function toBlock(p) {
+    return [
+      blockOrigin[0] + slot[0] * spanX + (p[0] - canonicalBounds.mins[0]),
+      blockOrigin[1] + slot[1] * spanY + (p[1] - canonicalBounds.mins[1]),
+      blockOrigin[2] + slot[2] * spanZ + (p[2] - canonicalBounds.mins[2]),
+    ];
+  }
+  return {
+    shellPoints: shellPoints.map(toBlock),
+    complementPoints: complementPoints.map(toBlock),
+    prismPoints: prismPoints.map(toBlock),
+  };
+}
+
+function buildAnimatedBlockAssembly(tet, baseColor, slot, blockOrigin, canonicalStages, canonicalBounds, explodeOffset) {
+  const shellFaces = [[0,3,2,1],[4,5,6,7],[0,1,5,4],[2,3,7,6],[3,0,4,7]];
+  const prismFaces = [[0,2,1],[3,4,5],[0,1,4,3],[1,2,5,4],[2,0,3,5]];
+  const stages = computeHillPrismStages(tet);
+  const sourceShell = stages.outerShell;
+  const sourceComplement = stages.subComplement;
+  const sourcePrism = stages.translatedSubPrism;
+  const sourceCenter = centroid([...sourceShell, ...sourceComplement, ...sourcePrism]);
+  const toSourceLocal = pts => pts.map(p => vsub(p, sourceCenter));
+
+  const canonicalShell = canonicalStages.outerShellLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const canonicalComplement = canonicalStages.subComplementLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const canonicalPrism = canonicalStages.translatedSubPrismLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const canonicalCenter = centroid([...canonicalShell, ...canonicalComplement, ...canonicalPrism]);
+
+  const translateGroup = new THREE.Group();
+  const rotateGroup = new THREE.Group();
+  rotateGroup.add(
+    buildPolyPieceGroup(toSourceLocal(sourceShell), shellFaces, tint(baseColor, -0.05), tint(baseColor, 0.16), 0.42),
+    buildPolyPieceGroup(toSourceLocal(sourceComplement), prismFaces, tint(baseColor, 0.08), tint(baseColor, 0.28), 0.78),
+    buildPolyPieceGroup(toSourceLocal(sourcePrism), prismFaces, tint(baseColor, 0.24), tint(baseColor, 0.44), 0.92),
+  );
+  translateGroup.add(rotateGroup);
+
+  const sourceBasis = makeOrthonormalBasis(sourcePrism[0], sourcePrism[1], sourceShell[3]);
+  const sourceQuat = new THREE.Quaternion();
+  const targetQuat = basisQuaternion(sourceBasis).invert();
+  const sourcePos = new THREE.Vector3(
+    sourceCenter[0] + explodeOffset[0],
+    sourceCenter[1] + explodeOffset[1],
+    sourceCenter[2] + explodeOffset[2]
+  );
+
+  const spanX = canonicalBounds.maxs[0] - canonicalBounds.mins[0];
+  const spanY = canonicalBounds.maxs[1] - canonicalBounds.mins[1];
+  const spanZ = canonicalBounds.maxs[2] - canonicalBounds.mins[2];
+  const targetPos = new THREE.Vector3(
+    blockOrigin[0] + slot[0] * spanX + (canonicalCenter[0] - canonicalBounds.mins[0]),
+    blockOrigin[1] + slot[1] * spanY + (canonicalCenter[1] - canonicalBounds.mins[1]),
+    blockOrigin[2] + slot[2] * spanZ + (canonicalCenter[2] - canonicalBounds.mins[2])
+  );
+
+  function setRotateT(t) {
+    translateGroup.position.copy(sourcePos);
+    rotateGroup.quaternion.slerpQuaternions(sourceQuat, targetQuat, t);
+  }
+
+  function setTranslateT(t) {
+    translateGroup.position.lerpVectors(sourcePos, targetPos, t);
+  }
+
+  setRotateT(0);
+  translateGroup.visible = false;
+  return {
+    group: translateGroup,
+    setRotateT,
+    setTranslateT,
+    targetQuat: targetQuat.clone(),
+    targetPos: targetPos.clone(),
+  };
+}
+
+function buildHexDissectionPackage(rhombo) {
+  const verts = (rhombo.verts || rhombo.verts8).map(v => [v.x, v.y, v.z]);
+  const [O, U, V, W, UV, UW, VW, UVW] = verts;
+  const baseColor = rhombo.mesh.material.color.clone();
+  const rhomboCentroid = centroid(verts);
+  const hillTets = [
+    { name: 'T123', pts: [O, W, VW, UVW], color: tint(baseColor, -0.14).getHex(), wire: tint(baseColor, 0.12).getHex() },
+    { name: 'T132', pts: [O, V, VW, UVW], color: tint(baseColor, -0.08).getHex(), wire: tint(baseColor, 0.18).getHex() },
+    { name: 'T213', pts: [O, W, UW, UVW], color: tint(baseColor, -0.02).getHex(), wire: tint(baseColor, 0.22).getHex() },
+    { name: 'T231', pts: [O, U, UW, UVW], color: tint(baseColor, 0.04).getHex(), wire: tint(baseColor, 0.28).getHex() },
+    { name: 'T312', pts: [O, V, UV, UVW], color: tint(baseColor, 0.10).getHex(), wire: tint(baseColor, 0.34).getHex() },
+    { name: 'T321', pts: [O, U, UV, UVW], color: tint(baseColor, 0.16).getHex(), wire: tint(baseColor, 0.40).getHex() },
+  ];
+
+  const stage0 = new THREE.Group();
+  const stage0Nodes = [];
+  hillTets.forEach(tet => {
+    const original = new THREE.Group();
+    original.add(
+      buildMesh(tet.pts, tet.color, 0.80),
+      buildWireframe(tet.pts, tet.wire, 1),
+    );
+    const c = centroid(tet.pts);
+    const dir = vsub(c, rhomboCentroid);
+    const explodeDir = vnorm(dir) > 1e-10 ? vunit(dir) : [0, 1, 0];
+    original.position.set(0, 0, 0);
+    stage0.add(original);
+    stage0Nodes.push({ node: original, explodeDir });
+  });
+
+  const stage1 = new THREE.Group();
+  const stage2 = new THREE.Group();
+  const stage3 = new THREE.Group();
+  const stage4 = new THREE.Group();
+  const stage5 = new THREE.Group();
+  const stage1Setters = [];
+  const stage3Setters = [];
+  const stage5Setters = [];
+  hillTets.forEach((tet, i) => {
+    const explodeOffset = vscale(stage0Nodes[i].explodeDir, HILL_EXPLODE_DIST);
+
+    const stage1Anim = buildTriPrismAnimator(tet);
+    stage1Anim.group.position.set(...explodeOffset);
+    stage1.add(stage1Anim.group);
+    stage1Setters.push(stage1Anim.setRotT);
+
+    const s2 = buildCutInnerPrismDissection(tet);
+    s2.position.set(...explodeOffset);
+    stage2.add(s2);
+
+    const stage3Anim = buildParallelogramPrismAnimator(tet);
+    stage3Anim.group.position.set(...explodeOffset);
+    stage3.add(stage3Anim.group);
+    stage3Setters.push(stage3Anim.setTurnT);
+
+    const s4 = buildSecondPrismCutDissection(tet);
+    s4.position.set(...explodeOffset);
+    stage4.add(s4);
+
+    const stage5Anim = buildRectangularPrismAnimator(tet);
+    stage5Anim.group.position.set(...explodeOffset);
+    stage5.add(stage5Anim.group);
+    stage5Setters.push(stage5Anim.setSlideT);
+  });
+
+  // --- Block assembly reference (same as pr.html) ---
+  const blockReference = computeHillPrismStages(hillTets[0]);
+  blockReference.blockBasis = makeOrthonormalBasis(
+    blockReference.translatedSubPrismLocal[0],
+    blockReference.translatedSubPrismLocal[1],
+    blockReference.outerShellLocal[3]
+  );
+  const canonicalPoints = [
+    ...blockReference.outerShellLocal.map(p => projectPointToBasis(p, blockReference.blockBasis)),
+    ...blockReference.subComplementLocal.map(p => projectPointToBasis(p, blockReference.blockBasis)),
+    ...blockReference.translatedSubPrismLocal.map(p => projectPointToBasis(p, blockReference.blockBasis)),
+  ];
+  const canonicalBounds = bounds(canonicalPoints);
+  const blockLayout = buildBlockLayout(canonicalBounds);
+  const [blockSpanX, blockSpanY, blockSpanZ] = blockLayout.spans;
+  const assembledBlockOrigin = [
+    rhomboCentroid[0] - blockLayout.dims[0] / 2,
+    rhomboCentroid[1] - blockLayout.dims[1] / 2,
+    rhomboCentroid[2] - blockLayout.dims[2] / 2,
+  ];
+  const blockSlots = blockLayout.slots;
+
+  const assemblyStage = new THREE.Group();
+  const assemblyNodes = [];
+  hillTets.forEach((tet, i) => {
+    const explodeOffset = vscale(stage0Nodes[i].explodeDir, HILL_EXPLODE_DIST);
+    const assembly = buildAnimatedBlockAssembly(
+      tet, new THREE.Color(tet.color),
+      blockSlots[i], assembledBlockOrigin,
+      blockReference, canonicalBounds,
+      explodeOffset
+    );
+    assemblyStage.add(assembly.group);
+    assemblyNodes.push(assembly);
+  });
+  assemblyStage.visible = false;
+
+  const originSlot = [0, 0, 0];
+  const longAxisIdx = blockLayout.counts.indexOf(3);
+  const mediumAxisIdx = blockLayout.counts.indexOf(2);
+  const longStepSlot = [0, 0, 0];
+  const mediumStepSlot = [0, 0, 0];
+  longStepSlot[longAxisIdx] = 1;
+  mediumStepSlot[mediumAxisIdx] = 1;
+  const originIdx = blockSlots.findIndex(slot => slot.every((v, i) => v === originSlot[i]));
+  const longIdx = blockSlots.findIndex(slot => slot.every((v, i) => v === longStepSlot[i]));
+  const mediumIdx = blockSlots.findIndex(slot => slot.every((v, i) => v === mediumStepSlot[i]));
+  const assembledBlockFrame = makeOrthonormalBasis(
+    assemblyNodes[originIdx].targetPos.toArray(),
+    assemblyNodes[longIdx].targetPos.toArray(),
+    assemblyNodes[mediumIdx].targetPos.toArray()
+  );
+  const assembledBlockPoints = [];
+  blockSlots.forEach(slot => {
+    const { shellPoints, complementPoints, prismPoints } = getBlockDissectionPoints(
+      slot, assembledBlockOrigin, blockReference, canonicalBounds
+    );
+    assembledBlockPoints.push(...shellPoints, ...complementPoints, ...prismPoints);
+  });
+  const assembledBlockCenter = centroid(assembledBlockPoints);
+  const assembledBlockFrameBounds = bounds(
+    assembledBlockPoints.map(p => projectPointToBasis(p, assembledBlockFrame))
+  );
+  const assembledBlockPackedDims = [
+    assembledBlockFrameBounds.maxs[0] - assembledBlockFrameBounds.mins[0],
+    assembledBlockFrameBounds.maxs[1] - assembledBlockFrameBounds.mins[1],
+    assembledBlockFrameBounds.maxs[2] - assembledBlockFrameBounds.mins[2],
+  ];
+  const assembledBlockAnchorFrame = [
+    assembledBlockFrameBounds.mins[0],
+    assembledBlockFrameBounds.mins[1],
+    assembledBlockFrameBounds.mins[2],
+  ];
+  const assembledBlockAnchorPointLocal = pointFromBasisCoords(assembledBlockAnchorFrame, assembledBlockFrame);
+
+  const stages = [stage0, stage1, stage2, stage3, stage4, stage5];
+  const group = new THREE.Group();
+  stages.forEach(stage => { stage.visible = false; group.add(stage); });
+  group.add(assemblyStage);
+  group.visible = false;
+  return {
+    group,
+    stages,
+    assemblyStage,
+    assembledBlockOrigin,
+    assembledBlockCenter,
+    assembledBlockDims: blockLayout.dims,
+    assembledBlockPackedDims,
+    assembledBlockAnchorPointLocal,
+    assembledBlockFrame,
+    setStage0T(t) {
+      stage0Nodes.forEach(({ node, explodeDir }) => {
+        const offset = vscale(explodeDir, HILL_EXPLODE_DIST * t);
+        node.position.set(...offset);
+      });
+    },
+    setStage1T(t) { stage1Setters.forEach(fn => fn(t)); },
+    setStage3T(t) { stage3Setters.forEach(fn => fn(t)); },
+    setStage5T(t) { stage5Setters.forEach(fn => fn(t)); },
+    setStage6T(t) {
+      assemblyNodes.forEach(({ group, setRotateT, setTranslateT }) => {
+        group.visible = true;
+        setRotateT(t);
+        setTranslateT(0);
+      });
+    },
+    setStage7T(t) {
+      assemblyNodes.forEach(({ group, setRotateT, setTranslateT }) => {
+        group.visible = true;
+        setRotateT(1);
+        setTranslateT(t);
+      });
+    },
+  };
+}
+
+function applyStageTransition(stages, prevIdx, nextIdx, t) {
+  stages.forEach((stage, idx) => {
+    const active = idx === prevIdx || idx === nextIdx;
+    stage.visible = active;
+    const opacity = prevIdx === nextIdx
+      ? (idx === prevIdx ? t : 0)
+      : idx === prevIdx
+        ? 1 - t
+        : idx === nextIdx
+          ? t
+          : 0;
+    setObjectOpacity(stage, opacity);
+  });
+}
+
+function buildAssembledBlockDissection(baseColor, slot, blockOrigin, canonicalStages, canonicalBounds) {
+  const shellFaces = [
+    [0, 3, 2, 1],
+    [4, 5, 6, 7],
+    [0, 1, 5, 4],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+  ];
+  const prismFaces = [
+    [0, 2, 1],
+    [3, 4, 5],
+    [0, 1, 4, 3],
+    [1, 2, 5, 4],
+    [2, 0, 3, 5],
+  ];
+  const shellPoints = canonicalStages.outerShellLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const complementPoints = canonicalStages.subComplementLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const prismPoints = canonicalStages.translatedSubPrismLocal.map(p => projectPointToBasis(p, canonicalStages.blockBasis));
+  const spanX = canonicalBounds.maxs[0] - canonicalBounds.mins[0];
+  const spanY = canonicalBounds.maxs[1] - canonicalBounds.mins[1];
+  const spanZ = canonicalBounds.maxs[2] - canonicalBounds.mins[2];
+
+  const toBlock = p => [
+    blockOrigin[0] + slot[0] * spanX + (p[0] - canonicalBounds.mins[0]),
+    blockOrigin[1] + slot[1] * spanY + (p[1] - canonicalBounds.mins[1]),
+    blockOrigin[2] + slot[2] * spanZ + (p[2] - canonicalBounds.mins[2]),
+  ];
+
+  const shellPts = shellPoints.map(toBlock);
+  const complementPts = complementPoints.map(toBlock);
+  const prismPts = prismPoints.map(toBlock);
+  const group = new THREE.Group();
+  group.add(
+    buildPolyPieceGroup(shellPts, shellFaces, tint(baseColor, -0.05), tint(baseColor, 0.16), 0.42),
+    buildPolyPieceGroup(complementPts, prismFaces, tint(baseColor, 0.08), tint(baseColor, 0.28), 0.78),
+    buildPolyPieceGroup(prismPts, prismFaces, tint(baseColor, 0.24), tint(baseColor, 0.44), 0.92),
+  );
+  group.userData.centroid = new THREE.Vector3(...centroid([...shellPts, ...complementPts, ...prismPts]));
+  return group;
+}
+
+function buildRectangularPrismPackage(rhombo, colorShifts = [-0.14, -0.08, -0.02, 0.04, 0.10, 0.16]) {
+  const verts = (rhombo.verts || rhombo.verts8).map(v => [v.x, v.y, v.z]);
+  const [O, U, V, W, UV, UW, VW, UVW] = verts;
+  const hillTets = [
+    { name: 'T123', pts: [O, W,  VW, UVW] },
+    { name: 'T132', pts: [O, V,  VW, UVW] },
+    { name: 'T213', pts: [O, W,  UW, UVW] },
+    { name: 'T231', pts: [O, U,  UW, UVW] },
+    { name: 'T312', pts: [O, V,  UV, UVW] },
+    { name: 'T321', pts: [O, U,  UV, UVW] },
+  ];
+  const rhomboCentroid = centroid(verts);
+  const reference = computeHillPrismStages(hillTets[0]);
+  reference.blockBasis = makeOrthonormalBasis(
+    reference.translatedSubPrismLocal[0],
+    reference.translatedSubPrismLocal[1],
+    reference.outerShellLocal[3]
+  );
+  const canonicalPoints = [
+    ...reference.outerShellLocal.map(p => projectPointToBasis(p, reference.blockBasis)),
+    ...reference.subComplementLocal.map(p => projectPointToBasis(p, reference.blockBasis)),
+    ...reference.translatedSubPrismLocal.map(p => projectPointToBasis(p, reference.blockBasis)),
+  ];
+  const canonicalBounds = bounds(canonicalPoints);
+  const blockLayout = buildBlockLayout(canonicalBounds);
+  const blockDims = blockLayout.dims;
+  const blockOrigin = [
+    rhomboCentroid[0] - blockDims[0] / 2,
+    rhomboCentroid[1] - blockDims[1] / 2,
+    rhomboCentroid[2] - blockDims[2] / 2,
+  ];
+  const slots = blockLayout.slots;
+  const baseColor = rhombo.mesh.material.color.clone();
+  const group = new THREE.Group();
+  const animNodes = [];
+  slots.forEach((slot, idx) => {
+    const block = buildAssembledBlockDissection(
+      tint(baseColor, colorShifts[idx % colorShifts.length]),
+      slot,
+      blockOrigin,
+      reference,
+      canonicalBounds
+    );
+    block.visible = false;
+    block.renderOrder = 5 + idx;
+    group.add(block);
+    animNodes.push(block);
+  });
+  group.visible = false;
+  return { group, animNodes };
+}
+
+function applyRectPackage(pkg, t) {
+  pkg.group.visible = t > 1e-4;
+  for (const node of pkg.animNodes) {
+    const center = node.userData.centroid;
+    node.visible = t > 1e-4;
+    node.position.copy(center).multiplyScalar(1 - t).negate();
+    setObjectOpacity(node, t);
+  }
+}
+
+// Build the RT outer shell from zonotope outer vertices, for display before explosion.
+// Outer vertices = those at r > midpoint between interior (r~1.07) and surface (r~1.73).
+function buildRTShell(zonoRhombs) {
+  const vtxMap = new Map();
+  zonoRhombs.forEach(({ verts8 }) => {
+    verts8.forEach(v => {
+      if (v.length() > 1.3) {
+        const key = v.toArray().map(x => x.toFixed(3)).join(',');
+        if (!vtxMap.has(key)) vtxMap.set(key, v.clone());
+      }
+    });
+  });
+  const rtVerts = [...vtxMap.values()];
+  console.log('RT shell: vertices', rtVerts.length, '(expect 32)');
+  const rtFaces = findFaces(rtVerts, ICO_R * ICO_R);
+  console.log('RT shell: faces', rtFaces.length, '(expect 30)');
+  const group = buildSolid(rtVerts, rtFaces, () => new THREE.Color(0xc8860a));
+  // Replace black edge material with a golden one
+  group.children.forEach(c => {
+    if (c instanceof THREE.LineSegments)
+      c.material = new THREE.LineBasicMaterial({ color: 0x885500, opacity: 0.5, transparent: true });
+  });
+  return { group, rtVerts };
+}
+
+const rtRhomboGroup = new THREE.Group();
+rtRhomboGroup.position.x = SPACING;
+scene.add(rtRhomboGroup);
+
+const rtRectGroup = new THREE.Group();
+rtRectGroup.position.x = SPACING;
+rtRectGroup.visible = false;
+scene.add(rtRectGroup);
+const rtDissectionGroup = new THREE.Group();
+rtDissectionGroup.position.x = SPACING;
+rtDissectionGroup.visible = false;
+scene.add(rtDissectionGroup);
+
+const zonoRhombs = buildZonoRhombohedra(icoVerts);
+zonoRhombs.forEach(({ mesh }) => rtRhomboGroup.add(mesh));
+console.log('Zono rhombs:', zonoRhombs.length,
+  '  oblate:', zonoRhombs.filter(r=>r.type==='oblate').length,
+  '  prolate:', zonoRhombs.filter(r=>r.type==='prolate').length);
+const rtProlateRhombs = zonoRhombs.filter(r => r.type === 'prolate');
+const rtOblateRhombs = zonoRhombs.filter(r => r.type === 'oblate');
+
+const rtProlateRectPackages = rtProlateRhombs.map(rhombo => buildRectangularPrismPackage(rhombo));
+const rtOblateRectPackages = rtOblateRhombs.map(rhombo => buildRectangularPrismPackage(rhombo));
+[...rtProlateRectPackages, ...rtOblateRectPackages].forEach(({ group }) => rtRectGroup.add(group));
+const rtProlateDissectionPackages = rtProlateRhombs.map(rhombo => buildHexDissectionPackage(rhombo));
+const rtOblateDissectionPackages = rtOblateRhombs.map(rhombo => buildHexDissectionPackage(rhombo));
+[...rtProlateDissectionPackages, ...rtOblateDissectionPackages].forEach(({ group }) => rtDissectionGroup.add(group));
+const rtFamilyMacroSlots = [];
+for (let y = 0; y < 2; y++) {
+  for (let x = 0; x < 5; x++) {
+    rtFamilyMacroSlots.push([x, y, 0]);
+  }
+}
+const rtProlateMacroUnitDims = rtProlateDissectionPackages[0].assembledBlockPackedDims;
+const rtOblateMacroUnitDims = rtOblateDissectionPackages[0].assembledBlockPackedDims;
+const rtProlateMacroDims = [5 * rtProlateMacroUnitDims[0], 2 * rtProlateMacroUnitDims[1], rtProlateMacroUnitDims[2]];
+const rtOblateMacroDims = [5 * rtOblateMacroUnitDims[0], 2 * rtOblateMacroUnitDims[1], rtOblateMacroUnitDims[2]];
+
+function buildCombStep1AAssembly() {
+  const sourceDims = [15 / (2 * phi), 8 / (Math.sqrt(3) * phi), Math.sqrt(3) * phi];
+  const targetDims = [5 * Math.sqrt(3) / (phi * phi), 4, Math.sqrt(3) * phi];
+  const dissection = buildExtrudedRectToRectDissection(
+    sourceDims[0], sourceDims[1], targetDims[0], targetDims[1], sourceDims[2]
+  );
+  const group = new THREE.Group();
+  group.visible = false;
+
+  const sourceOrigin = new THREE.Vector3(
+    -SPACING + hexMacroOrigin[0],
+    hexMacroOrigin[1],
+    hexMacroOrigin[2]
+  );
+  group.position.copy(sourceOrigin);
+
+  const sourceOutline = buildBoxWireGroup([0, 0, 0], sourceDims, 0x88c8ff, 0.22);
+  const targetOutline = buildBoxWireGroup([0, 0, 0], targetDims, 0xffc08a, 0.22);
+  group.add(sourceOutline, targetOutline);
+
+  const overlapColor = new THREE.Color(0xd5ccb9);
+  const overlapWire = new THREE.Color(0x61675f);
+  const overlapGroup = buildPolyPieceGroup(
+    dissection.overlapPrism.vertices.map(v => [v.x, v.y, v.z]),
+    dissection.overlapPrism.faces,
+    overlapColor,
+    overlapWire,
+    0.55
+  );
+  group.add(overlapGroup);
+
+  const pieceNodes = dissection.pieces.map((piece, idx) => {
+    const color = new THREE.Color().setHSL(((22 + idx * 31) % 360) / 360, 0.63, 0.58);
+    const wire = tint(color, -0.26);
+    const node = buildPolyPieceGroup(
+      piece.prism.vertices.map(v => [v.x, v.y, v.z]),
+      piece.prism.faces,
+      color,
+      wire,
+      0.78
+    );
+    node.userData.piece = piece;
+    group.add(node);
+    return node;
+  });
+
+  function setT(t) {
+    group.visible = true;
+    setObjectOpacity(sourceOutline, Math.max(0.1, 0.45 * (1 - t)));
+    setObjectOpacity(targetOutline, Math.max(0.1, 0.45 * t));
+    overlapGroup.visible = true;
+    pieceNodes.forEach(node => {
+      const piece = node.userData.piece;
+      applyPlanarTransform(node, pathTransform3D(piece, t));
+      node.visible = true;
+    });
+  }
+
+  return {
+    group,
+    setT,
+    sourceDims,
+    targetDims,
+  };
+}
+
+const combStep1A = buildCombStep1AAssembly();
+combStep1A.group.userData.baseY = combStep1A.group.position.y;
+combStep1A.group.userData.basePosition = combStep1A.group.position.clone();
+scene.add(combStep1A.group);
+
+function buildCombStep1BAssembly() {
+  const sourceDims = [5 * Math.sqrt(3) / (phi * phi), 4, Math.sqrt(3) * phi];
+  const targetDims = [5 * Math.sqrt(3) / (phi * phi), 2, 2 * Math.sqrt(3) * phi];
+  const group = new THREE.Group();
+  group.visible = false;
+
+  const sourceOrigin = new THREE.Vector3(
+    -SPACING + hexMacroOrigin[0],
+    hexMacroOrigin[1],
+    hexMacroOrigin[2]
+  );
+  group.position.copy(sourceOrigin);
+
+  const sourceOutline = buildBoxWireGroup([0, 0, 0], sourceDims, 0xffc08a, 0.22);
+  const targetOutline = buildBoxWireGroup([0, 0, 0], targetDims, 0xf4df8c, 0.22);
+  group.add(sourceOutline, targetOutline);
+
+  const boxFaces = [
+    [0, 1, 2, 3],
+    [4, 7, 6, 5],
+    [0, 4, 5, 1],
+    [1, 5, 6, 2],
+    [2, 6, 7, 3],
+    [3, 7, 4, 0],
+  ];
+  const makeBoxPts = (mins, maxs) => [
+    [mins[0], mins[1], mins[2]],
+    [maxs[0], mins[1], mins[2]],
+    [maxs[0], maxs[1], mins[2]],
+    [mins[0], maxs[1], mins[2]],
+    [mins[0], mins[1], maxs[2]],
+    [maxs[0], mins[1], maxs[2]],
+    [maxs[0], maxs[1], maxs[2]],
+    [mins[0], maxs[1], maxs[2]],
+  ];
+
+  const overlapPts = makeBoxPts([0, 0, 0], [sourceDims[0], 2, sourceDims[2]]);
+  const overlapGroup = buildPolyPieceGroup(
+    overlapPts,
+    boxFaces,
+    new THREE.Color(0xd7cba7),
+    new THREE.Color(0x6b674f),
+    0.55
+  );
+  group.add(overlapGroup);
+
+  const movingPiece = buildPolyPieceGroup(
+    makeBoxPts([0, 2, 0], [sourceDims[0], 4, sourceDims[2]]),
+    boxFaces,
+    new THREE.Color().setHSL(54 / 360, 0.6, 0.58),
+    tint(new THREE.Color().setHSL(54 / 360, 0.6, 0.58), -0.26),
+    0.78
+  );
+  group.add(movingPiece);
+  const moveDelta = new THREE.Vector3(0, -2, sourceDims[2]);
+
+  function setT(t) {
+    group.visible = true;
+    setObjectOpacity(sourceOutline, Math.max(0.1, 0.45 * (1 - t)));
+    setObjectOpacity(targetOutline, Math.max(0.1, 0.45 * t));
+    overlapGroup.visible = true;
+    movingPiece.visible = true;
+    movingPiece.position.copy(moveDelta).multiplyScalar(t);
+  }
+
+  return {
+    group,
+    setT,
+    sourceDims,
+    targetDims,
+  };
+}
+
+const combStep1B = buildCombStep1BAssembly();
+combStep1B.group.userData.baseY = combStep1B.group.position.y;
+combStep1B.group.userData.basePosition = combStep1B.group.position.clone();
+scene.add(combStep1B.group);
+
+const step2FinalDims = [
+  5 * Math.sqrt(3) / (phi * phi),
+  2,
+  2 * Math.sqrt(3) * phi + 2 / Math.sqrt(3),
+];
+const cubeSide = Math.cbrt(20 * Math.sqrt(5));
+const step3AIntermediateDims = [
+  cubeSide,
+  (10 * Math.sqrt(3)) / (phi * phi * cubeSide),
+  step2FinalDims[2],
+];
+
+function buildCombStep3AAssembly() {
+  const sourceDims = step2FinalDims;
+  const targetDims = step3AIntermediateDims;
+  const dissection = buildExtrudedRectToRectDissection(
+    sourceDims[0], sourceDims[1], targetDims[0], targetDims[1], sourceDims[2]
+  );
+  const group = new THREE.Group();
+  group.visible = false;
+
+  const sourceOrigin = new THREE.Vector3(
+    -SPACING + hexMacroOrigin[0],
+    hexMacroOrigin[1],
+    hexMacroOrigin[2]
+  );
+  group.position.copy(sourceOrigin);
+
+  const sourceOutline = buildBoxWireGroup([0, 0, 0], sourceDims, 0xf3e08f, 0.22);
+  const targetOutline = buildBoxWireGroup([0, 0, 0], targetDims, 0xb8f0c9, 0.22);
+  group.add(sourceOutline, targetOutline);
+
+  const overlapGroup = buildPolyPieceGroup(
+    dissection.overlapPrism.vertices.map(v => [v.x, v.y, v.z]),
+    dissection.overlapPrism.faces,
+    new THREE.Color(0xd5d9b2),
+    new THREE.Color(0x6c745a),
+    0.55
+  );
+  group.add(overlapGroup);
+
+  const pieceNodes = dissection.pieces.map((piece, idx) => {
+    const color = new THREE.Color().setHSL(((112 + idx * 23) % 360) / 360, 0.52, 0.58);
+    const wire = tint(color, -0.26);
+    const node = buildPolyPieceGroup(
+      piece.prism.vertices.map(v => [v.x, v.y, v.z]),
+      piece.prism.faces,
+      color,
+      wire,
+      0.78
+    );
+    node.userData.piece = piece;
+    group.add(node);
+    return node;
+  });
+
+  function setT(t) {
+    group.visible = true;
+    setObjectOpacity(sourceOutline, Math.max(0.1, 0.45 * (1 - t)));
+    setObjectOpacity(targetOutline, Math.max(0.1, 0.45 * t));
+    overlapGroup.visible = true;
+    pieceNodes.forEach(node => {
+      applyPlanarTransform(node, pathTransform3D(node.userData.piece, t));
+      node.visible = true;
+    });
+  }
+
+  return { group, setT, sourceDims, targetDims };
+}
+
+const combStep3A = buildCombStep3AAssembly();
+combStep3A.group.userData.baseY = combStep3A.group.position.y;
+combStep3A.group.userData.basePosition = combStep3A.group.position.clone();
+scene.add(combStep3A.group);
+
+function buildCombStep3BAssembly() {
+  const sourceDims = step3AIntermediateDims;
+  const targetDims = [cubeSide, cubeSide, cubeSide];
+  const dissection = buildExtrudedRectToRectDissection(
+    sourceDims[1], sourceDims[2], targetDims[1], targetDims[2], sourceDims[0]
+  );
+  const group = new THREE.Group();
+  group.visible = false;
+
+  const sourceOrigin = new THREE.Vector3(
+    -SPACING + hexMacroOrigin[0],
+    hexMacroOrigin[1],
+    hexMacroOrigin[2]
+  );
+  group.position.copy(sourceOrigin);
+
+  const sourceOutline = buildBoxWireGroup([0, 0, 0], sourceDims, 0xb8f0c9, 0.22);
+  const targetOutline = buildBoxWireGroup([0, 0, 0], targetDims, 0xd8f3ff, 0.22);
+  group.add(sourceOutline, targetOutline);
+
+  const remapVertex = v => [v.z, v.x, v.y];
+  const overlapGroup = buildPolyPieceGroup(
+    dissection.overlapPrism.vertices.map(remapVertex),
+    dissection.overlapPrism.faces,
+    new THREE.Color(0xc8d9cf),
+    new THREE.Color(0x64766c),
+    0.55
+  );
+  group.add(overlapGroup);
+
+  const pieceNodes = dissection.pieces.map((piece, idx) => {
+    const color = new THREE.Color().setHSL(((168 + idx * 19) % 360) / 360, 0.45, 0.58);
+    const wire = tint(color, -0.26);
+    const node = buildPolyPieceGroup(
+      piece.prism.vertices.map(remapVertex),
+      piece.prism.faces,
+      color,
+      wire,
+      0.78
+    );
+    node.userData.piece = piece;
+    group.add(node);
+    return node;
+  });
+
+  function setT(t) {
+    group.visible = true;
+    setObjectOpacity(sourceOutline, Math.max(0.1, 0.45 * (1 - t)));
+    setObjectOpacity(targetOutline, Math.max(0.1, 0.45 * t));
+    overlapGroup.visible = true;
+    pieceNodes.forEach(node => {
+      applyPlanarTransform(node, pathTransform3D(node.userData.piece, t), 'x');
+      node.visible = true;
+    });
+  }
+
+  return { group, setT, sourceDims, targetDims };
+}
+
+const combStep3B = buildCombStep3BAssembly();
+combStep3B.group.userData.baseY = combStep3B.group.position.y;
+combStep3B.group.userData.basePosition = combStep3B.group.position.clone();
+scene.add(combStep3B.group);
+
+const { group: rtShell, rtVerts } = buildRTShell(zonoRhombs);
+rtShell.visible = false;
+rtRhomboGroup.add(rtShell);
+
+const icoGroup = new THREE.Group();
+icoGroup.position.x = -SPACING;
+scene.add(icoGroup);
+
+const pyramids = buildIcoPyramids(icoVerts, icoFaces);
+pyramids.forEach(({ mesh }) => icoGroup.add(mesh));
+
+// ---------------------------------------------------------------------------
+// Step 3: compute target pose for each pyramid on the ido triangular face.
+// For ico face [ia,ib,ic], the corresponding ido triangle uses idoVerts at
+// indices edgeToIdoIdx(ia,ib), edgeToIdoIdx(ib,ic), edgeToIdoIdx(ic,ia).
+// Target: base flush with ido face (centroid ct), apex outward at ct + n*h.
+// Rotation maps explodeDir → −n  (base points from apex toward ido center).
+// Positions are stored in icoGroup local space (= world + SPACING offset).
+// ---------------------------------------------------------------------------
+const pyramidTargets = icoFaces.map((face, k) => {
+  const [ia, ib, ic] = face;
+  const j0 = edgeToIdoIdx.get(edgeKey(ia, ib));
+  const j1 = edgeToIdoIdx.get(edgeKey(ib, ic));
+  const j2 = edgeToIdoIdx.get(edgeKey(ic, ia));
+
+  // Ido face centroid in world space (idoGroup at origin)
+  const ct = idoVerts[j0].clone().add(idoVerts[j1]).add(idoVerts[j2]).divideScalar(3);
+  const n  = ct.clone().normalize();
+  const negN = n.clone().negate();
+
+  // h = ico pyramid height = distance from apex (origin) to base centroid
+  const faceCent = icoVerts[ia].clone().add(icoVerts[ib]).add(icoVerts[ic]).divideScalar(3);
+  const h = faceCent.length();
+  const { explodeDir } = pyramids[k];
+
+  // Apex world position: outward from ido face by h
+  const apexWorld = ct.clone().addScaledVector(n, h);
+  // Convert to icoGroup local space
+  const apexLocal = apexWorld.clone();
+  apexLocal.x += SPACING;
+
+  // R1: align the base-direction axis (explodeDir → −n)
+  const R1 = new THREE.Quaternion().setFromUnitVectors(explodeDir, negN);
+
+  // R2: in-plane twist correction
+  // After R1, the midpoint of base edge (ia,ib) should point toward idoVerts[j0].
+  // Compute the rotated source reference and the target reference, both
+  // projected onto the plane perpendicular to negN, then find the remaining angle.
+  // Source reference: ico vertex ia projected onto the base plane, after R1.
+  // (Using the vertex directly, not the edge midpoint — the ido medial triangle
+  //  is already 60° rotated, so aligning vertex→vertex gives the correct R2.)
+  const srcRef = icoVerts[ia].clone().sub(faceCent).applyQuaternion(R1);
+  srcRef.addScaledVector(negN, -srcRef.dot(negN)).normalize();
+
+  const tgtRef = idoVerts[j0].clone().sub(ct);
+  tgtRef.addScaledVector(negN, -tgtRef.dot(negN)).normalize();
+
+  const sinA = new THREE.Vector3().crossVectors(srcRef, tgtRef).dot(negN);
+  const cosA = THREE.MathUtils.clamp(srcRef.dot(tgtRef), -1, 1);
+  const R2 = new THREE.Quaternion().setFromAxisAngle(negN, Math.atan2(sinA, cosA));
+
+  const targetQuat = new THREE.Quaternion().multiplyQuaternions(R2, R1);
+
+  return { apexLocal, targetQuat };
+});
+
+const idoGroup = new THREE.Group();
+const idoTriSolid = buildSolid(idoVerts, idoFaces.filter(f => f.length === 3), colorFn);
+idoGroup.add(idoTriSolid);
+const idoPentSolid = buildSolid(idoVerts, idoFaces.filter(f => f.length === 5), colorFn);
+idoGroup.add(idoPentSolid);
+const idoPyramids = buildIdoPyramids(idoVerts, idoFaces, icoVerts, idoToIcoEdge);
+idoPyramids.forEach(({ mesh }) => idoGroup.add(mesh));
+const cavityWalls = buildCavityWalls(idoVerts, idoFaces, icoVerts, idoToIcoEdge);
+cavityWalls.forEach(m => idoGroup.add(m));
+scene.add(idoGroup);
+
+const dodGroup = buildSolid(dodVerts, dodFaces, colorFn);
+dodGroup.position.x = SPACING;
+scene.add(dodGroup);
+
+// ---------------------------------------------------------------------------
+// Step 4b: compute target pose for each P5 pyramid on the corresponding dod face.
+// Each ido pentagon (around ico vertex v) maps to the dod pentagon whose outward
+// normal is in direction v.  The base sits flush on the dod face; apex points outward.
+// Rotation: explodeDir (base outward from ido) → −nDod (base inward into dod).
+// targetPos ensures the base centroid lands exactly on the dod face centroid.
+// ---------------------------------------------------------------------------
+const pentIdoFaces = idoFaces.filter(f => f.length === 5);
+const p5Targets = pentIdoFaces.map((face, k) => {
+  const { explodeDir } = idoPyramids[k];
+
+  // Ido pentagon centroid
+  const cenIdo = new THREE.Vector3();
+  face.forEach(j => cenIdo.add(idoVerts[j]));
+  cenIdo.divideScalar(5);
+  const hIdo = cenIdo.length();
+
+  // Find the dod pentagon whose centroid direction best matches explodeDir
+  let dodFace = null, bestDot = -Infinity;
+  for (const df of dodFaces) {
+    if (df.length !== 5) continue;
+    const cen = new THREE.Vector3();
+    df.forEach(j => cen.add(dodVerts[j]));
+    cen.divideScalar(5);
+    const d = cen.normalize().dot(explodeDir);
+    if (d > bestDot) { bestDot = d; dodFace = df; }
+  }
+
+  // Dod face centroid (in dod-local space; world = +SPACING in x)
+  const cenDod = new THREE.Vector3();
+  dodFace.forEach(j => cenDod.add(dodVerts[j]));
+  cenDod.divideScalar(5);
+  const nDod = cenDod.clone().normalize();
+  const negNDod = nDod.clone().negate();
+
+  // targetPos: after rotation, base centroid (at −hIdo·nDod) must reach cenDod+(SPACING,0,0)
+  const targetPos = cenDod.clone().addScaledVector(nDod, hIdo);
+  targetPos.x += SPACING;
+
+  // R1: align explodeDir with −nDod (base faces into dod, apex points outward)
+  const R1 = new THREE.Quaternion().setFromUnitVectors(explodeDir, negNDod);
+
+  // R2: in-plane correction — align ido vertex 0 with the nearest dod face vertex
+  const srcRef = idoVerts[face[0]].clone().sub(cenIdo).applyQuaternion(R1);
+  srcRef.addScaledVector(negNDod, -srcRef.dot(negNDod)).normalize();
+
+  let bestDodV = null, bestVDot = -Infinity;
+  for (const j of dodFace) {
+    const ref = dodVerts[j].clone().sub(cenDod);
+    ref.addScaledVector(negNDod, -ref.dot(negNDod)).normalize();
+    const d = ref.dot(srcRef);
+    if (d > bestVDot) { bestVDot = d; bestDodV = dodVerts[j]; }
+  }
+  const tgtRef = bestDodV.clone().sub(cenDod);
+  tgtRef.addScaledVector(negNDod, -tgtRef.dot(negNDod)).normalize();
+
+  const sinA = new THREE.Vector3().crossVectors(srcRef, tgtRef).dot(negNDod);
+  const cosA = THREE.MathUtils.clamp(srcRef.dot(tgtRef), -1, 1);
+  const R2 = new THREE.Quaternion().setFromAxisAngle(negNDod, Math.atan2(sinA, cosA));
+
+  return { targetPos, targetQuat: new THREE.Quaternion().multiplyQuaternions(R2, R1) };
+});
+
+// ---------------------------------------------------------------------------
+// Align RT to dod+P5 via vertex-ring correspondence
+// ---------------------------------------------------------------------------
+
+(function alignRT() {
+  // Apex positions in dodGroup-local space (subtract SPACING from world targetPos)
+  const leftApexVerts = idoPyramids.map(({ apexLocal }, k) => {
+    const pos = p5Targets[k].targetPos.clone(); pos.x -= SPACING;
+    return apexLocal.clone().applyQuaternion(p5Targets[k].targetQuat).add(pos);
+  });
+
+  // Separate RT verts by valence: 12 largest-radius = five-valent tips
+  const rtSorted = rtVerts.slice().sort((a, b) => b.length() - a.length());
+  const rtFive  = rtSorted.slice(0, 12);
+  const rtThree = rtSorted.slice(12);
+
+  // RT adjacency graph
+  const rtAdj = Array.from({length: rtVerts.length}, () => []);
+  for (let i = 0; i < rtVerts.length; i++)
+    for (let j = i+1; j < rtVerts.length; j++)
+      if (Math.abs(rtVerts[i].distanceToSquared(rtVerts[j]) - ICO_R*ICO_R) < ICO_R*ICO_R*0.03)
+        { rtAdj[i].push(j); rtAdj[j].push(i); }
+
+  // Seed pair: closest five-valent vertex directions
+  let bestDot = -Infinity, seedK = 0, seedJ = 0;
+  leftApexVerts.forEach((la, k) => {
+    const ld = la.clone().normalize();
+    rtFive.forEach((rf, j) => {
+      const d = ld.dot(rf.clone().normalize());
+      if (d > bestDot) { bestDot = d; seedK = k; seedJ = j; }
+    });
+  });
+
+  // Left ring: 5 base verts of pyramid seedK in dodGroup-local space
+  const leftRing = pentIdoFaces[seedK].map(idx => {
+    const pos = p5Targets[seedK].targetPos.clone(); pos.x -= SPACING;
+    return idoVerts[idx].clone().applyQuaternion(p5Targets[seedK].targetQuat).add(pos);
+  });
+
+  // Right ring: three-valent neighbors of rtFive[seedJ]
+  const seedRTIdx = rtVerts.findIndex(v =>
+    Math.abs(v.x - rtFive[seedJ].x) < 1e-6 &&
+    Math.abs(v.y - rtFive[seedJ].y) < 1e-6 &&
+    Math.abs(v.z - rtFive[seedJ].z) < 1e-6
+  );
+  const rightRing = rtAdj[seedRTIdx]
+    .map(i => rtVerts[i])
+    .filter(v => rtThree.some(t =>
+      Math.abs(t.x-v.x)<1e-6 && Math.abs(t.y-v.y)<1e-6 && Math.abs(t.z-v.z)<1e-6));
+
+  if (rightRing.length !== 5) {
+    console.warn('alignRT: unexpected right ring length', rightRing.length);
+    return;
+  }
+
+  // Sort rings CCW around outward normals
+  function sortCCW(pts, normal) {
+    const ref = pts[0].clone().sub(normal.clone().multiplyScalar(pts[0].dot(normal))).normalize();
+    const perp = new THREE.Vector3().crossVectors(normal, ref);
+    return pts.slice().sort((a, b) => {
+      const da = a.clone().sub(normal.clone().multiplyScalar(a.dot(normal)));
+      const db = b.clone().sub(normal.clone().multiplyScalar(b.dot(normal)));
+      return Math.atan2(da.dot(perp), da.dot(ref)) - Math.atan2(db.dot(perp), db.dot(ref));
+    });
+  }
+  const leftRingSorted  = sortCCW(leftRing,  leftApexVerts[seedK].clone().normalize());
+  const rightRingSorted = sortCCW(rightRing, rtFive[seedJ].clone().normalize());
+
+  // Try all 10 ring candidates (5 offsets × CCW/CW), filter det(R)≈+1, pick min residual
+  function tryCandidate(rr) {
+    const lp = [leftApexVerts[seedK], ...leftRingSorted];
+    const rp = [rtFive[seedJ], ...rr];
+    let bestR = null, bestResid = Infinity;
+    for (let i = 0; i < 6; i++)
+      for (let j = i+1; j < 6; j++)
+        for (let k = j+1; k < 6; k++) {
+          const p0=lp[i],p1=lp[j],p2=lp[k], q0=rp[i],q1=rp[j],q2=rp[k];
+          const P = new THREE.Matrix3().set(p0.x,p1.x,p2.x, p0.y,p1.y,p2.y, p0.z,p1.z,p2.z);
+          const Q = new THREE.Matrix3().set(q0.x,q1.x,q2.x, q0.y,q1.y,q2.y, q0.z,q1.z,q2.z);
+          const R = Q.clone().multiply(P.clone().invert());
+          if (Math.abs(R.determinant() - 1) > 0.1) continue;
+          const R4 = new THREE.Matrix4().setFromMatrix3(R);
+          let maxResid = 0;
+          for (let m = 0; m < 6; m++)
+            maxResid = Math.max(maxResid, lp[m].clone().applyMatrix4(R4).distanceTo(rp[m]));
+          if (maxResid < bestResid) { bestResid = maxResid; bestR = R; }
+        }
+    return { R: bestR, residual: bestResid };
+  }
+
+  let bestR = null, bestResid = Infinity;
+  for (let offset = 0; offset < 5; offset++) {
+    for (const dir of [1, -1]) {
+      const rr = Array.from({length: 5}, (_, i) => {
+        const idx = dir > 0 ? (i+offset)%5 : (offset-i+5)%5;
+        return rightRingSorted[idx];
+      });
+      const { R, residual } = tryCandidate(rr);
+      if (R && residual < bestResid) { bestResid = residual; bestR = R; }
+    }
+  }
+
+  if (!bestR) { console.warn('alignRT: no valid rotation found'); return; }
+  if (bestResid > 1e-3) console.warn('alignRT: poor fit, residual =', bestResid);
+
+  const computedQuat = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().setFromMatrix3(bestR)
+  );
+  rtRhomboGroup.quaternion.copy(computedQuat);
+  rtDissectionGroup.quaternion.copy(computedQuat);
+  rtRectGroup.quaternion.copy(computedQuat);
+
+  const sign = computedQuat.w >= 0 ? 1 : -1;
+  const q = computedQuat.clone();
+  if (sign < 0) { q.x=-q.x; q.y=-q.y; q.z=-q.z; q.w=-q.w; }
+  const halfAngle = Math.acos(THREE.MathUtils.clamp(q.w, 0, 1));
+  const sinH = Math.sin(halfAngle);
+  const axis = sinH > 1e-6 ? new THREE.Vector3(q.x,q.y,q.z).divideScalar(sinH) : new THREE.Vector3(1,0,0);
+  console.log(`alignRT: axis (${axis.x.toFixed(4)}, ${axis.y.toFixed(4)}, ${axis.z.toFixed(4)})  angle ${(2*halfAngle*180/Math.PI).toFixed(4)}°  residual ${bestResid.toFixed(8)}`);
+})();
+
+function getRTMacroLayout() {
+  const targetQuat = rtDissectionGroup.quaternion.clone().invert()
+    .multiply(hexDissectionGroup.quaternion)
+    .multiply(hexAssembledBlockQuat);
+  const basis = quaternionToBasis(targetQuat);
+  const totalDims = [
+    rtProlateMacroDims[0] + rtOblateMacroDims[0],
+    Math.max(rtProlateMacroDims[1], rtOblateMacroDims[1]),
+    Math.max(rtProlateMacroDims[2], rtOblateMacroDims[2]),
+  ];
+  const baseOrigin = vadd(
+    vscale(basis.u, -0.5 * totalDims[0]),
+    vadd(
+      vscale(basis.v, -0.5 * totalDims[1]),
+      vscale(basis.w, -0.5 * totalDims[2])
+    )
+  );
+  return {
+    basis,
+    prolateOrigin: baseOrigin,
+    oblateOrigin: vadd(baseOrigin, vscale(basis.u, rtProlateMacroDims[0])),
+  };
+}
+
+function getRTOblateStep2Pose() {
+  const slotLayout = getLateStageSlotLayout();
+  const layout = getRTMacroLayout();
+  const sourceCenterWorld = rtDissectionGroup.localToWorld(new THREE.Vector3(...layout.oblateOrigin)
+    .add(new THREE.Vector3(...layout.basis.u).multiplyScalar(0.5 * rtOblateMacroDims[0]))
+    .add(new THREE.Vector3(...layout.basis.v).multiplyScalar(0.5 * rtOblateMacroDims[1]))
+    .add(new THREE.Vector3(...layout.basis.w).multiplyScalar(0.5 * rtOblateMacroDims[2])))
+    .add(slotLayout.rightDeltaWorld);
+  const leftBaseOrigin = new THREE.Vector3(
+    -SPACING + hexMacroOrigin[0],
+    hexMacroOrigin[1],
+    hexMacroOrigin[2]
+  ).add(slotLayout.leftDeltaWorld);
+  const targetCenterWorld = leftBaseOrigin.add(new THREE.Vector3(
+    combStep1B.targetDims[0] / 2,
+    combStep1B.targetDims[1] / 2,
+    combStep1B.targetDims[2] + 1 / Math.sqrt(3)
+  ));
+  const sourceCenter = rtDissectionGroup.worldToLocal(sourceCenterWorld.clone());
+  const targetCenter = rtDissectionGroup.worldToLocal(targetCenterWorld.clone());
+  return {
+    layout,
+    sourceCenter,
+    translateDelta: targetCenter.sub(sourceCenter.clone()),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Labels
+// ---------------------------------------------------------------------------
+
+const LABEL_DATA = [
+  { group: icoGroup, name: 'Icosahedron',
+    faces: '20 △  faces',
+    role:  'donates 20 × P3A →' },
+  { group: idoGroup, name: 'Icosidodecahedron',
+    faces: '20 △  + 12 ⬠  faces',
+    role:  '← receives P3A · donates P5 →' },
+  { group: dodGroup, name: 'Dodecahedron',
+    faces: '12 ⬠  faces',
+    role:  '← receives 12 × P5' },
+];
+
+const labelsEl = document.getElementById('labels');
+const labelEls = LABEL_DATA.map(({ name, faces, role }) => {
+  const el = document.createElement('div');
+  el.className = 'label';
+  el.innerHTML =
+    `<div class="name">${name}</div>` +
+    `<div class="faces">${faces}</div>` +
+    `<div class="role">${role}</div>`;
+  labelsEl.appendChild(el);
+  return el;
+});
+
+const PRISM_LABELS = [
+  {
+    name: 'Hex Prism',
+    dims: '15/(2φ) × 8/(√3φ) × 2φ/√3',
+    color: '#9fd6ff',
+  },
+  {
+    name: 'RT Prolate Prism',
+    dims: '15/(2φ) × 8/(√3φ) × φ/√3',
+    color: '#9fd6ff',
+  },
+  {
+    name: 'RT Oblate Prism',
+    dims: '5√3/φ² × 2 × 2/√3',
+    color: '#ffd59a',
+  },
+];
+
+const prismLabelEls = PRISM_LABELS.map(({ name, dims, color }) => {
+  const el = document.createElement('div');
+  el.className = 'label';
+  el.style.display = 'none';
+  el.innerHTML =
+    `<div class="name" style="color:${color}">${name}</div>` +
+    `<div class="faces">${dims}</div>`;
+  labelsEl.appendChild(el);
+  return el;
+});
+
+function lateStagePrismLabels() {
+  const layout = getRTMacroLayout();
+  const rtOblatePose = getRTOblateStep2Pose();
+  const stage28Layout = getLateStageSlotLayout();
+  function labelOffset(point, amount = TARGET_R + 0.7) {
+    return point.clone().add(new THREE.Vector3(0, -amount, 0));
+  }
+  const p1SourceCenter = combStep1A.group.localToWorld(new THREE.Vector3(
+    combStep1A.sourceDims[0] / 2,
+    combStep1A.sourceDims[1] / 2,
+    combStep1A.sourceDims[2] / 2
+  ));
+  const b1Center = combStep1A.group.localToWorld(new THREE.Vector3(
+    combStep1A.targetDims[0] / 2,
+    combStep1A.targetDims[1] / 2,
+    combStep1A.targetDims[2] / 2
+  ));
+  const p1PrimeCenter = combStep1B.group.localToWorld(new THREE.Vector3(
+    combStep1B.targetDims[0] / 2,
+    combStep1B.targetDims[1] / 2,
+    combStep1B.targetDims[2] / 2
+  ));
+  const b2Center = combStep3A.group.localToWorld(new THREE.Vector3(
+    combStep3A.targetDims[0] / 2,
+    combStep3A.targetDims[1] / 2,
+    combStep3A.targetDims[2] / 2
+  ));
+  const cubeCenter = combStep3B.group.localToWorld(new THREE.Vector3(
+    combStep3B.targetDims[0] / 2,
+    combStep3B.targetDims[1] / 2,
+    combStep3B.targetDims[2] / 2
+  ));
+  const rtOblateSourceCenterWorld = rtDissectionGroup.localToWorld(rtOblatePose.sourceCenter.clone());
+  const rtOblateTargetCenterWorld = rtDissectionGroup.localToWorld(
+    rtOblatePose.sourceCenter.clone().add(rtOblatePose.translateDelta)
+  );
+  if (step === 28) {
+    return [
+      {
+        name: 'Hex Prism',
+        dims: '15/(2φ) × 8/(√3φ) × 2φ/√3',
+        color: '#9fd6ff',
+        worldPoint: labelOffset(stage28Layout.hexPresentedCenterWorld),
+      },
+      {
+        name: 'RT Prolate Prism',
+        dims: '15/(2φ) × 8/(√3φ) × φ/√3',
+        color: '#9fd6ff',
+        worldPoint: labelOffset(stage28Layout.prolatePresentedCenterWorld),
+      },
+      {
+        name: 'RT Oblate Prism',
+        dims: '5√3/φ² × 2 × 2/√3',
+        color: '#ffd59a',
+        worldPoint: labelOffset(stage28Layout.oblatePresentedCenterWorld),
+      },
+    ];
+  }
+  if (step === 29) {
+    return [
+      { name: 'P₁', dims: '15/(2φ) × 8/(√3φ) × √3φ', color: '#9fd6ff', worldPoint: labelOffset(p1SourceCenter) },
+      { name: 'P₂', dims: '5√3/φ² × 2 × 2/√3', color: '#ffd59a', worldPoint: labelOffset(rtOblateSourceCenterWorld) },
+    ];
+  }
+  if (step === 30) {
+    return [
+      { name: 'B₁', dims: '5√3/φ² × 4 × √3φ', color: '#ffc98d', worldPoint: labelOffset(b1Center) },
+      { name: 'P₂', dims: '5√3/φ² × 2 × 2/√3', color: '#ffd59a', worldPoint: labelOffset(rtOblateSourceCenterWorld) },
+    ];
+  }
+  if (step === 31) {
+    return [
+      { name: 'P₁′', dims: '5√3/φ² × 2 × 2√3φ', color: '#f3e08f', worldPoint: labelOffset(p1PrimeCenter) },
+      { name: 'P₂', dims: '5√3/φ² × 2 × 2/√3', color: '#ffd59a', worldPoint: labelOffset(rtOblateSourceCenterWorld) },
+    ];
+  }
+  if (step === 32) {
+    return [
+      { name: 'Step 2 Block', dims: '5√3/φ² × 2 × (2√3φ + 2/√3)', color: '#f3e08f', worldPoint: labelOffset(rtOblateTargetCenterWorld.clone().add(p1PrimeCenter).multiplyScalar(0.5)) },
+    ];
+  }
+  if (step === 33) {
+    return [
+      { name: 'B₂', dims: 's × 10√3/(φ²s) × (2√3φ + 2/√3)', color: '#b8f0c9', worldPoint: labelOffset(b2Center) },
+    ];
+  }
+  return [
+    {
+      name: 'Cube',
+      dims: 's × s × s',
+      color: '#d8f3ff',
+      worldPoint: labelOffset(cubeCenter),
+    },
+  ];
+}
+
+const tmpV = new THREE.Vector3();
+function updateLabels() {
+  LABEL_DATA.forEach(({ group }, i) => {
+    tmpV.set(0, -(TARGET_R + 0.7), 0);
+    tmpV.applyMatrix4(group.matrixWorld);
+    tmpV.project(camera);
+    labelEls[i].style.left = ((tmpV.x *  0.5 + 0.5) * innerWidth)  + 'px';
+    labelEls[i].style.top  = ((tmpV.y * -0.5 + 0.5) * innerHeight) + 'px';
+  });
+
+  const showPrismLabels = step >= 28 && (animDir === 0 || autoplay);
+  const lateLabels = showPrismLabels ? lateStagePrismLabels() : [];
+  prismLabelEls.forEach((el, i) => {
+    const cfg = lateLabels[i];
+    el.style.display = cfg ? '' : 'none';
+    if (!cfg) return;
+    el.innerHTML =
+      `<div class="name" style="color:${cfg.color}">${cfg.name}</div>` +
+      `<div class="faces">${cfg.dims}</div>`;
+    tmpV.copy(cfg.worldPoint).project(camera);
+    el.style.left = ((tmpV.x * 0.5 + 0.5) * innerWidth) + 'px';
+    el.style.top = ((tmpV.y * -0.5 + 0.5) * innerHeight) + 'px';
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Animations
+// ---------------------------------------------------------------------------
+
+let step    = 0;
+let animT   = 0;
+let animDir = 0;
+let autoplay = false;
+let debugPanelVisible = true;
+
+function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+const btnBack = document.getElementById('btnBack');
+const btnNext = document.getElementById('btnNext');
+const btnPlayAll = document.getElementById('btnPlayAll');
+const btnToggleDebug = document.getElementById('btnToggleDebug');
+const stageMenuEl = document.getElementById('stage-menu');
+const stageListEl = document.getElementById('stage-list');
+
+const STEPS = [
+  { next: 'Explode icosahedron →',                                             back: null,                                    speed: 0.025 },
+  { next: 'Transfer P3A →',                                                    back: '← Assemble icosahedron',                speed: 0.018 },
+  { next: 'Extract P5 →',                                                      back: '← Recall P3A',                          speed: 0.025 },
+  { next: 'Transfer P5 to dod →',                                              back: '← Reinsert P5',                         speed: 0.018 },
+  { next: 'Show Rhombic Solids →',                                             back: '← Recall P5',                           speed: 0.03  },
+  { next: 'Explode hexecontahedron →',                                         back: '← Back',                                speed: 0.025 },
+  { next: 'Prolates → 6 Hill tetrahedra',                                      back: '← Assemble hexecontahedron',            speed: 0.022 },
+  { next: '6 Hill tetrahedra → 6 tri prisms',                                  back: '← Show prolates',                       speed: 0.022 },
+  { next: '6 tri prisms → 6 parallelogram prisms',                             back: '← Show Hill tetrahedra',                speed: 0.022 },
+  { next: '6 parallelogram prisms → 6 rect prisms',                            back: '← Show tri prisms',                     speed: 0.022 },
+  { next: '6 rect prisms → axis-aligned prisms',                               back: '← Show parallelogram prisms',           speed: 0.022 },
+  { next: 'Axis-aligned prisms → 1×2×3 block',                                 back: '← Show rect prisms',                    speed: 0.022 },
+  { next: '20 local blocks → 2×2×5 prism →',                                   back: '← Show axis-aligned prisms',            speed: 0.025 },
+  { next: 'Explode triacontahedron →',                                         back: '← Show 20 local blocks',                speed: 0.025 },
+  { next: 'RT prolates → 6 Hill tetrahedra',                                   back: '← Assemble triacontahedron',            speed: 0.022 },
+  { next: 'RT prolates: 6 Hill tetrahedra → 6 tri prisms',                     back: '← Show RT rhombohedra',                 speed: 0.022 },
+  { next: 'RT prolates: 6 tri prisms → 6 parallelogram prisms',                back: '← Show prolate Hill tetrahedra',        speed: 0.022 },
+  { next: 'RT prolates: 6 parallelogram prisms → 6 rect prisms',               back: '← Show prolate tri prisms',             speed: 0.022 },
+  { next: 'RT prolates: 6 rect prisms → axis-aligned prisms',                  back: '← Show prolate parallelogram prisms',   speed: 0.022 },
+  { next: 'RT prolates: axis-aligned prisms → 1×2×3 block',                    back: '← Show prolate rect prisms',            speed: 0.022 },
+  { next: 'RT oblates → 6 Hill tetrahedra',                                    back: '← Show prolate axis-aligned prisms',    speed: 0.022 },
+  { next: 'RT oblates: 6 Hill tetrahedra → 6 tri prisms',                      back: '← Show oblate rhombohedra',             speed: 0.022 },
+  { next: 'RT oblates: 6 tri prisms → 6 parallelogram prisms',                 back: '← Show oblate Hill tetrahedra',         speed: 0.022 },
+  { next: 'RT oblates: 6 parallelogram prisms → 6 rect prisms',                back: '← Show oblate tri prisms',              speed: 0.022 },
+  { next: 'RT oblates: 6 rect prisms → axis-aligned prisms',                   back: '← Show oblate parallelogram prisms',    speed: 0.022 },
+  { next: 'RT oblates: axis-aligned prisms → 1×2×3 block',                     back: '← Show oblate rect prisms',             speed: 0.022 },
+  { next: 'Rotate 20 local RT blocks →',                                       back: '← Show oblate axis-aligned prisms',     speed: 0.022 },
+  { next: '20 rotated RT blocks → two 1×2×5 prisms →',                         back: '← Show 20 local RT blocks',             speed: 0.025 },
+  { next: 'Stack RT prolate prism on hex prism →',                             back: '← Show 20 rotated RT blocks',           speed: 0.025 },
+  { next: 'Step 1A: reshape stacked prism →',                                  back: '← Show stacked prisms',                 speed: 0.022 },
+  { next: 'Step 1B: reshape B₁ → P₁′',                                        back: '← Show stacked prism P₁',               speed: 0.022 },
+  { next: 'Translate P₂ onto P₁′ →',                                          back: '← Show Step 1A prism B₁',               speed: 0.022 },
+  { next: 'Step 3A: reshape block → B₂',                                       back: '← Show P₁′ + P₂',                      speed: 0.022 },
+  { next: 'Step 3B: reshape B₂ → cube',                                        back: '← Show Step 2 block',                   speed: 0.022 },
+  { next: null,                                                                 back: '← Show Step 3A block',                  speed: 0.022 },
+];
+
+const stageJumpButtons = STEPS.map((label, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'stage-jump';
+  btn.textContent = `${idx}. ${label.next || 'Final state'}`;
+  btn.addEventListener('click', () => {
+    if (animDir !== 0 || autoplay) return;
+    step = idx;
+    animT = 0;
+    animDir = 0;
+    onStepChange(step);
+    refreshStageMenu();
+  });
+  stageListEl.appendChild(btn);
+  return btn;
+});
+
+function refreshStageMenu() {
+  stageJumpButtons.forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === step);
+    btn.disabled = animDir !== 0 || autoplay;
+  });
+}
+
+function beginStepAnimation(dir) {
+  if (animDir !== 0) return;
+  if (dir > 0 && step >= STEPS.length - 1) return;
+  if (dir < 0 && step <= 0) return;
+  // Re-parent P5s to dodGroup before the slide so they don't move with idoGroup
+  if (dir > 0 && step === 4) idoPyramids.forEach(({ mesh }) => { if (mesh.parent === idoGroup) dodGroup.attach(mesh); });
+  animT = 0;
+  animDir = dir;
+}
+
+btnNext.addEventListener('click', () => {
+  if (autoplay) return;
+  beginStepAnimation(1);
+});
+btnBack.addEventListener('click', () => {
+  if (autoplay) return;
+  beginStepAnimation(-1);
+});
+btnPlayAll.addEventListener('click', () => {
+  if (autoplay) {
+    autoplay = false;
+    return;
+  }
+  step = 0;
+  animT = 0;
+  animDir = 0;
+  autoplay = true;
+  onStepChange(step);
+  refreshStageMenu();
+});
+btnToggleDebug.addEventListener('click', () => {
+  debugPanelVisible = !debugPanelVisible;
+  stageMenuEl.classList.toggle('hidden', !debugPanelVisible);
+  btnToggleDebug.textContent = debugPanelVisible ? 'Hide Debug Panel' : 'Show Debug Panel';
+});
+
+function setHexDissectionState(stageIdx, t) {
+  hexDissectionPackages.forEach(({ group, stages, assemblyStage, assembledBlockOrigin, setStage0T, setStage1T, setStage3T, setStage5T, setStage6T, setStage7T }, idx) => {
+    const offset = prolateRhombs[idx].explodeDir.clone().multiplyScalar(HEX_EXPLODE_DIST);
+    if (stageIdx === 8) {
+      const slot = hexMacroSlots[idx];
+      const target = [
+        hexMacroOrigin[0] + slot[0] * hexMacroUnitDims[0] - assembledBlockOrigin[0],
+        hexMacroOrigin[1] + slot[1] * hexMacroUnitDims[1] - assembledBlockOrigin[1],
+        hexMacroOrigin[2] + slot[2] * hexMacroUnitDims[2] - assembledBlockOrigin[2],
+      ];
+      group.position.set(
+        THREE.MathUtils.lerp(offset.x, target[0], t),
+        THREE.MathUtils.lerp(offset.y, target[1], t),
+        THREE.MathUtils.lerp(offset.z, target[2], t),
+      );
+    } else {
+      group.position.copy(offset);
+    }
+    group.visible = true;
+    stages.forEach((stage, i) => { stage.visible = i === stageIdx; });
+    assemblyStage.visible = stageIdx >= 6;
+    setStage0T(stageIdx > 0 ? 1 : t);
+    setStage1T(stageIdx === 1 ? t : stageIdx > 1 ? 1 : 0);
+    setStage3T(stageIdx === 3 ? t : stageIdx > 3 ? 1 : 0);
+    setStage5T(stageIdx === 5 ? t : stageIdx > 5 ? 1 : 0);
+    setStage6T(stageIdx === 6 ? t : stageIdx > 6 ? 1 : 0);
+    if (stageIdx === 7) setStage7T(t);
+    else if (stageIdx > 7) setStage7T(1);
+  });
+}
+
+function getRTPackedPose(pkg, idx, macroOrigin, macroUnitDims, macroSlots) {
+  const sourceBlockQuat = basisQuaternion(pkg.assembledBlockFrame);
+  const targetBlockQuat = rtDissectionGroup.quaternion.clone().invert()
+    .multiply(hexDissectionGroup.quaternion)
+    .multiply(hexAssembledBlockQuat);
+  const basisCorrection = targetBlockQuat.clone().multiply(sourceBlockQuat.invert());
+  const macroBasis = quaternionToBasis(targetBlockQuat);
+  const anchorPointLocal = new THREE.Vector3(...pkg.assembledBlockAnchorPointLocal);
+  const slot = macroSlots[idx];
+  const targetAnchor = new THREE.Vector3(...macroOrigin)
+    .add(new THREE.Vector3(...macroBasis.u).multiplyScalar(slot[0] * macroUnitDims[0]))
+    .add(new THREE.Vector3(...macroBasis.v).multiplyScalar(slot[1] * macroUnitDims[1]))
+    .add(new THREE.Vector3(...macroBasis.w).multiplyScalar(slot[2] * macroUnitDims[2]));
+  const rotatedAnchorOffset = anchorPointLocal.clone().applyQuaternion(basisCorrection);
+  return {
+    position: targetAnchor.sub(rotatedAnchorOffset),
+    quaternion: basisCorrection,
+  };
+}
+
+function getRTProlateStackOrigin() {
+  const topAnchorWorld = hexDissectionGroup.localToWorld(
+    new THREE.Vector3(
+      hexMacroOrigin[0],
+      hexMacroOrigin[1],
+      hexMacroOrigin[2] + 2 * hexMacroUnitDims[2]
+    )
+  );
+  return rtDissectionGroup.worldToLocal(topAnchorWorld).toArray();
+}
+
+function setRTFamilyDissectionState(packages, rhombos, stageIdx, t, macroOrigin = null, macroUnitDims = null, macroSlots = null) {
+  packages.forEach(({ group, stages, assemblyStage, assembledBlockCenter, assembledBlockAnchorPointLocal, assembledBlockFrame, setStage0T, setStage1T, setStage3T, setStage5T, setStage6T, setStage7T }, idx) => {
+    const sourceBlockQuat = basisQuaternion(assembledBlockFrame);
+    const basisCorrection = rtDissectionGroup.quaternion.clone().invert()
+      .multiply(hexDissectionGroup.quaternion)
+      .multiply(hexAssembledBlockQuat)
+      .multiply(sourceBlockQuat.invert());
+    const center = new THREE.Vector3(...assembledBlockCenter);
+    if (stageIdx === 8 || stageIdx === 9 || stageIdx === 10) {
+      const rhomboPos = rhombos[idx].mesh.position.clone();
+      if (stageIdx === 8) {
+        const currentQuat = new THREE.Quaternion().slerpQuaternions(_q0, basisCorrection, t);
+        const rotatedCenter = center.clone().applyQuaternion(currentQuat);
+        group.position.copy(rhomboPos).add(center).sub(rotatedCenter);
+        group.quaternion.copy(currentQuat);
+      } else if (stageIdx === 9) {
+        const rotatedCenter = center.clone().applyQuaternion(basisCorrection);
+        const sourcePos = rhomboPos.clone().add(center).sub(rotatedCenter);
+        const packedPose = getRTPackedPose({
+          assembledBlockFrame,
+          assembledBlockAnchorPointLocal,
+        }, idx, macroOrigin, macroUnitDims, macroSlots);
+        group.position.lerpVectors(sourcePos, packedPose.position, t);
+        group.quaternion.copy(packedPose.quaternion);
+      } else {
+        const fromPose = getRTPackedPose({
+          assembledBlockFrame,
+          assembledBlockAnchorPointLocal,
+        }, idx, macroOrigin, macroUnitDims, macroSlots);
+        const toPose = getRTPackedPose({
+          assembledBlockFrame,
+          assembledBlockAnchorPointLocal,
+        }, idx, getRTProlateStackOrigin(), macroUnitDims, macroSlots);
+        group.position.lerpVectors(fromPose.position, toPose.position, t);
+        group.quaternion.copy(fromPose.quaternion);
+      }
+    } else {
+      group.position.copy(rhombos[idx].mesh.position);
+      group.quaternion.identity();
+    }
+    group.visible = true;
+    stages.forEach((stage, i) => { stage.visible = i === stageIdx; });
+    assemblyStage.visible = stageIdx >= 6;
+    setStage0T(stageIdx > 0 ? 1 : t);
+    setStage1T(stageIdx === 1 ? t : stageIdx > 1 ? 1 : 0);
+    setStage3T(stageIdx === 3 ? t : stageIdx > 3 ? 1 : 0);
+    setStage5T(stageIdx === 5 ? t : stageIdx > 5 ? 1 : 0);
+    setStage6T(stageIdx === 6 ? t : stageIdx > 6 ? 1 : 0);
+    if (stageIdx === 7) setStage7T(t);
+    else if (stageIdx > 7) setStage7T(1);
+  });
+}
+
+function buildBoxCornersLocal(origin, basis0, basis1, basis2, dims) {
+  const o = new THREE.Vector3(...origin);
+  const b0 = new THREE.Vector3(...basis0);
+  const b1 = new THREE.Vector3(...basis1);
+  const b2 = new THREE.Vector3(...basis2);
+  const corners = [];
+  for (const i of [0, 1]) {
+    for (const j of [0, 1]) {
+      for (const k of [0, 1]) {
+        corners.push(
+          o.clone()
+            .addScaledVector(b0, i * dims[0])
+            .addScaledVector(b1, j * dims[1])
+            .addScaledVector(b2, k * dims[2])
+        );
+      }
+    }
+  }
+  return corners;
+}
+
+function averageWorldPoints(points) {
+  const sum = new THREE.Vector3();
+  points.forEach(p => sum.add(p));
+  return sum.multiplyScalar(1 / points.length);
+}
+
+function worldExtentAlong(points, axis) {
+  let min = Infinity;
+  let max = -Infinity;
+  points.forEach(point => {
+    const d = axis.dot(point);
+    min = Math.min(min, d);
+    max = Math.max(max, d);
+  });
+  return max - min;
+}
+
+function worldDeltaToParentLocal(object, deltaWorld) {
+  if (!object.parent) return deltaWorld.clone();
+  const parentQuat = new THREE.Quaternion();
+  object.parent.getWorldQuaternion(parentQuat);
+  return deltaWorld.clone().applyQuaternion(parentQuat.invert());
+}
+
+function getLateStageSlotLayout() {
+  const layout = getRTMacroLayout();
+  const worldXAxis = new THREE.Vector3(1, 0, 0);
+
+  const hexCornersWorld = buildBoxCornersLocal(
+    [hexMacroOrigin[0], hexMacroOrigin[1], hexMacroOrigin[2]],
+    [1, 0, 0], [0, 1, 0], [0, 0, 1],
+    [5 * hexMacroUnitDims[0], 2 * hexMacroUnitDims[1], 2 * hexMacroUnitDims[2]]
+  ).map(point => hexDissectionGroup.localToWorld(point));
+  const prolateCornersWorld = buildBoxCornersLocal(
+    layout.prolateOrigin,
+    layout.basis.u, layout.basis.v, layout.basis.w,
+    rtProlateMacroDims
+  ).map(point => rtDissectionGroup.localToWorld(point));
+  const oblateCornersWorld = buildBoxCornersLocal(
+    layout.oblateOrigin,
+    layout.basis.u, layout.basis.v, layout.basis.w,
+    rtOblateMacroDims
+  ).map(point => rtDissectionGroup.localToWorld(point));
+
+  const hexCenterWorld = averageWorldPoints(hexCornersWorld);
+  const prolateCenterWorld = averageWorldPoints(prolateCornersWorld);
+  const oblateCenterWorld = averageWorldPoints(oblateCornersWorld);
+  const hexWidth = worldExtentAlong(hexCornersWorld, worldXAxis);
+  const prolateWidth = worldExtentAlong(prolateCornersWorld, worldXAxis);
+  const oblateWidth = worldExtentAlong(oblateCornersWorld, worldXAxis);
+
+  const prolateTargetWorld = prolateCenterWorld.clone();
+  prolateTargetWorld.x = 0;
+  const centerSpacing = Math.max(
+    0.5 * (hexWidth + prolateWidth),
+    0.5 * (prolateWidth + oblateWidth)
+  ) + 0.4;
+  const hexTargetWorld = hexCenterWorld.clone();
+  const oblateTargetWorld = oblateCenterWorld.clone();
+  oblateTargetWorld.x = centerSpacing;
+
+  const hexDeltaWorld = hexTargetWorld.sub(hexCenterWorld);
+  const prolateDeltaWorld = prolateTargetWorld.sub(prolateCenterWorld);
+  const oblateDeltaWorld = oblateTargetWorld.sub(oblateCenterWorld);
+
+  return {
+    hexCenterWorld,
+    prolateCenterWorld,
+    oblateCenterWorld,
+    hexPresentedCenterWorld: hexCenterWorld.clone().add(hexDeltaWorld),
+    prolatePresentedCenterWorld: prolateCenterWorld.clone().add(prolateDeltaWorld),
+    oblatePresentedCenterWorld: oblateCenterWorld.clone().add(oblateDeltaWorld),
+    leftDeltaWorld: hexDeltaWorld,
+    centerDeltaWorld: prolateDeltaWorld,
+    rightDeltaWorld: oblateDeltaWorld,
+    hexDeltaWorld,
+    prolateDeltaWorld,
+    oblateDeltaWorld,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Visual state helpers (called by applyVisuals)
+// ---------------------------------------------------------------------------
+
+function _applyIcoPyramids(from, t) {
+  if (from === 0) {
+    pyramids.forEach(({ mesh, explodeDir }) => {
+      mesh.position.copy(explodeDir).multiplyScalar(t * EXPLODE_DIST);
+      mesh.quaternion.identity();
+    });
+  } else if (from === 1) {
+    pyramids.forEach(({ mesh, explodeDir }, k) => {
+      const { apexLocal, targetQuat } = pyramidTargets[k];
+      mesh.position.lerpVectors(explodeDir.clone().multiplyScalar(EXPLODE_DIST), apexLocal, t);
+      mesh.quaternion.slerpQuaternions(_q0, targetQuat, t);
+    });
+  } else {
+    pyramids.forEach(({ mesh }, k) => {
+      mesh.position.copy(pyramidTargets[k].apexLocal);
+      mesh.quaternion.copy(pyramidTargets[k].targetQuat);
+    });
+  }
+}
+
+function _applyP5Pyramids(from, t) {
+  const p5Active = from >= 2;
+  idoPyramids.forEach(({ mesh }) => { mesh.visible = p5Active; });
+  idoPentSolid.visible = !p5Active;
+  cavityWalls.forEach(m => { m.visible = p5Active && from < 5; });
+
+  if (from === 2) {
+    idoPyramids.forEach(({ mesh, explodeDir }) => {
+      mesh.position.copy(explodeDir).multiplyScalar(t * EXPLODE_DIST);
+      mesh.quaternion.identity();
+    });
+  } else if (from === 3) {
+    idoPyramids.forEach(({ mesh, explodeDir }, k) => {
+      const { targetPos, targetQuat } = p5Targets[k];
+      mesh.position.lerpVectors(explodeDir.clone().multiplyScalar(EXPLODE_DIST), targetPos, t);
+      mesh.quaternion.slerpQuaternions(_q0, targetQuat, t);
+    });
+  } else if (from >= 4) {
+    idoPyramids.forEach(({ mesh }, k) => {
+      if (mesh.parent !== idoGroup) return;
+      mesh.position.copy(p5Targets[k].targetPos);
+      mesh.quaternion.copy(p5Targets[k].targetQuat);
+    });
+  }
+}
+
+function _applyHexSection(from, t) {
+  const hexExploded  = from >= 6;
+  const hexExploding = from === 5 && t > 0;
+  icoGroup.visible    = !hexExploded && !hexExploding;
+  idoTriSolid.visible = !hexExploded && !hexExploding;
+  prolateRhombs.forEach(({ mesh, explodeDir }) => {
+    mesh.visible = from >= 5;
+    mesh.position.copy(explodeDir).multiplyScalar(
+      hexExploded ? HEX_EXPLODE_DIST : hexExploding ? t * HEX_EXPLODE_DIST : 0
+    );
+  });
+  hexDissectionGroup.visible = from >= 6;
+
+  const HEX_DISPATCH = {
+    lt6:  () => { hexDissectionPackages.forEach(({ group, stages }) => { group.visible = false; stages.forEach(s => { s.visible = false; }); }); },
+    6:    () => setHexDissectionState(0, t),
+    7:    () => setHexDissectionState(1, t),
+    8:    () => setHexDissectionState(3, t),
+    9:    () => setHexDissectionState(5, t),
+    10:   () => t > 1e-6 ? setHexDissectionState(6, t) : setHexDissectionState(5, 1),
+    11:   () => t > 1e-6 ? setHexDissectionState(7, t) : setHexDissectionState(6, 1),
+    12:   () => t > 1e-6 ? setHexDissectionState(8, t) : setHexDissectionState(7, 1),
+    gte13: () => setHexDissectionState(8, 1),
+  };
+  const hexKey = from < 6 ? 'lt6' : from <= 12 ? String(from) : 'gte13';
+  (HEX_DISPATCH[hexKey] || HEX_DISPATCH.gte13)();
+
+  prolateRhombs.forEach(({ mesh }) => {
+    const opacity = from < 6 ? 1 : from === 6 ? 1 - t : 0;
+    mesh.material.opacity = opacity;
+    mesh.visible = from >= 5 && opacity > 1e-4;
+  });
+  hexRectGroup.visible = false;
+}
+
+const RT_STAGE_HANDLERS = {
+  14: (t, ctx) => {
+    const { rtOblateRightDeltaLocal } = ctx;
+    if (t > 1e-6) setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 0, t);
+    else ctx._hidePackages(rtProlateDissectionPackages);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 1 - t);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  15: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 1, t);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  16: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 3, t);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  17: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 5, t);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  18: (t, ctx) => {
+    if (t > 1e-6) setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 6, t);
+    else setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 5, 1);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  19: (t, ctx) => {
+    if (t > 1e-6) setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, t);
+    else setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 6, 1);
+    ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1);
+  },
+  20: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    if (t > 1e-6) setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 0, t);
+    else ctx._hidePackages(rtOblateDissectionPackages);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 1 - t);
+  },
+  21: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 1, t);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  22: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 3, t);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  23: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 5, t);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  24: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    if (t > 1e-6) setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 6, t);
+    else setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 5, 1);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  25: (t, ctx) => {
+    setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+    if (t > 1e-6) setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 7, t);
+    else setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 6, 1);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  26: (t, ctx) => {
+    if (t > 1e-6) {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 8, t);
+      setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 8, t);
+    } else {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 7, 1);
+      setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 7, 1);
+    }
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  27: (t, ctx) => {
+    const rtMacroLayout = getRTMacroLayout();
+    if (t > 1e-6) {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 9, t, rtMacroLayout.prolateOrigin, rtProlateMacroUnitDims, rtFamilyMacroSlots);
+      setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 9, t, rtMacroLayout.oblateOrigin, rtOblateMacroUnitDims, rtFamilyMacroSlots);
+    } else {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 8, 1);
+      setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 8, 1);
+    }
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+  28: (t, ctx) => {
+    const rtMacroLayout = getRTMacroLayout();
+    if (t > 1e-6) {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 10, t, rtMacroLayout.prolateOrigin, rtProlateMacroUnitDims, rtFamilyMacroSlots);
+    } else {
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 9, 1, rtMacroLayout.prolateOrigin, rtProlateMacroUnitDims, rtFamilyMacroSlots);
+    }
+    setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 9, 1, rtMacroLayout.oblateOrigin, rtOblateMacroUnitDims, rtFamilyMacroSlots);
+    ctx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+    ctx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+  },
+};
+
+function applyVisuals(from, t) {
+  // Shared setup: reset late-stage comb groups to base positions
+  combStep1A.group.visible = false;
+  combStep1B.group.visible = false;
+  combStep3A.group.visible = false;
+  combStep3B.group.visible = false;
+  combStep1A.group.position.copy(combStep1A.group.userData.basePosition);
+  combStep1B.group.position.copy(combStep1B.group.userData.basePosition);
+  combStep3A.group.position.copy(combStep3A.group.userData.basePosition);
+  combStep3B.group.position.copy(combStep3B.group.userData.basePosition);
+  const lateSlotLayout = getLateStageSlotLayout();
+  const leftDeltaComb1A = worldDeltaToParentLocal(combStep1A.group, lateSlotLayout.leftDeltaWorld);
+  const leftDeltaComb1B = worldDeltaToParentLocal(combStep1B.group, lateSlotLayout.leftDeltaWorld);
+  const leftDeltaComb3A = worldDeltaToParentLocal(combStep3A.group, lateSlotLayout.leftDeltaWorld);
+  const leftDeltaComb3B = worldDeltaToParentLocal(combStep3B.group, lateSlotLayout.leftDeltaWorld);
+  const hexLeftDeltaLocal = worldDeltaToParentLocal(hexDissectionGroup, lateSlotLayout.leftDeltaWorld);
+  const rtProlateLeftDeltaLocal = worldDeltaToParentLocal(rtProlateDissectionPackages[0].group, lateSlotLayout.leftDeltaWorld);
+  const rtProlateCenterDeltaLocal = worldDeltaToParentLocal(rtProlateDissectionPackages[0].group, lateSlotLayout.centerDeltaWorld);
+  const rtOblateRightDeltaLocal = worldDeltaToParentLocal(rtOblateDissectionPackages[0].group, lateSlotLayout.rightDeltaWorld);
+
+  // --- Ico pyramids (steps 0→1: explode, 1→2: transfer, 2+: settled) ---
+  _applyIcoPyramids(from, t);
+
+  // --- P5 pyramids (visible from step 2 onward) ---
+  _applyP5Pyramids(from, t);
+
+  // --- Stage slide (step 4→5) ---
+  const st = from < 4 ? 0 : from === 4 ? t : 1;
+  icoGroup.position.x        = THREE.MathUtils.lerp(-SPACING,  -2*SPACING, st);
+  idoGroup.position.x        = THREE.MathUtils.lerp(0,         -SPACING,   st);
+  hexRhomboGroup.position.x  = THREE.MathUtils.lerp(0,         -SPACING,   st);
+  hexDissectionGroup.position.x = hexRhomboGroup.position.x;
+  hexRectGroup.position.x    = hexRhomboGroup.position.x;
+  rtRectGroup.position.x     = rtRhomboGroup.position.x;
+  rtShell.visible  = from >= 5;
+  dodGroup.visible = from <= 4;
+
+  // --- Hex rhombohedra (steps 5–12) ---
+  _applyHexSection(from, t);
+
+  // --- RT rhombohedra / dissections (steps 13–28) ---
+  const rtExploded  = from >= 14;
+  const rtExploding = from === 13 && t > 0;
+  if (from >= 5) rtShell.visible = !rtExploded && !rtExploding;
+  zonoRhombs.forEach(({ mesh, explodeDir }) => {
+    mesh.visible = rtExploded || rtExploding;
+    mesh.position.copy(explodeDir).multiplyScalar(
+      rtExploded ? RT_EXPLODE_DIST : rtExploding ? t * RT_EXPLODE_DIST : 0
+    );
+    mesh.material.opacity = 1;
+  });
+  rtRectGroup.visible = false;
+  rtDissectionGroup.visible = from >= 14;
+  if (from < 14) {
+    [...rtProlateDissectionPackages, ...rtOblateDissectionPackages].forEach(({ group, stages, assemblyStage }) => {
+      group.visible = false;
+      stages.forEach(stage => { stage.visible = false; });
+      assemblyStage.visible = false;
+    });
+  } else {
+    const rtCtx = {
+      rtOblateRightDeltaLocal,
+      _hidePackages: pkgs => pkgs.forEach(({ group }) => { group.visible = false; }),
+      _setRhombFamilyOpacity: (family, opacity) => {
+        family.forEach(({ mesh }) => {
+          mesh.material.opacity = opacity;
+          mesh.visible = opacity > 1e-4;
+        });
+      },
+    };
+    if (RT_STAGE_HANDLERS[from]) {
+      RT_STAGE_HANDLERS[from](t, rtCtx);
+    } else {
+      // from >= 29: RT fully assembled
+      const rtMacroLayout = getRTMacroLayout();
+      setRTFamilyDissectionState(rtProlateDissectionPackages, rtProlateRhombs, 10, 1, rtMacroLayout.prolateOrigin, rtProlateMacroUnitDims, rtFamilyMacroSlots);
+      setRTFamilyDissectionState(rtOblateDissectionPackages, rtOblateRhombs, 9, 1, rtMacroLayout.oblateOrigin, rtOblateMacroUnitDims, rtFamilyMacroSlots);
+      rtCtx._setRhombFamilyOpacity(rtProlateRhombs, 0);
+      rtCtx._setRhombFamilyOpacity(rtOblateRhombs, 0);
+    }
+  }
+
+  // --- Late stage (steps 29–34) ---
+  const step1AActive = from >= 29;
+  const step1BActive = from >= 30;
+  if (step1AActive) {
+    combStep1A.setT(from > 29 ? 1 : t);
+    hexDissectionGroup.visible = false;
+    rtProlateDissectionPackages.forEach(({ group }) => { group.visible = false; });
+  }
+  if (step1BActive) {
+    combStep1B.setT(from > 30 ? 1 : t);
+    hexDissectionGroup.visible = false;
+    rtProlateDissectionPackages.forEach(({ group }) => { group.visible = false; });
+    combStep1A.group.visible = false;
+  }
+  if (from >= 31) {
+    const step2Pose = getRTOblateStep2Pose();
+    const translateT = from === 31 ? t : from > 31 ? 1 : 0;
+    rtOblateDissectionPackages.forEach((pkg, idx) => {
+      const basePose = getRTPackedPose({
+        assembledBlockFrame: pkg.assembledBlockFrame,
+        assembledBlockAnchorPointLocal: pkg.assembledBlockAnchorPointLocal,
+      }, idx, step2Pose.layout.oblateOrigin, rtOblateMacroUnitDims, rtFamilyMacroSlots);
+      pkg.group.position.copy(basePose.position)
+        .add(rtOblateRightDeltaLocal)
+        .addScaledVector(step2Pose.translateDelta, translateT);
+      pkg.group.quaternion.copy(basePose.quaternion);
+    });
+  }
+  const step3AActive = (from === 32 && t > 1e-6) || from === 33;
+  const step3BActive = (from === 33 && t > 1e-6) || from > 33;
+  if (step3AActive) {
+    combStep3A.setT(from > 32 ? 1 : t);
+    combStep1B.group.visible = false;
+    rtOblateDissectionPackages.forEach(({ group }) => { group.visible = false; });
+  }
+  if (step3BActive) {
+    combStep3B.setT(from > 33 ? 1 : t);
+    combStep3A.group.visible = false;
+    combStep1B.group.visible = false;
+    rtOblateDissectionPackages.forEach(({ group }) => { group.visible = false; });
+  }
+
+  // --- Position adjustments (steps 27–29) ---
+  if (from === 27) {
+    hexDissectionGroup.position.addScaledVector(hexLeftDeltaLocal, t);
+    rtProlateDissectionPackages.forEach(({ group }) => {
+      group.position.addScaledVector(rtProlateCenterDeltaLocal, t);
+    });
+    rtOblateDissectionPackages.forEach(({ group }) => {
+      group.position.addScaledVector(rtOblateRightDeltaLocal, t);
+    });
+  } else if (from === 28) {
+    hexDissectionGroup.position.add(hexLeftDeltaLocal);
+    rtProlateDissectionPackages.forEach(({ group }) => {
+      group.position.add(rtProlateCenterDeltaLocal.clone().lerp(rtProlateLeftDeltaLocal, t));
+    });
+    rtOblateDissectionPackages.forEach(({ group }) => {
+      group.position.add(rtOblateRightDeltaLocal);
+    });
+  }
+
+  if (from >= 29) {
+    combStep1A.group.position.add(leftDeltaComb1A);
+    combStep1B.group.position.add(leftDeltaComb1B);
+    combStep3A.group.position.add(leftDeltaComb3A);
+    combStep3B.group.position.add(leftDeltaComb3B);
+  }
+  if (from === 29 || from === 30) {
+    rtOblateDissectionPackages.forEach(({ group }) => {
+      group.position.add(rtOblateRightDeltaLocal);
+    });
+  }
+}
+
+function onStepChange(s) {
+  // Re-parent P5 pyramids
+  if (s >= 5) {
+    idoPyramids.forEach(({ mesh }) => { if (mesh.parent === idoGroup) dodGroup.attach(mesh); });
+  } else {
+    idoPyramids.forEach(({ mesh }) => { if (mesh.parent === dodGroup) idoGroup.attach(mesh); });
+  }
+
+  // Label updates
+  labelEls[0].style.display = s < 5 ? '' : 'none';
+  const usePrismLabels = s >= 28;
+  labelEls[1].style.display = usePrismLabels ? 'none' : '';
+  labelEls[2].style.display = usePrismLabels ? 'none' : '';
+  if (s >= 5) {
+    const hexRole = s >= 13
+      ? s >= 34
+        ? '= contributes to final cube'
+        : s >= 33
+          ? '= contributes to Step 3A block B₂'
+        : s >= 32
+          ? '= contributes to final Step 2 block'
+        : s >= 31
+          ? '= contributes to Step 1 prism P₁′'
+        : s >= 30
+          ? '= contributes to Step 1A prism P₁'
+        : '= 1 large 2×2×5 prism'
+      : s === 12
+        ? '= 20 local 1×2×3 prism blocks'
+        : s === 11
+          ? '= 120 axis-aligned rectangular prisms'
+          : s === 10
+            ? '= 120 rectangular prisms'
+            : s === 9
+        ? '= 120 parallelogram prisms'
+        : s === 8
+          ? '= 120 triangular prisms'
+          : s === 7
+            ? '= 120 Hill tetrahedra'
+            : '= 20 prolate rhombohedra';
+    const rtRole = s >= 26
+      ? s === 26
+        ? '= 20 local 1×2×3 prism blocks'
+        : s === 27
+          ? '= 20 rotated local 1×2×3 prism blocks'
+          : s === 28
+            ? '= 2 separate 1×2×5 prisms'
+            : s === 29
+              ? '= stacked hex + RT prolate prisms, plus 1 oblate 1×2×5 prism'
+              : s === 30
+                ? '= Step 1A prism B₁, plus 1 oblate 1×2×5 prism'
+                : s === 31
+                  ? '= Step 1 prism P₁′, plus 1 oblate 1×2×5 prism'
+                  : s === 32
+                    ? '= final Step 2 block'
+                    : s === 33
+                      ? '= Step 3A block B₂'
+                      : '= cube'
+      : s === 25
+        ? '= 10 local prolate blocks + 60 axis-aligned oblate prisms'
+        : s === 24
+          ? '= 10 local prolate blocks + 60 oblate rectangular prisms'
+          : s === 23
+            ? '= 10 local prolate blocks + 60 oblate parallelogram prisms'
+            : s === 22
+              ? '= 10 local prolate blocks + 60 oblate triangular prisms'
+              : s === 21
+                ? '= 10 local prolate blocks + 60 oblate Hill tetrahedra'
+                : s === 20
+                  ? '= 10 local prolate 1×2×3 blocks + 10 oblate rhombohedra'
+                  : s === 19
+                    ? '= 60 axis-aligned prolate prisms + 10 oblate rhombohedra'
+                    : s === 18
+                      ? '= 60 prolate rectangular prisms + 10 oblate rhombohedra'
+                      : s === 17
+                        ? '= 60 prolate parallelogram prisms + 10 oblate rhombohedra'
+                        : s === 16
+                          ? '= 60 prolate triangular prisms + 10 oblate rhombohedra'
+                          : s === 15
+                            ? '= 60 prolate Hill tetrahedra + 10 oblate rhombohedra'
+                            : '= 10 prolate + 10 oblate rhombohedra';
+    if (!usePrismLabels) {
+      labelEls[1].innerHTML =
+        '<div class="name">Rhombic Hexecontahedron</div>' +
+        '<div class="faces">60 rhombic faces</div>' +
+        `<div class="role">${hexRole}</div>`;
+      labelEls[2].innerHTML =
+        '<div class="name">Rhombic Triacontahedron</div>' +
+        '<div class="faces">30 rhombic faces</div>' +
+        `<div class="role">${rtRole}</div>`;
+    }
+  } else {
+    labelEls[1].style.display = '';
+    labelEls[2].style.display = '';
+    labelEls[1].innerHTML =
+      '<div class="name">Icosidodecahedron</div>' +
+      '<div class="faces">20 \u25b3  + 12 \u2b20  faces</div>' +
+      '<div class="role">\u2190 receives P3A \u00b7 donates P5 \u2192</div>';
+    labelEls[2].innerHTML =
+      '<div class="name">Dodecahedron</div>' +
+      '<div class="faces">12 \u2b20  faces</div>' +
+      '<div class="role">\u2190 receives 12 \u00d7 P5</div>';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Render loop
+// ---------------------------------------------------------------------------
+
+const _q0 = new THREE.Quaternion(); // identity, reused
+const _xAxis = new THREE.Vector3(1, 0, 0);
+const _zAxis = new THREE.Vector3(0, 0, 1);
+
+function render() {
+  requestAnimationFrame(render);
+
+  if (animDir !== 0) {
+    const speed = STEPS[animDir > 0 ? step : step - 1].speed;
+    animT = Math.min(1, animT + speed);
+    if (animT >= 1) {
+      step += animDir;
+      animT = 0;
+      animDir = 0;
+      onStepChange(step);
+    }
+  } else if (autoplay) {
+    if (step < STEPS.length - 1) beginStepAnimation(1);
+    else autoplay = false;
+  }
+
+  const from = animDir < 0 ? step - 1 : step;
+  const t    = animDir < 0 ? 1 - easeInOut(animT) : easeInOut(animT);
+  applyVisuals(from, animDir !== 0 ? t : 0);
+
+  const lbl = STEPS[step];
+  const controlsIdle = animDir === 0 && !autoplay;
+  btnBack.style.visibility = (lbl.back && controlsIdle) ? 'visible' : 'hidden';
+  btnNext.style.visibility = (lbl.next && controlsIdle) ? 'visible' : 'hidden';
+  btnPlayAll.textContent = autoplay ? 'Stop Playback' : 'Play All';
+  if (animDir === 0) {
+    if (lbl.back) btnBack.textContent = lbl.back;
+    if (lbl.next) btnNext.textContent = lbl.next;
+  }
+  refreshStageMenu();
+
+  controls.update();
+  renderer.render(scene, camera);
+  updateLabels();
+}
+render();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

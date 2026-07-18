@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raindrop Display</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.181.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.181.1/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="stage">
+        <canvas id="scene"></canvas>
+        <canvas id="overlay"></canvas>
+      </div>
+      <aside class="panel">
+        <div>
+          <p class="eyebrow">Raindrop Display</p>
+          <h1>Periodic ripple image synthesis</h1>
+          <p class="intro">
+            A repeating schedule of raindrop impacts drives a damped wave field.
+            The image appears when the loop reaches the chosen snapshot phase.
+          </p>
+        </div>
+
+        <section class="group">
+          <div class="row">
+            <label for="period">Loop period</label>
+            <output id="periodValue">4.00s</output>
+          </div>
+          <input id="period" type="range" min="2" max="8" step="0.1" value="4" />
+
+          <div class="row">
+            <label for="snapshot">Snapshot phase</label>
+            <output id="snapshotValue">0.72</output>
+          </div>
+          <input id="snapshot" type="range" min="0.1" max="0.95" step="0.01" value="0.72" />
+
+          <div class="row">
+            <label for="impacts">Max impacts</label>
+            <output id="impactsValue">18</output>
+          </div>
+          <input id="impacts" type="range" min="4" max="128" step="1" value="18" />
+
+          <div class="row">
+            <label for="damping">Damping</label>
+            <output id="dampingValue">0.25</output>
+          </div>
+          <input id="damping" type="range" min="0.05" max="0.6" step="0.01" value="0.25" />
+
+          <div class="row">
+            <label for="wavespeed">Wave speed</label>
+            <output id="wavespeedValue">0.34</output>
+          </div>
+          <input id="wavespeed" type="range" min="0.15" max="0.65" step="0.01" value="0.34" />
+
+          <div class="row">
+            <label for="slowWidth">Ease zone</label>
+            <output id="slowWidthValue">0.18</output>
+          </div>
+          <input id="slowWidth" type="range" min="0.02" max="0.45" step="0.01" value="0.18" />
+
+          <div class="row">
+            <label for="slowStrength">Hold amount</label>
+            <output id="slowStrengthValue">0.65</output>
+          </div>
+          <input id="slowStrength" type="range" min="0" max="0.95" step="0.01" value="0.65" />
+        </section>
+
+        <section class="group">
+          <div class="row">
+            <label for="viewMode">Display mode</label>
+            <select id="viewMode">
+              <option value="surface">Surface</option>
+              <option value="target">Target</option>
+              <option value="reconstruction">Optimizer preview</option>
+              <option value="difference">Difference</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label for="showMarkers">Show impact markers</label>
+            <input id="showMarkers" type="checkbox" checked />
+          </div>
+
+          <div class="row">
+            <label for="resetCamera">3D camera</label>
+            <button id="resetCamera" type="button">Reset view</button>
+          </div>
+
+          <div class="row">
+            <label for="autoplay">Autoplay loop</label>
+            <input id="autoplay" type="checkbox" checked />
+          </div>
+
+          <div class="row">
+            <label for="phaseControl">Manual phase</label>
+            <output id="phaseControlValue">0.00</output>
+          </div>
+          <input id="phaseControl" type="range" min="0" max="1" step="0.01" value="0" />
+
+          <div class="row">
+            <label for="imageUpload">Target image</label>
+            <input id="imageUpload" type="file" accept="image/*" />
+          </div>
+
+          <div class="row">
+            <label for="offlineUpload">Offline solve JSON</label>
+            <input id="offlineUpload" type="file" accept=".json,application/json" />
+          </div>
+
+          <button id="recompute">Recompute schedule</button>
+          <button id="clearCache" type="button">Clear cache</button>
+        </section>
+
+        <section class="group stats">
+          <div class="stat">
+            <span>Loop phase</span>
+            <strong id="phaseLabel">0.00</strong>
+          </div>
+          <div class="stat">
+            <span>Predicted error</span>
+            <strong id="errorLabel">0.000</strong>
+          </div>
+          <div class="stat">
+            <span>Active impacts</span>
+            <strong id="activeLabel">0</strong>
+          </div>
+        </section>
+
+        <section class="group">
+          <canvas id="targetPreview" width="160" height="160"></canvas>
+          <p class="caption">
+            The optimizer solves for ripple events that approximate this grayscale
+            target at the snapshot phase.
+          </p>
+        </section>
+
+        <section class="group">
+          <p class="caption">
+            Run this app from a simple local static server such as
+            <code>python3 -m http.server</code> in this folder. No npm step is
+            required.
+          </p>
+        </section>
+      </aside>
+    </div>
+  </body>
+</html>

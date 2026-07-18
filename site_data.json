@@ -374,6 +374,21 @@
     "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
     "items": [
       {
+        "title": "Optical Mosaic",
+        "image": "static/optical_mosaic.png",
+        "url": "optical-mosaic"
+      },
+      {
+        "title": "Raindrop Display",
+        "image": "static/raindrop.png",
+        "url": "raindrop-display"
+      },
+      {
+        "title": "3D Scissors Congruence",
+        "image": "static/scissors.png",
+        "url": "scissors-congruence"
+      },
+      {
         "title": "Tangram Generator",
         "image": "static/tangram.gif",
         "url": "dissect"
