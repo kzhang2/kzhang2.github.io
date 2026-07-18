@@ -3957,16 +3957,7 @@ void main() {
     <canvas class="viewport"></canvas>
     <div class="hud">
       <p class="eyebrow">Apparatus sim</p>
-      <h1>Step 7: Optical Mosaic</h1>
-      <p class="copy">
-        The print is the raw image; the mosaic is made of light. Stage
-        one combines the print with its lenslet replicas at a fixed
-        50/50; stage two is the crank-driven polarization crossfade and
-        zoom relay. The screen is backward-ray-traced through the whole
-        train — four paths per pixel, including replicas of replicas.
-        The bench relays out of the grid: odd grids only, or the wrap
-        lands on a lenslet corner.
-      </p>
+      <h1>Optical Mosaic</h1>
       <p class="keys">
         [space] motor on/off &nbsp; [&uarr;]/[&darr;] hand-crank &nbsp;
         [i] switch source &nbsp; drag orbit &nbsp; scroll dolly
