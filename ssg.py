@@ -324,12 +324,21 @@ def generate_html_page(data):
         <h4><b>Publications</b> (* indicates equal contribution)</h4>
         {publications_html}
     </section>
+    <section>
+        <div class="dropdown-container" style="margin-bottom: 20px;">
+            <button class="btn btn-outline-secondary" type="button" id="funSectionButton" data-toggle="collapse" data-target="#funSection" aria-expanded="false" aria-controls="funSection">
+                Show Fun
+            </button>
+        </div>
+        <div class="collapse" id="funSection">
     {articles_html and f'<section>{articles_html}</section>' or ''}
     <section>
         <h4><b>Side Projects</b></h4>
         {projects_html}
     </section>
     {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
+        </div>
+    </section>
     <section>
         <br>
         {inspiration_html}
@@ -353,6 +362,15 @@ def generate_html_page(data):
                         $(this).text('Hide Additional Publications');
                     } else {
                         $(this).text('Show Additional Publications');
+                    }
+                });
+
+                $('#funSectionButton').text('Show Fun');
+                $('#funSectionButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Fun');
+                    } else {
+                        $(this).text('Show Fun');
                     }
                 });
             });

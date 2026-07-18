@@ -374,6 +374,13 @@
     </div>
     
     </section>
+    <section>
+        <div class="dropdown-container" style="margin-bottom: 20px;">
+            <button class="btn btn-outline-secondary" type="button" id="funSectionButton" data-toggle="collapse" data-target="#funSection" aria-expanded="false" aria-controls="funSection">
+                Show Fun
+            </button>
+        </div>
+        <div class="collapse" id="funSection">
     <section><h4><b>Articles</b></h4>
         <div class="row align-items-center publication-row">
             
@@ -530,6 +537,8 @@
         </div>
     </div>
     </section>
+        </div>
+    </section>
     <section>
         <br>
         <p>Site design inspired by <a href="https://haozhi.io/">Haozhi Qi</a>, <a href="https://github.com/orderedlist/minimal">orderedlist</a>.</p>
@@ -551,6 +560,15 @@
                         $(this).text('Hide Additional Publications');
                     } else {
                         $(this).text('Show Additional Publications');
+                    }
+                });
+
+                $('#funSectionButton').text('Show Fun');
+                $('#funSectionButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Fun');
+                    } else {
+                        $(this).text('Show Fun');
                     }
                 });
             });
