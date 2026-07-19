@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<link rel="stylesheet" href="styles.css">
+<title> CS284A Final Project | Proposal </title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+  <!-- src: https://www.w3schools.com/howto/howto_js_topnav.asp -->
+  <div class="topnav">
+	  <a class="active" href=".">Proposal</a>
+	  <a href="./milestone.html">Milestone</a>
+	  <a href="./final.html">Final</a>
+  <a href="./index.html">Demo</a>
+</div>
+
+  <div>
+<h1 align="middle">CS 184/284A Final Project Proposal: 2D Smoke Simulator on the Surface of 3D Manifolds</h1>
+	<h2 align="middle">Kevin Zhang (184), Charles Sun (184), Catherine Cang (184), Alex Kassil (284A) </h2>
+	<div align="middle">
+	  <h3> Project Summary </h3>
+
+	  <p>
+		Traditional smoke simulators model smoke on a 2D plane. We plan to explore creating simulating smoke on a torus, klein bottle, and curved space (e.g. hyperbolic space). 
+
+	  </p>
+	  
+	</div>
+    <h2 align="middle">Problem Description</h2>
+	<p> <b>Problem:</b> Our problem is how to do physically accurate smoke simulations on manifolds, which are surfaces like the plane, in three dimensions. </p>
+	
+	<p> <b> Why is it important:</b> It’s a step in the direction of allowing people to do physical simulations on more exotic spaces in 3 dimensions. Some applications could be making games which utilize exotic geometries in their mechanics. </p>
+	
+	<p> <b> Where it is challenging:</b> This project is challenging because in order to simulate smoke efficiently we need to be able to solve the navier stokes equations quickly. Furthermore, we need to render the smoke in 3 dimensions on surfaces with nontrivial geometries. </p>
+	<p> <b>How we are going to solve it:</b> Simulate the physics in two dimensions and map the resulting 2d positions onto the manifold in 3d space with the natural smooth map. </p>
+
+
+    <h2 align="middle">Goals and Deliverables</h2>
+
+	<h3 align="middle"> What we plan to deliver:</h3>
+	<p><b>Main Deliverable:</b> Our goal is to create an interactive smoke simulator system, where the user can define several parameters, and simulate smoke by dragging and clicking their mouse. Clicking the mouse defines where the smoke originates from, and dragging the mouse affects the velocity of the smoke. The parameters specific to the smoke being simulated include density and temperature. For our geometric extension, we will have an additional parameter indicating the manifold that the smoke simulator will be simulated over. The options will be torus, klein bottle, mobius strip, and hyperbolic space. </p>
+
+	<p><b>Measuring performance:</b> We hope that our simulator will perform at real-time speeds, because it is interactive. We will run tests on our system for how fast we can compute the outputs for different inputs to test the speed. We will make qualitative analyses based on how the smoke simulations look for each manifold.</p>
+
+	<h3 align="middle"> What we we hope to deliver:</h3>
+	<p>In addition to our main deliverable, we have several interesting extensions in mind. First, we can add an additional 3D visualization of each of the geometries alongside the 2D plane visualization. This will show the non-embedded view of the manifold from an outside camera view (for example, a torus filled with smoke). Second, we can add extra sliders that will change parameters that define each manifold’s geometry (e.g. the radius or curvature).<p>
+
+
+    <h2 align="middle">Schedule</h2>
+
+	  <h3> Week 1 Tasks</h3>
+	  <ol>
+		<li>Set up the infrastructure for our codebase.</li>
+		<li>Implement all of the Navier Stokes approximation equations.</li>
+	  </ol>
+	  
+	  <h3> Week 2 Tasks</h3>
+	  <ol>
+		<li>Successfully visualize the smoke simulator in the normal, flat plane.</li>
+		<li>Implement the modifications to our physics simulation for circulating smoke inside a torus.</li>
+	  </ol>
+
+	  <h3> Week 3 Tasks</h3>
+	  <ol>
+		<li>Implement the modifications to our physics simulation for circulating smoke inside the rest of the manifolds.</li>
+		<li>Begin collecting demonstrations and visualizations.</li>
+		<li>Begin the writeup.</li>
+	  </ol>
+
+	  <h3> Week 4 Tasks</h3>
+	  <ol>
+		<li>Finish collecting the demonstrations and visualizations.</li>
+		<li>Finish the writeup.</li>
+	  </ol>
+	  
+
+	  
+      <h2 align="middle">Resources and References</h2>
+	  <ul>
+		<li>https://gamedevelopment.tutsplus.com/tutorials/how-to-write-a-smoke-shader--cms-25587 </li>
+		<li>Elements of Differential Geometry- Millman </li>
+		<li>http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch38.html </li>
+		<li>https://developer.nvidia.com/gpugems/gpugems3/part-v-physics-simulation/chapter-30-real-time-simulation-and-rendering-3d-fluids </li>
+		<li>https://web.stanford.edu/class/cs237d/smoke.pdf</li>
+	  </ul>
+	  
+
+    <!-- <div align="middle">
+            <table style="width=100%">
+                <tr>
+                  <td>
+					<figure>
+                      <img src="images/CBSpheres_m0_s256_l16.png"/>
+                      <figcaption align="middle"><code>./pathtracer -t 8 -r 480 360 -m 0 -s 256 -l 16 ../dae/sky/CBSpheres.dae</code> <br> Cornell Box Spheres with ray depth 0, 256 camera rays per pixel, and 16 samples per area light <br> 0 bounce illumination, so only see light source</figcaption>
+					</figure>
+				  </td>
+                  <td>
+					<figure>
+                      <img src="images/CBSpheres_m1_s256_l16.png"/>
+                      <figcaption align="middle"><code>./pathtracer -t 8 -r 480 360 -m 1 -s 256 -l 16 ../dae/sky/CBSpheres.dae</code> <br> Cornell Box Spheres with ray depth 1, 256 camera rays per pixel, and 16 samples per area light <br> 1 bounce - direct illumination, see walls and light reflect off of spheres</figcaption>
+					</figure>
+				  </td>
+                </tr>
+            </table>
+		</div> -->
+					
+
+</div>
+</body>
+</html>

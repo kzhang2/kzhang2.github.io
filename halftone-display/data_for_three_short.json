@@ -1,0 +1,31 @@
+{
+    "data": [
+        {
+            "light_angle": 0.5235987755982988,
+            "light_offset": [
+                -1.0,
+                0.0,
+                -1.7320508075688772
+            ],
+            "scene_path": "scene_0_merged.glb"
+        },
+        {
+            "light_angle": 0,
+            "light_offset": [
+                0.0,
+                0.0,
+                -2.0
+            ],
+            "scene_path": "scene_1_merged.glb"
+        },
+        {
+            "light_angle": -0.5235987755982988,
+            "light_offset": [
+                1.0,
+                0.0,
+                -1.7320508075688772
+            ],
+            "scene_path": "scene_2_merged.glb"
+        }
+    ]
+}

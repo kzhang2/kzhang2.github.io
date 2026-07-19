@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.obj
+*.gltf
+*.glb
+*.txt
+*.png
+*.npy
+*.json
+
+!data_for_three_short.json
