@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neural World Model</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "onnxruntime-web/webgpu": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.webgpu.mjs"
+        }
+      }
+    </script>
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="stage">
+        <canvas id="frame" width="64" height="64"></canvas>
+        <div id="overlay" class="overlay"></div>
+      </div>
+
+      <aside class="panel">
+        <p class="eyebrow">Neural World Model</p>
+        <div class="row buttons">
+          <button id="play">▶ Play</button>
+          <button id="step">⏭ Step</button>
+          <button id="reset">⟳ New start</button>
+        </div>
+
+        <section class="group">
+          <div class="row">
+            <label for="fps">Speed (fps)</label>
+            <output id="fpsValue">8</output>
+          </div>
+          <input id="fps" type="range" min="1" max="30" step="1" value="8" />
+
+          <div class="row">
+            <label for="steps">Denoising steps</label>
+            <output id="stepsValue">3</output>
+          </div>
+          <input id="steps" type="range" min="1" max="3" step="1" value="3" />
+          <p class="note">Fewer steps &rarr; faster, lower fidelity.</p>
+        </section>
+
+        <div class="hud" id="hud">initializing…</div>
+        <p class="note" id="status">Loading model &amp; WebGPU…</p>
+      </aside>
+    </div>
+  </body>
+</html>

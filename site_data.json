@@ -515,6 +515,11 @@
         "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
         "items": [
             {
+                "title": "Neural World Model",
+                "image": "static/flash-world-model.gif",
+                "url": "world-model"
+            },
+            {
                 "title": "Optical Mosaic",
                 "image": "static/optical_mosaic.mp4",
                 "url": "optical-mosaic"
