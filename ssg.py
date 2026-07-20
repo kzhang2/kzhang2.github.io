@@ -151,10 +151,14 @@ def generate_projects_html(projects):
     '''
     
     for project in project_items:
+        if project["image"].endswith(".mp4"):
+            media_html = f'<video src="{project["image"]}" class="img-fluid project-image" autoplay loop muted playsinline></video>'
+        else:
+            media_html = f'<img src="{project["image"]}" class="img-fluid project-image">'
         projects_html += f'''
             <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
                 <div class="text-center">
-                    <img src="{project["image"]}" class="img-fluid project-image">
+                    {media_html}
                     <div>
                         <a class="btn btn-secondary btn-sm" href="{project["url"]}">{project["title"]}</a>
                     </div>

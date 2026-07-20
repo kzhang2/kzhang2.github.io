@@ -1,442 +1,607 @@
 {
-  "personal_info": {
-    "name": "Kevin W. Zhang",
-    "bio": "I'm a 5th year CS PhD student at the <a href=\"https://www.cs.umd.edu/people/kzhang24\">University of Maryland, College Park</a>, working with <a href=\"https://www.cs.umd.edu/~metzler/\">Christopher Metzler</a> and <a href=\"https://jbhuang0604.github.io/\">Jia-Bin Huang</a> on computer vision and computational imaging. Previously, I interned at <a href=\"https://research.adobe.com/\">Adobe Research</a> in SF, where I worked with <a href=\"https://www.dgp.toronto.edu/~hertzman/\">Aaron Hertzmann</a>, and completed a BA in Computer Science and Pure Mathematics at <a href=\"https://ls.berkeley.edu/home\">UC Berkeley</a>, advised by <a href=\"http://www.laurawaller.com/\">Laura Waller</a> and <a href=\"http://people.eecs.berkeley.edu/~mlustig/\">Michael Lustig</a>.",
-    "profile_image": "static/headshot.jpg",
-    "links": [
-      {
-        "platform": "GitHub",
-        "url": "https://github.com/kzhang2",
-        "icon": "fab fa-github"
-      },
-      {
-        "platform": "Google Scholar",
-        "url": "https://scholar.google.com/citations?user=Sm16yZ4AAAAJ&hl=en",
-        "icon": "ai ai-google-scholar-square"
-      },
-      {
-        "platform": "LinkedIn",
-        "url": "https://www.linkedin.com/in/kevin-zhang-4baa79a3/",
-        "icon": "fab fa-linkedin-in"
-      },
-      {
-        "platform": "X",
-        "url": "https://x.com/kevinzhang25",
-        "icon": "fa-brands fa-x-twitter"
-      },
-      {
-        "platform": "Goodreads",
-        "url": "https://www.goodreads.com/user/show/41379284-kevin-zhang",
-        "icon": "fab fa-goodreads-g"
-      }
+    "personal_info": {
+        "name": "Kevin W. Zhang",
+        "bio": "I'm a 5th year CS PhD student at the <a href=\"https://www.cs.umd.edu/people/kzhang24\">University of Maryland, College Park</a>, working with <a href=\"https://www.cs.umd.edu/~metzler/\">Christopher Metzler</a> and <a href=\"https://jbhuang0604.github.io/\">Jia-Bin Huang</a> on computer vision and computational imaging. Previously, I interned at <a href=\"https://research.adobe.com/\">Adobe Research</a> in SF, where I worked with <a href=\"https://www.dgp.toronto.edu/~hertzman/\">Aaron Hertzmann</a>, and completed a BA in Computer Science and Pure Mathematics at <a href=\"https://ls.berkeley.edu/home\">UC Berkeley</a>, advised by <a href=\"http://www.laurawaller.com/\">Laura Waller</a> and <a href=\"http://people.eecs.berkeley.edu/~mlustig/\">Michael Lustig</a>.",
+        "profile_image": "static/headshot.jpg",
+        "links": [
+            {
+                "platform": "GitHub",
+                "url": "https://github.com/kzhang2",
+                "icon": "fab fa-github"
+            },
+            {
+                "platform": "Google Scholar",
+                "url": "https://scholar.google.com/citations?user=Sm16yZ4AAAAJ&hl=en",
+                "icon": "ai ai-google-scholar-square"
+            },
+            {
+                "platform": "LinkedIn",
+                "url": "https://www.linkedin.com/in/kevin-zhang-4baa79a3/",
+                "icon": "fab fa-linkedin-in"
+            },
+            {
+                "platform": "X",
+                "url": "https://x.com/kevinzhang25",
+                "icon": "fa-brands fa-x-twitter"
+            },
+            {
+                "platform": "Goodreads",
+                "url": "https://www.goodreads.com/user/show/41379284-kevin-zhang",
+                "icon": "fab fa-goodreads-g"
+            }
+        ],
+        "cv_url": "static/CV.pdf",
+        "cv_date": "2025-10-21"
+    },
+    "updates": [
+        {
+            "description": "Acoustic Neural 3D Reconstruction Under Pose Drift accepted at IROS 2025. Congratulations to Tianxiang and Mohamad!",
+            "date": "2025-06"
+        },
+        {
+            "description": "Presented MaDCoW at CVPR 2025.",
+            "date": "2025-06"
+        },
+        {
+            "description": "Started a research internship on Marc Levoy's computational imaging team at Adobe.",
+            "date": "2025-05"
+        }
     ],
-    "cv_url": "static/CV.pdf",
-    "cv_date": "2025-10-21"
-  },
-  "updates": [
-    {
-      "description": "Acoustic Neural 3D Reconstruction Under Pose Drift accepted at IROS 2025. Congratulations to Tianxiang and Mohamad!",
-      "date": "2025-06"
-    },
-    {
-      "description": "Presented MaDCoW at CVPR 2025.",
-      "date": "2025-06"
-    },
-    {
-      "description": "Started a research internship on Marc Levoy's computational imaging team at Adobe.",
-      "date": "2025-05"
-    }
-  ],
-  "publications": [
-    {
-      "title": "Acoustic Neural 3D Reconstruction Under Pose Drift",
-      "authors": [
-        { "name": "Tianxiang Lin*", "url": "https://www.cs.cmu.edu/~tianxian/" },
-        { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
-        { "name": "Kevin Zhang", "url": "" },
+    "publications": [
         {
-          "name": "Adithya Pediredla",
-          "url": "https://sites.google.com/view/adithyapediredla/"
+            "title": "Acoustic Neural 3D Reconstruction Under Pose Drift",
+            "authors": [
+                {
+                    "name": "Tianxiang Lin*",
+                    "url": "https://www.cs.cmu.edu/~tianxian/"
+                },
+                {
+                    "name": "Mohamad Qadri*",
+                    "url": "https://www.cs.cmu.edu/~mqadri/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Adithya Pediredla",
+                    "url": "https://sites.google.com/view/adithyapediredla/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                },
+                {
+                    "name": "Michael Kaess",
+                    "url": "https://www.cs.cmu.edu/~kaess/"
+                }
+            ],
+            "conference": "IROS 2025",
+            "paper_url": "https://arxiv.org/abs/2503.08930",
+            "image": "static/neusis_pose.png"
         },
         {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
+            "title": "MaDCoW: Marginal Distortion Correction for Wide-Angle Photography with Arbitrary Objects",
+            "authors": [
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Jia-Bin Huang",
+                    "url": "https://jbhuang0604.github.io/"
+                },
+                {
+                    "name": "Jose Echevarria",
+                    "url": "https://www.jiechevarria.com/"
+                },
+                {
+                    "name": "Stephen DiVerdi",
+                    "url": "https://www.stephendiverdi.com/"
+                },
+                {
+                    "name": "Aaron Hertzmann",
+                    "url": "https://www.dgp.toronto.edu/~hertzman/"
+                }
+            ],
+            "conference": "CVPR 2025",
+            "paper_url": "https://openaccess.thecvf.com/content/CVPR2025/html/Zhang_MaDCoW_Marginal_Distortion_Correction_for_Wide-Angle_Photography_with_Arbitrary_Objects_CVPR_2025_paper.html",
+            "image": "static/madcow.png",
+            "important": true
         },
         {
-          "name": "Michael Kaess",
-          "url": "https://www.cs.cmu.edu/~kaess/"
+            "title": "A Scalable Training Strategy for Blind Multi-Distribution Noise Removal",
+            "authors": [
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Sakshum Kulshrestha",
+                    "url": "https://www.linkedin.com/in/sakshum-kulshrestha/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                }
+            ],
+            "conference": "IEEE TIP 2024",
+            "paper_url": "https://ieeexplore.ieee.org/document/10729723",
+            "image": "static/consistent_denoising_sample.jpg"
+        },
+        {
+            "title": "Z-Splat: Z-Axis Gaussian Splatting for Camera-Sonar Fusion",
+            "authors": [
+                {
+                    "name": "Ziyuan Qu",
+                    "url": "https://www.linkedin.com/in/quintonq/"
+                },
+                {
+                    "name": "Omkar Vengurlekar",
+                    "url": "https://www.linkedin.com/in/omkar-veng/"
+                },
+                {
+                    "name": "Mohamad Qadri",
+                    "url": "https://www.cs.cmu.edu/~mqadri/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Michael Kaess",
+                    "url": "https://www.cs.cmu.edu/~kaess/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                },
+                {
+                    "name": "Suren Jayasuriya",
+                    "url": "https://sites.google.com/asu.edu/imaging-lyceum"
+                },
+                {
+                    "name": "Adithya Pediredla",
+                    "url": "https://sites.google.com/view/adithyapediredla/"
+                }
+            ],
+            "conference": "IEEE TPAMI 2024",
+            "paper_url": "https://arxiv.org/abs/2404.04687",
+            "image": "static/z_splat_sample.png"
+        },
+        {
+            "title": "Temporally Consistent Atmospheric Turbulence Mitigation with Neural Representations",
+            "authors": [
+                {
+                    "name": "Haoming Cai*",
+                    "url": "https://www.haomingcai.com/"
+                },
+                {
+                    "name": "Jingxi Chen*",
+                    "url": "https://codingrex.github.io/"
+                },
+                {
+                    "name": "Brandon Y. Feng",
+                    "url": "https://brandonyfeng.github.io/"
+                },
+                {
+                    "name": "Weiyun Jiang",
+                    "url": "https://www.linkedin.com/in/wyjiang/"
+                },
+                {
+                    "name": "Mingyang Xie",
+                    "url": "https://mingyangx.github.io/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Cornelia Fermuller",
+                    "url": "https://users.umiacs.umd.edu/~fer/"
+                },
+                {
+                    "name": "Yiannis Aloimonos",
+                    "url": "https://users.umiacs.umd.edu/~yiannis/"
+                },
+                {
+                    "name": "Ashok Veeraraghavan",
+                    "url": "https://computationalimaging.rice.edu/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                }
+            ],
+            "conference": "NeurIPS 2024",
+            "paper_url": "https://arxiv.org/abs/2312.04679",
+            "website_url": "https://convrt-2024.github.io/",
+            "image": "static/00_Pub_23_ConVRT.png"
+        },
+        {
+            "title": "AONeuS: A Neural Rendering Framework for Acoustic-Optical Sensor Fusion",
+            "authors": [
+                {
+                    "name": "Kevin Zhang*",
+                    "url": ""
+                },
+                {
+                    "name": "Mohamad Qadri*",
+                    "url": "https://www.cs.cmu.edu/~mqadri/"
+                },
+                {
+                    "name": "Akshay Hinduja",
+                    "url": "https://akshayhinduja.github.io/"
+                },
+                {
+                    "name": "Michael Kaess",
+                    "url": "https://www.cs.cmu.edu/~kaess/"
+                },
+                {
+                    "name": "Adithya Pediredla",
+                    "url": "https://sites.google.com/view/adithyapediredla/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                }
+            ],
+            "conference": "SIGGRAPH 2024 (conference track full paper)",
+            "paper_url": "https://arxiv.org/abs/2402.03309",
+            "website_url": "https://aoneus.github.io/",
+            "image": "static/aoneus_teaser_3_2.jpg",
+            "important": true
+        },
+        {
+            "title": "Seeing the World through Your Eyes",
+            "authors": [
+                {
+                    "name": "Kevin Zhang*",
+                    "url": ""
+                },
+                {
+                    "name": "Hadi AlZayer*",
+                    "url": "https://hadizayer.github.io/"
+                },
+                {
+                    "name": "Brandon Feng",
+                    "url": "https://brandonyfeng.github.io/"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                },
+                {
+                    "name": "Jia-bin Huang",
+                    "url": "https://jbhuang0604.github.io/"
+                }
+            ],
+            "conference": "CVPR 2024 (Oral, top 0.78% of submitted papers)",
+            "paper_url": "https://arxiv.org/abs/2306.09348",
+            "website_url": "https://world-from-eyes.github.io/",
+            "press_url": "https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090",
+            "twitter_url": "https://twitter.com/akanazawa/status/1669530277289562112",
+            "image": "static/eye_pic.png",
+            "important": true
+        },
+        {
+            "title": "PAniC-3D: Stylized Single-view 3D Reconstruction from Portraits of Anime Characters",
+            "authors": [
+                {
+                    "name": "Shuhong Chen",
+                    "url": "https://shuhongchen.github.io/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Yichun Shi",
+                    "url": "https://seasonsh.github.io/"
+                },
+                {
+                    "name": "Heng Wang",
+                    "url": "https://hengcv.github.io/"
+                },
+                {
+                    "name": "Yiheng Zhu",
+                    "url": "https://www.linkedin.com/in/yihengz/"
+                },
+                {
+                    "name": "Guoxian Song",
+                    "url": "https://guoxiansong.github.io/homepage/index.html"
+                },
+                {
+                    "name": "Sizhe An",
+                    "url": "https://sizhean.github.io/"
+                },
+                {
+                    "name": "Janus \u00de\u00f3r Kristj\u00e1nsson",
+                    "url": "https://www.linkedin.com/in/janusthor/"
+                },
+                {
+                    "name": "Xiao Yang",
+                    "url": "https://www.linkedin.com/in/xiao-yang-46464934/"
+                },
+                {
+                    "name": "Matthias Zwicker",
+                    "url": "http://www.cs.umd.edu/~zwicker/"
+                }
+            ],
+            "conference": "CVPR 2023",
+            "paper_url": "https://openaccess.thecvf.com/content/CVPR2023/html/Chen_PAniC-3D_Stylized_Single-View_3D_Reconstruction_From_Portraits_of_Anime_Characters_CVPR_2023_paper.html",
+            "code_url": "https://github.com/ShuhongChen/panic3d-anime-reconstruction",
+            "image": "static/proj_panic.png"
+        },
+        {
+            "title": "MetaDIP: Accelerating Deep Image Prior with Meta Learning",
+            "authors": [
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Mingyang Xie",
+                    "url": "https://mingyangx.github.io/"
+                },
+                {
+                    "name": "Maharshi Gor",
+                    "url": "https://mgor.info/"
+                },
+                {
+                    "name": "Yi-Ting Chen",
+                    "url": "https://jamie725.github.io/website/"
+                },
+                {
+                    "name": "Yvonne Zhou",
+                    "url": "https://www.cs.umd.edu/people/skyzhou"
+                },
+                {
+                    "name": "Christopher Metzler",
+                    "url": "https://www.cs.umd.edu/~metzler/"
+                }
+            ],
+            "conference": "arXiv, 2022",
+            "paper_url": "https://arxiv.org/abs/2209.08452",
+            "image": "static/meta_dip_preview.jpg"
+        },
+        {
+            "title": "Memory-efficient Learning for High-Dimensional MRI Reconstruction",
+            "authors": [
+                {
+                    "name": "Ke Wang",
+                    "url": "https://people.eecs.berkeley.edu/~kewang/"
+                },
+                {
+                    "name": "Christopher Sandino",
+                    "url": "https://chrsandino.github.io/"
+                },
+                {
+                    "name": "Michael Kellman",
+                    "url": "https://kellman.github.io/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Shreyas Vasanawala",
+                    "url": "https://profiles.stanford.edu/shreyas-vasanawala"
+                },
+                {
+                    "name": "Jonathan I. Tamir",
+                    "url": "http://users.ece.utexas.edu/~jtamir/"
+                },
+                {
+                    "name": "Stella Yu",
+                    "url": "https://web.eecs.umich.edu/~stellayu/"
+                },
+                {
+                    "name": "Michael Lustig",
+                    "url": "http://people.eecs.berkeley.edu/~mlustig/"
+                }
+            ],
+            "conference": "MICCAI 2021",
+            "paper_url": "https://miccai2021.org/openaccess/paperlinks/2021/09/01/305-Paper2251.html",
+            "code_url": "https://github.com/mikgroup/MEL_MRI",
+            "image": "static/miccai_2021_preview.jpg"
+        },
+        {
+            "title": "Memory-efficient Learning for Large-scale Computational Imaging",
+            "authors": [
+                {
+                    "name": "Michael Kellman",
+                    "url": "https://kellman.github.io/"
+                },
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Eric Markley",
+                    "url": "https://www.linkedin.com/in/eric-markley/"
+                },
+                {
+                    "name": "Jonathan I. Tamir",
+                    "url": "http://users.ece.utexas.edu/~jtamir/"
+                },
+                {
+                    "name": "Emrah Bostan",
+                    "url": "https://emrahbostan.com/"
+                },
+                {
+                    "name": "Michael Lustig",
+                    "url": "http://people.eecs.berkeley.edu/~mlustig/"
+                },
+                {
+                    "name": "Laura Waller",
+                    "url": "http://www.laurawaller.com/"
+                }
+            ],
+            "conference": "IEEE TCI 2020",
+            "paper_url": "https://ieeexplore.ieee.org/document/9204455",
+            "code_url": "https://github.com/mikgroup/MELD",
+            "image": "static/meld.png"
+        },
+        {
+            "title": "Memory-Efficient Learning for Unrolled 3D MRI Reconstructions",
+            "authors": [
+                {
+                    "name": "Kevin Zhang*",
+                    "url": ""
+                },
+                {
+                    "name": "Michael Kellman*",
+                    "url": "https://kellman.github.io/"
+                },
+                {
+                    "name": "Jonathan I. Tamir",
+                    "url": "http://users.ece.utexas.edu/~jtamir/"
+                },
+                {
+                    "name": "Michael Lustig",
+                    "url": "http://people.eecs.berkeley.edu/~mlustig/"
+                },
+                {
+                    "name": "Laura Waller",
+                    "url": "http://www.laurawaller.com/"
+                }
+            ],
+            "conference": "ISMRM Workshop on Data Sampling and Reconstruction, 2020",
+            "paper_url": "https://www.ismrm.org/workshops/2020/Data/#:~:text=Memory%2DEfficient%20Learning%20for%20Unrolled%203D%20MRI%20Reconstructions",
+            "video_url": "https://www.youtube.com/watch?v=AypmyOlqVK8",
+            "image": "static/3d_mri.png"
+        },
+        {
+            "title": "3D fluorescence deconvolution with deep priors",
+            "authors": [
+                {
+                    "name": "Kevin Zhang",
+                    "url": ""
+                },
+                {
+                    "name": "Michael Kellman",
+                    "url": "https://kellman.github.io/"
+                },
+                {
+                    "name": "Emrah Bostan",
+                    "url": "https://emrahbostan.com/"
+                },
+                {
+                    "name": "Laura Waller",
+                    "url": "http://www.laurawaller.com/"
+                }
+            ],
+            "conference": "SPIE BiOS 2020",
+            "paper_url": "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11245/112450N/3D-fluorescence-deconvolution-with-deep-priors-Conference-Presentation/10.1117/12.2545041.short?webSyncID=ce46e9e6-ec7a-49da-b6a0-cbad059329ad&sessionGUID=883c9d90-2bc9-993c-ed26-8bead49a28535",
+            "image": "static/spie.png"
         }
-      ],
-      "conference": "IROS 2025",
-      "paper_url": "https://arxiv.org/abs/2503.08930",
-      "image": "static/neusis_pose.png"
-    },
-    {
-      "title": "MaDCoW: Marginal Distortion Correction for Wide-Angle Photography with Arbitrary Objects",
-      "authors": [
-        { "name": "Kevin Zhang", "url": "" },
-        { "name": "Jia-Bin Huang", "url": "https://jbhuang0604.github.io/" },
-        { "name": "Jose Echevarria", "url": "https://www.jiechevarria.com/" },
-        {
-          "name": "Stephen DiVerdi",
-          "url": "https://www.stephendiverdi.com/"
-        },
-        {
-          "name": "Aaron Hertzmann",
-          "url": "https://www.dgp.toronto.edu/~hertzman/"
-        }
-      ],
-      "conference": "CVPR 2025",
-      "paper_url": "https://openaccess.thecvf.com/content/CVPR2025/html/Zhang_MaDCoW_Marginal_Distortion_Correction_for_Wide-Angle_Photography_with_Arbitrary_Objects_CVPR_2025_paper.html",
-      "image": "static/madcow.png",
-      "important": true
-    },
-    {
-      "title": "A Scalable Training Strategy for Blind Multi-Distribution Noise Removal",
-      "authors": [
-        { "name": "Kevin Zhang", "url": "" },
-        {
-          "name": "Sakshum Kulshrestha",
-          "url": "https://www.linkedin.com/in/sakshum-kulshrestha/"
-        },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        }
-      ],
-      "conference": "IEEE TIP 2024",
-      "paper_url":"https://ieeexplore.ieee.org/document/10729723",
-      "image": "static/consistent_denoising_sample.jpg"
-    },
-    {
-      "title": "Z-Splat: Z-Axis Gaussian Splatting for Camera-Sonar Fusion",
-      "authors": [
-        { "name": "Ziyuan Qu", "url": "https://www.linkedin.com/in/quintonq/" },
-        {
-          "name": "Omkar Vengurlekar",
-          "url": "https://www.linkedin.com/in/omkar-veng/"
-        },
-        { "name": "Mohamad Qadri", "url": "https://www.cs.cmu.edu/~mqadri/" },
-        { "name": "Kevin Zhang", "url": "" },
-        { "name": "Michael Kaess", "url": "https://www.cs.cmu.edu/~kaess/" },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        },
-        {
-          "name": "Suren Jayasuriya",
-          "url": "https://sites.google.com/asu.edu/imaging-lyceum"
-        },
-        {
-          "name": "Adithya Pediredla",
-          "url": "https://sites.google.com/view/adithyapediredla/"
-        }
-      ],
-      "conference": "IEEE TPAMI 2024",
-      "paper_url": "https://arxiv.org/abs/2404.04687",
-      "image": "static/z_splat_sample.png"
-    },
-    {
-      "title": "Temporally Consistent Atmospheric Turbulence Mitigation with Neural Representations",
-      "authors": [
-        { "name": "Haoming Cai*", "url": "https://www.haomingcai.com/" },
-        { "name": "Jingxi Chen*", "url": "https://codingrex.github.io/" },
-        { "name": "Brandon Y. Feng", "url": "https://brandonyfeng.github.io/" },
-        {
-          "name": "Weiyun Jiang",
-          "url": "https://www.linkedin.com/in/wyjiang/"
-        },
-        { "name": "Mingyang Xie", "url": "https://mingyangx.github.io/" },
-        { "name": "Kevin Zhang", "url": "" },
-        {
-          "name": "Cornelia Fermuller",
-          "url": "https://users.umiacs.umd.edu/~fer/"
-        },
-        {
-          "name": "Yiannis Aloimonos",
-          "url": "https://users.umiacs.umd.edu/~yiannis/"
-        },
-        {
-          "name": "Ashok Veeraraghavan",
-          "url": "https://computationalimaging.rice.edu/"
-        },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        }
-      ],
-      "conference": "NeurIPS 2024",
-      "paper_url": "https://arxiv.org/abs/2312.04679",
-      "website_url": "https://convrt-2024.github.io/",
-      "image": "static/00_Pub_23_ConVRT.png"
-    },
-    {
-      "title": "AONeuS: A Neural Rendering Framework for Acoustic-Optical Sensor Fusion",
-      "authors": [
-        { "name": "Kevin Zhang*", "url": "" },
-        { "name": "Mohamad Qadri*", "url": "https://www.cs.cmu.edu/~mqadri/" },
-        { "name": "Akshay Hinduja", "url": "https://akshayhinduja.github.io/" },
-        { "name": "Michael Kaess", "url": "https://www.cs.cmu.edu/~kaess/" },
-        {
-          "name": "Adithya Pediredla",
-          "url": "https://sites.google.com/view/adithyapediredla/"
-        },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        }
-      ],
-      "conference": "SIGGRAPH 2024 (conference track full paper)",
-      "paper_url": "https://arxiv.org/abs/2402.03309",
-      "website_url": "https://aoneus.github.io/",
-      "image": "static/aoneus_teaser_3_2.jpg",
-      "important": true
-    },
-    {
-      "title": "Seeing the World through Your Eyes",
-      "authors": [
-        { "name": "Kevin Zhang*", "url": "" },
-        { "name": "Hadi AlZayer*", "url": "https://hadizayer.github.io/" },
-        { "name": "Brandon Feng", "url": "https://brandonyfeng.github.io/" },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        },
-        { "name": "Jia-bin Huang", "url": "https://jbhuang0604.github.io/" }
-      ],
-      "conference": "CVPR 2024 (Oral, top 0.78% of submitted papers)",
-      "paper_url": "https://arxiv.org/abs/2306.09348",
-      "website_url": "https://world-from-eyes.github.io/",
-      "press_url": "https://gizmodo.com/eye-reflections-3d-reconstructions-experiment-1850586090",
-      "twitter_url": "https://twitter.com/akanazawa/status/1669530277289562112",
-      "image": "static/eye_pic.png",
-      "important": true
-    },
-    {
-      "title": "PAniC-3D: Stylized Single-view 3D Reconstruction from Portraits of Anime Characters",
-      "authors": [
-        { "name": "Shuhong Chen", "url": "https://shuhongchen.github.io/" },
-        { "name": "Kevin Zhang", "url": "" },
-        { "name": "Yichun Shi", "url": "https://seasonsh.github.io/" },
-        { "name": "Heng Wang", "url": "https://hengcv.github.io/" },
-        { "name": "Yiheng Zhu", "url": "https://www.linkedin.com/in/yihengz/" },
-        {
-          "name": "Guoxian Song",
-          "url": "https://guoxiansong.github.io/homepage/index.html"
-        },
-        { "name": "Sizhe An", "url": "https://sizhean.github.io/" },
-        {
-          "name": "Janus Þór Kristjánsson",
-          "url": "https://www.linkedin.com/in/janusthor/"
-        },
-        {
-          "name": "Xiao Yang",
-          "url": "https://www.linkedin.com/in/xiao-yang-46464934/"
-        },
-        { "name": "Matthias Zwicker", "url": "http://www.cs.umd.edu/~zwicker/" }
-      ],
-      "conference": "CVPR 2023",
-      "paper_url": "https://openaccess.thecvf.com/content/CVPR2023/html/Chen_PAniC-3D_Stylized_Single-View_3D_Reconstruction_From_Portraits_of_Anime_Characters_CVPR_2023_paper.html",
-      "code_url": "https://github.com/ShuhongChen/panic3d-anime-reconstruction",
-      "image": "static/proj_panic.png"
-    },
-    {
-      "title": "MetaDIP: Accelerating Deep Image Prior with Meta Learning",
-      "authors": [
-        { "name": "Kevin Zhang", "url": "" },
-        {
-          "name": "Mingyang Xie",
-          "url": "https://mingyangx.github.io/"
-        },
-        { "name": "Maharshi Gor", "url": "https://mgor.info/" },
-        {
-          "name": "Yi-Ting Chen",
-          "url": "https://jamie725.github.io/website/"
-        },
-        {
-          "name": "Yvonne Zhou",
-          "url": "https://www.cs.umd.edu/people/skyzhou"
-        },
-        {
-          "name": "Christopher Metzler",
-          "url": "https://www.cs.umd.edu/~metzler/"
-        }
-      ],
-      "conference": "arXiv, 2022",
-      "paper_url": "https://arxiv.org/abs/2209.08452",
-      "image": "static/meta_dip_preview.jpg"
-    },
-    {
-      "title": "Memory-efficient Learning for High-Dimensional MRI Reconstruction",
-      "authors": [
-        {
-          "name": "Ke Wang",
-          "url": "https://people.eecs.berkeley.edu/~kewang/"
-        },
-        {
-          "name": "Christopher Sandino",
-          "url": "https://chrsandino.github.io/"
-        },
-        { "name": "Michael Kellman", "url": "https://kellman.github.io/" },
-        { "name": "Kevin Zhang", "url": "" },
-        {
-          "name": "Shreyas Vasanawala",
-          "url": "https://profiles.stanford.edu/shreyas-vasanawala"
-        },
-        {
-          "name": "Jonathan I. Tamir",
-          "url": "http://users.ece.utexas.edu/~jtamir/"
-        },
-        { "name": "Stella Yu", "url": "https://web.eecs.umich.edu/~stellayu/" },
-        {
-          "name": "Michael Lustig",
-          "url": "http://people.eecs.berkeley.edu/~mlustig/"
-        }
-      ],
-      "conference": "MICCAI 2021",
-      "paper_url": "https://miccai2021.org/openaccess/paperlinks/2021/09/01/305-Paper2251.html",
-      "code_url": "https://github.com/mikgroup/MEL_MRI",
-      "image": "static/miccai_2021_preview.jpg"
-    },
-    {
-      "title": "Memory-efficient Learning for Large-scale Computational Imaging",
-      "authors": [
-        { "name": "Michael Kellman", "url": "https://kellman.github.io/" },
-        { "name": "Kevin Zhang", "url": "" },
-        {
-          "name": "Eric Markley",
-          "url": "https://www.linkedin.com/in/eric-markley/"
-        },
-        {
-          "name": "Jonathan I. Tamir",
-          "url": "http://users.ece.utexas.edu/~jtamir/"
-        },
-        { "name": "Emrah Bostan", "url": "https://emrahbostan.com/" },
-        {
-          "name": "Michael Lustig",
-          "url": "http://people.eecs.berkeley.edu/~mlustig/"
-        },
-        { "name": "Laura Waller", "url": "http://www.laurawaller.com/" }
-      ],
-      "conference": "IEEE TCI 2020",
-      "paper_url": "https://ieeexplore.ieee.org/document/9204455",
-      "code_url": "https://github.com/mikgroup/MELD",
-      "image": "static/meld.png"
-    },
-    {
-      "title": "Memory-Efficient Learning for Unrolled 3D MRI Reconstructions",
-      "authors": [
-        { "name": "Kevin Zhang*", "url": "" },
-        { "name": "Michael Kellman*", "url": "https://kellman.github.io/" },
-        {
-          "name": "Jonathan I. Tamir",
-          "url": "http://users.ece.utexas.edu/~jtamir/"
-        },
-        {
-          "name": "Michael Lustig",
-          "url": "http://people.eecs.berkeley.edu/~mlustig/"
-        },
-        { "name": "Laura Waller", "url": "http://www.laurawaller.com/" }
-      ],
-      "conference": "ISMRM Workshop on Data Sampling and Reconstruction, 2020",
-      "paper_url": "https://www.ismrm.org/workshops/2020/Data/#:~:text=Memory%2DEfficient%20Learning%20for%20Unrolled%203D%20MRI%20Reconstructions",
-      "video_url": "https://www.youtube.com/watch?v=AypmyOlqVK8",
-      "image": "static/3d_mri.png"
-    },
-    {
-      "title": "3D fluorescence deconvolution with deep priors",
-      "authors": [
-        { "name": "Kevin Zhang", "url": "" },
-        { "name": "Michael Kellman", "url": "https://kellman.github.io/" },
-        { "name": "Emrah Bostan", "url": "https://emrahbostan.com/" },
-        { "name": "Laura Waller", "url": "http://www.laurawaller.com/" }
-      ],
-      "conference": "SPIE BiOS 2020",
-      "paper_url": "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11245/112450N/3D-fluorescence-deconvolution-with-deep-priors-Conference-Presentation/10.1117/12.2545041.short?webSyncID=ce46e9e6-ec7a-49da-b6a0-cbad059329ad&sessionGUID=883c9d90-2bc9-993c-ed26-8bead49a28535",
-      "image": "static/spie.png"
-    }
-  ],
+    ],
     "articles": [
-      {
-        "title": "Integer Partition Generating Function Forms",
-        "description": "Motivated by a question from a friend about a statement from a book on number theory.",
-        "date": "2024-05-21-tues",
-        "url": "integer_partition_generating_function_forms/index.html"
-      },
-      {
-        "title": "On an Integral from Griffith's Problem 2.7",
-        "description": "A fun problem from Griffith's book on electrodynamics.",
-        "date": "2024-03-06-wed",
-        "url": "griffiths_prob_2_7_integral/index.html"
-      }
+        {
+            "title": "Integer Partition Generating Function Forms",
+            "description": "Motivated by a question from a friend about a statement from a book on number theory.",
+            "date": "2024-05-21-tues",
+            "url": "integer_partition_generating_function_forms/index.html"
+        },
+        {
+            "title": "On an Integral from Griffith's Problem 2.7",
+            "description": "A fun problem from Griffith's book on electrodynamics.",
+            "date": "2024-03-06-wed",
+            "url": "griffiths_prob_2_7_integral/index.html"
+        }
     ],
-  "projects": {
-    "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
-    "items": [
-      {
-        "title": "Optical Mosaic",
-        "image": "static/optical_mosaic.png",
-        "url": "optical-mosaic"
-      },
-      {
-        "title": "Raindrop Display",
-        "image": "static/raindrop.png",
-        "url": "raindrop-display"
-      },
-      {
-        "title": "3D Scissors Congruence",
-        "image": "static/scissors.png",
-        "url": "scissors-congruence"
-      },
-      {
-        "title": "Tangram Generator",
-        "image": "static/tangram.gif",
-        "url": "dissect"
-      },
-    {
-      "title": "Life Simulator",
-      "image": "static/conway.gif",
-      "url": "genetic"
+    "projects": {
+        "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
+        "items": [
+            {
+                "title": "Optical Mosaic",
+                "image": "static/optical_mosaic.mp4",
+                "url": "optical-mosaic"
+            },
+            {
+                "title": "Raindrop Display",
+                "image": "static/raindrop.mp4",
+                "url": "raindrop-display"
+            },
+            {
+                "title": "3D Scissors Congruence",
+                "image": "static/scissors.mp4",
+                "url": "scissors-congruence"
+            },
+            {
+                "title": "Tangram Generator",
+                "image": "static/tangram.gif",
+                "url": "dissect"
+            },
+            {
+                "title": "Life Simulator",
+                "image": "static/conway.gif",
+                "url": "genetic"
+            },
+            {
+                "title": "Smoke on Manifolds",
+                "image": "static/smoke.gif",
+                "url": "cs184-smoke-simulator"
+            },
+            {
+                "title": "Halftone Display",
+                "image": "static/htd.gif",
+                "url": "halftone-display"
+            },
+            {
+                "title": "Wide Angle Lens Visualizations",
+                "image": "static/walv.gif",
+                "url": "wide-angle-lens-vis"
+            }
+        ]
     },
-    {
-      "title": "Smoke on Manifolds",
-      "image": "static/smoke.gif",
-      "url": "cs184-smoke-simulator"
+    "reading_list": {
+        "preamble": "A sample of inspirational works.",
+        "themes": {
+            "Strange Loops": [
+                {
+                    "title": "G\u00f6del, Escher, Bach"
+                },
+                {
+                    "title": "Don Quixote"
+                },
+                {
+                    "title": "A\u1e63\u1e6d\u0101dhy\u0101y\u012b"
+                }
+            ],
+            "Existential": [
+                {
+                    "title": "Steppenwolf"
+                },
+                {
+                    "title": "The Catcher in the Rye"
+                },
+                {
+                    "title": "One Hundred Years of Solitude"
+                }
+            ],
+            "Speculative": [
+                {
+                    "title": "The Dispossessed"
+                },
+                {
+                    "title": "Brave New World"
+                },
+                {
+                    "title": "Exhalations"
+                }
+            ]
+        }
     },
-    {
-      "title": "Halftone Display",
-      "image": "static/htd.gif",
-      "url": "halftone-display"
-    },
-      {
-        "title": "Wide Angle Lens Visualizations",
-        "image": "static/walv.gif",
-        "url": "wide-angle-lens-vis"
-      }
+    "inspiration": [
+        {
+            "name": "Haozhi Qi",
+            "link": "https://haozhi.io/"
+        },
+        {
+            "name": "orderedlist",
+            "link": "https://github.com/orderedlist/minimal"
+        }
     ]
-  },
-  "reading_list": {
-    "preamble": "A sample of inspirational works.",
-    "themes": {
-      "Strange Loops": [
-        { "title": "Gödel, Escher, Bach" },
-        { "title": "Don Quixote" },
-        { "title": "Aṣṭādhyāyī" }
-      ],
-      "Existential": [
-        { "title": "Steppenwolf" },
-        { "title": "The Catcher in the Rye" },
-        { "title": "One Hundred Years of Solitude" }
-      ],
-      "Speculative": [
-        { "title": "The Dispossessed" },
-        { "title": "Brave New World" },
-        { "title": "Exhalations" }
-      ]
-    }
-  },
-  "inspiration": [
-    { "name": "Haozhi Qi", "link": "https://haozhi.io/" },
-    { "name": "orderedlist", "link": "https://github.com/orderedlist/minimal" }
-  ]
 }
