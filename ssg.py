@@ -14,7 +14,7 @@ def generate_personal_info_html(info):
     <header>
         <div class="row align-items-center">
             <div class="col-md-4 text-center">
-                <img id="profile_pic" src="{info["profile_image"]}">
+                <img id="profile_pic" src="{info["profile_image"]}" style="width: {info.get("profile_image_width", 175)}px;">
             </div>
             <div class="col-md-8">
                 <h1>{info["name"]}</h1>
@@ -213,40 +213,63 @@ def generate_articles_html(articles):
         '''
     return articles_html
 
-def generate_updates_html(updates):
+def generate_update_row_html(update):
+    # Convert date to YYYY-MM format
+    date_str = update.get("date", "")
+    if date_str:
+        try:
+            # Parse the date and format as YYYY-MM
+            from datetime import datetime
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            formatted_date = date_obj.strftime("%Y-%m")
+        except:
+            formatted_date = date_str
+    else:
+        formatted_date = ""
+
+    return f'''
+    <div class="row no-gutters align-items-start updates-row">
+        <div class="col-md-2 content-column">
+            <span class="text-group">
+                <small>{formatted_date}</small>
+            </span>
+        </div>
+        <div class="col-md-10 content-column">
+            <span class="text-group">
+                {update["description"]}
+            </span>
+            {f'<br><a href="{update["url"]}" target="_blank">[Read More]</a>' if update.get("url") else ''}
+        </div>
+    </div>
+    '''
+
+def generate_updates_html(updates, visible_count=3):
     if not updates:
         return ''
-        
+
+    recent_updates = updates[:visible_count]
+    older_updates = updates[visible_count:]
+
     updates_html = '<h4><b>Updates</b></h4>'
-    for update in updates:
-        # Convert date to YYYY-MM format
-        date_str = update.get("date", "")
-        if date_str:
-            try:
-                # Parse the date and format as YYYY-MM
-                from datetime import datetime
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-                formatted_date = date_obj.strftime("%Y-%m")
-            except:
-                formatted_date = date_str
-        else:
-            formatted_date = ""
-            
+    for update in recent_updates:
+        updates_html += generate_update_row_html(update)
+
+    if older_updates:
+        older_html = ''
+        for update in older_updates:
+            older_html += generate_update_row_html(update)
+
         updates_html += f'''
-        <div class="row no-gutters align-items-start updates-row">
-            <div class="col-md-2 content-column">
-                <span class="text-group">
-                    <small>{formatted_date}</small>
-                </span>
-            </div>
-            <div class="col-md-10 content-column">
-                <span class="text-group">
-                    {update["description"]}
-                </span>
-                {f'<br><a href="{update["url"]}" target="_blank">[Read More]</a>' if update.get("url") else ''}
+        <div class="dropdown-container" style="margin-top: 10px; margin-bottom: 20px;">
+            <button class="btn btn-outline-secondary" type="button" id="otherUpdatesButton" data-toggle="collapse" data-target="#otherUpdates" aria-expanded="false" aria-controls="otherUpdates">
+                Show Older Updates
+            </button>
+            <div class="collapse" id="otherUpdates">
+                {older_html}
             </div>
         </div>
         '''
+
     return updates_html
 
 def generate_reading_list_html(reading_list):
@@ -375,6 +398,15 @@ def generate_html_page(data):
                         $(this).text('Hide Fun');
                     } else {
                         $(this).text('Show Fun');
+                    }
+                });
+
+                $('#otherUpdatesButton').text('Show Older Updates');
+                $('#otherUpdatesButton').click(function() {
+                    if($(this).attr('aria-expanded') === 'false') {
+                        $(this).text('Hide Older Updates');
+                    } else {
+                        $(this).text('Show Older Updates');
                     }
                 });
             });

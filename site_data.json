@@ -1,8 +1,9 @@
 {
     "personal_info": {
         "name": "Kevin W. Zhang",
-        "bio": "I'm a 5th year CS PhD student at the <a href=\"https://www.cs.umd.edu/people/kzhang24\">University of Maryland, College Park</a>, working with <a href=\"https://www.cs.umd.edu/~metzler/\">Christopher Metzler</a> and <a href=\"https://jbhuang0604.github.io/\">Jia-Bin Huang</a> on computer vision and computational imaging. Previously, I interned at <a href=\"https://research.adobe.com/\">Adobe Research</a> in SF, where I worked with <a href=\"https://www.dgp.toronto.edu/~hertzman/\">Aaron Hertzmann</a>, and completed a BA in Computer Science and Pure Mathematics at <a href=\"https://ls.berkeley.edu/home\">UC Berkeley</a>, advised by <a href=\"http://www.laurawaller.com/\">Laura Waller</a> and <a href=\"http://people.eecs.berkeley.edu/~mlustig/\">Michael Lustig</a>.",
+        "bio": "I'm currently a research scientist at <a href=\"https://waabi.ai\">Waabi</a>, working on 4D foundation models for autonomous vehicle sensor simulation. I did a CS PhD at the <a href=\"https://www.cs.umd.edu/people/kzhang24\">University of Maryland, College Park</a>, working with <a href=\"https://www.cs.umd.edu/~metzler/\">Christopher Metzler</a> and <a href=\"https://jbhuang0604.github.io/\">Jia-Bin Huang</a> on computer vision and computational imaging. Previously, I interned at <a href=\"https://research.adobe.com/\">Adobe Research</a> in SF, where I worked with <a href=\"https://www.dgp.toronto.edu/~hertzman/\">Aaron Hertzmann</a>, and completed a BA in Computer Science and Pure Mathematics at <a href=\"https://ls.berkeley.edu/home\">UC Berkeley</a>, advised by <a href=\"http://www.laurawaller.com/\">Laura Waller</a> and <a href=\"http://people.eecs.berkeley.edu/~mlustig/\">Michael Lustig</a>.",
         "profile_image": "static/headshot.jpg",
+        "profile_image_width": 235,
         "links": [
             {
                 "platform": "GitHub",
@@ -34,6 +35,14 @@
         "cv_date": "2025-10-21"
     },
     "updates": [
+        {
+            "description": "Moved to SF and joined Waabi as a research scientist.",
+            "date": "2026-07"
+        },
+        {
+            "description": "Defended my PhD at UMD CP. Thanks to my advisors Chris and Jiabin and many other people for the support throughout the years!",
+            "date": "2026-04"
+        },
         {
             "description": "Acoustic Neural 3D Reconstruction Under Pose Drift accepted at IROS 2025. Congratulations to Tianxiang and Mohamad!",
             "date": "2025-06"
