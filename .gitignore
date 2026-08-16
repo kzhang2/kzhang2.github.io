@@ -2,3 +2,4 @@ node_modules/
 fonts/
 .DS_Store
 *.mov
+__pycache__/

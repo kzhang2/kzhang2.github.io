@@ -1,6 +1,8 @@
 import json
 import os
 
+import sync_projects
+
 # Load site metadata from a JSON file
 def load_metadata(file_path):
     with open(file_path, 'r') as file:
@@ -422,6 +424,7 @@ def main():
     metadata_file = 'site_data.json'
     output_file = 'index.html'
 
+    sync_projects.sync()
     data = load_metadata(metadata_file)
     html_content = generate_html_page(data)
 

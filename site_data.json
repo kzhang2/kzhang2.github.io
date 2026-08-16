@@ -524,49 +524,49 @@
         "preamble": "I also enjoy building small web apps to visualize algorithmic ideas. The source code for these projects is on my Github.",
         "items": [
             {
-                "title": "Neural World Model",
-                "image": "static/flash-world-model.gif",
-                "url": "world-model"
-            },
-            {
-                "title": "Optical Mosaic",
-                "image": "static/optical_mosaic.mp4",
-                "url": "optical-mosaic"
-            },
-            {
-                "title": "Raindrop Display",
-                "image": "static/raindrop.mp4",
-                "url": "raindrop-display"
-            },
-            {
                 "title": "3D Scissors Congruence",
                 "image": "static/scissors.mp4",
-                "url": "scissors-congruence"
-            },
-            {
-                "title": "Tangram Generator",
-                "image": "static/tangram.gif",
-                "url": "dissect"
-            },
-            {
-                "title": "Life Simulator",
-                "image": "static/conway.gif",
-                "url": "genetic"
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/3d-scissors-congruence/demo/index.html"
             },
             {
                 "title": "Smoke on Manifolds",
                 "image": "static/smoke.gif",
-                "url": "cs184-smoke-simulator"
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/cs184-smoke-simulator/demo/index.html"
+            },
+            {
+                "title": "Tangram Generator",
+                "image": "static/tangram.gif",
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/dissect/demo/index.html"
+            },
+            {
+                "title": "Life Simulator",
+                "image": "static/conway.gif",
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/genetic/demo/index.html"
             },
             {
                 "title": "Halftone Display",
                 "image": "static/htd.gif",
-                "url": "halftone-display"
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/halftone-display/demo/index.html"
+            },
+            {
+                "title": "Optical Mosaic",
+                "image": "static/optical_mosaic.mp4",
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/interactive-infinite-zoom-photo-mosaic/demo/index.html"
+            },
+            {
+                "title": "Raindrop Display",
+                "image": "static/raindrop.mp4",
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/raindrop-display/demo/index.html"
             },
             {
                 "title": "Wide Angle Lens Visualizations",
                 "image": "static/walv.gif",
-                "url": "wide-angle-lens-vis"
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/wide-angle-lens-vis/demo/index.html"
+            },
+            {
+                "title": "Neural World Model",
+                "image": "static/flash-world-model.gif",
+                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/world-model/demo/index.html"
             }
         ]
     },
