@@ -1,0 +1,47 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", system-ui, sans-serif;
+  line-height: 1.65;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  color: #202124;
+  background: #fff;
+}
+
+nav,
+.content {
+  width: min(100%, 800px);
+  margin-inline: auto;
+}
+
+nav {
+  margin-bottom: 32px;
+}
+
+a {
+  color: #2457a7;
+}
+
+h1 {
+  line-height: 1.2;
+  margin-bottom: 32px;
+}
+
+p,
+li {
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 18px;
+  }
+
+  mjx-container[display="true"] {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}

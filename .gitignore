@@ -3,3 +3,5 @@ fonts/
 .DS_Store
 *.mov
 __pycache__/
+.claude/
+_site/
