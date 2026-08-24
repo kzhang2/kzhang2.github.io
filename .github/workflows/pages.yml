@@ -22,16 +22,20 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: "3.13"
+          enable-cache: true
+      - name: Install Python and project environment
+        run: |
+          uv python install
+          uv sync --locked
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Build site
-        run: python3 scripts/build.py
+        run: uv run --locked python scripts/build.py
       - name: Check local links
-        run: python3 scripts/check_site.py _site
+        run: uv run --locked python scripts/check_site.py _site
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

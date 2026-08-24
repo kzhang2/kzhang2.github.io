@@ -3,5 +3,6 @@ fonts/
 .DS_Store
 *.mov
 __pycache__/
+.venv/
 .claude/
 _site/

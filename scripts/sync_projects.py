@@ -4,7 +4,7 @@
 Single source of truth: ../site-pipeline/sideprojects.metadata.json (which projects are
 public, plus title/image overrides) combined with ../site-pipeline/sideprojects-static-site/
 site-data.json (auto-discovered demo path, produced by build_sideprojects_site.py). Run
-`python3 build_sideprojects_site.py` in site-pipeline/ first so that file is up to date.
+`uv run python build_sideprojects_site.py` in site-pipeline/ first so that file is up to date.
 
 Each generated project card links straight to the Netlify-hosted demo instead of a copy
 vendored into this repo, so there is nothing to hand-copy/rename when a project changes.

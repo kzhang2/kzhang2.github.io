@@ -1,0 +1,10 @@
+[project]
+name = "kzhang2-github-io"
+version = "0.1.0"
+description = "Build tooling for Kevin W. Zhang's personal website"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.uv]
+package = false

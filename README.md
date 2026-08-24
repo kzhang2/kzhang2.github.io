@@ -23,8 +23,9 @@ it in the shared article template and stylesheet.
 Build and validate the site:
 
 ```sh
-python3 scripts/build.py
-python3 scripts/check_site.py _site
+uv sync
+uv run python scripts/build.py
+uv run python scripts/check_site.py _site
 ```
 
 For automatic rebuilds and a local server, install `entr` and run:
@@ -36,7 +37,7 @@ For automatic rebuilds and a local server, install `entr` and run:
 To update side-project cards, first rebuild `../site-pipeline`, then run:
 
 ```sh
-python3 scripts/sync_projects.py
+uv run python scripts/sync_projects.py
 ```
 
 ## Deployment

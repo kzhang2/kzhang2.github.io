@@ -14,11 +14,11 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-python3 scripts/build.py
-find content scripts articles static -type f | entr -rn python3 scripts/build.py &
+uv run python scripts/build.py
+find content scripts articles static -type f | entr -rn uv run python scripts/build.py &
 rebuild_pid=$!
 
-python3 -m http.server 8000 --directory _site &
+uv run python -m http.server 8000 --directory _site &
 serve_pid=$!
 
 wait
