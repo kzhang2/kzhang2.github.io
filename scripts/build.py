@@ -332,10 +332,24 @@ def generate_reading_list_html(reading_list):
     
     return reading_list_html
 
-# Generate HTML for the inspiration section
-def generate_inspiration_html(inspiration):
-    inspiration_html = ', '.join([f'<a href="{attribute(inspire["link"])}">{inspire["name"]}</a>' for inspire in inspiration])
-    return f'<p>Site design inspired by {inspiration_html}.</p>'
+def generate_gratitude_html(gratitude):
+    people = gratitude.get("people", [])
+    if not people:
+        return ''
+    links = [
+        f'<a href="{attribute(person["url"])}">{escape(person["name"])}</a>'
+        for person in people
+    ]
+    if len(links) > 2:
+        names = ', '.join(links[:-1]) + ', and ' + links[-1]
+    else:
+        names = ' and '.join(links)
+    preamble = escape(gratitude.get("preamble", "I'm extremely grateful for the following friends"))
+    return f'''<section id="gratitude">
+        <h4><b>Gratitude</b></h4>
+        <p class="text-group">{preamble} - {names}.</p>
+    </section>'''
+
 
 # Generate the full HTML page
 def generate_html_page(data):
@@ -365,7 +379,7 @@ def generate_html_page(data):
     articles_html = generate_articles_html(data.get('articles', []))
     projects_html = generate_projects_html(data['projects'])
     reading_list_html = generate_reading_list_html(data.get('reading_list', {}))
-    inspiration_html = generate_inspiration_html(data['inspiration'])
+    gratitude_html = generate_gratitude_html(data.get('gratitude', {}))
 
     html_body = f'''
     {personal_info_html}
@@ -389,10 +403,7 @@ def generate_html_page(data):
     {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
         </div>
     </section>
-    <section>
-        <br>
-        {inspiration_html}
-    </section>
+    {gratitude_html}
     '''
 
     html_footer = '''

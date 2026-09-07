@@ -34,6 +34,11 @@ For automatic rebuilds and a local server, install `entr` and run:
 ./dev.sh
 ```
 
+Open http://localhost:8080. Source changes rebuild the site and automatically
+refresh the browser. Requires Node/npm for `live-server` (cached by `npx`).
+Use `./dev.sh --no-reload` to serve without watching or browser refresh for
+tests and controlled automation. Both modes bind only to loopback.
+
 To update side-project cards, first rebuild `../site-pipeline`, then run:
 
 ```sh

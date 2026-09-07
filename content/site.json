@@ -619,14 +619,15 @@
             ]
         }
     },
-    "inspiration": [
-        {
-            "name": "Haozhi Qi",
-            "link": "https://haozhi.io/"
-        },
-        {
-            "name": "orderedlist",
-            "link": "https://github.com/orderedlist/minimal"
-        }
-    ]
+    "gratitude": {
+        "preamble": "I'm extremely grateful for the following friends",
+        "people": [
+            {"name": "Rebecca Y. E. Lin", "url": "https://rebeccayelin.github.io/"},
+            {"name": "Zora Che", "url": "https://zora-che.com/"},
+            {"name": "Brandon Y. Feng", "url": "https://brandonyfeng.github.io/"},
+            {"name": "Ani Nrusimha", "url": "https://anin.dev/"},
+            {"name": "Catherine Cang", "url": "https://x.com/catherine_cang"},
+            {"name": "Anna Brewer", "url": "https://www.syntacticspice.com/"}
+        ]
+    }
 }
