@@ -622,6 +622,7 @@
     "gratitude": {
         "preamble": "I'm extremely grateful for the following friends",
         "people": [
+            {"name": "Daniel Xu", "url": "https://www.linkedin.com/in/daniel-xu-665212215"},
             {"name": "Rebecca Y. E. Lin", "url": "https://rebeccayelin.github.io/"},
             {"name": "Zora Che", "url": "https://zora-che.com/"},
             {"name": "Brandon Y. Feng", "url": "https://brandonyfeng.github.io/"},
