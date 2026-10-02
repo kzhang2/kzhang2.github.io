@@ -27,6 +27,7 @@
             },
             {
                 "platform": "Goodreads",
+                "visible": false,
                 "url": "https://www.goodreads.com/user/show/41379284-kevin-zhang",
                 "icon": "fab fa-goodreads-g"
             }
@@ -582,6 +583,7 @@
         ]
     },
     "reading_list": {
+        "visible": false,
         "preamble": "A sample of inspirational works.",
         "themes": {
             "Strange Loops": [

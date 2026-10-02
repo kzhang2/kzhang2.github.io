@@ -30,6 +30,7 @@ def generate_personal_info_html(info):
     links_html = ' '.join([
         f'<a href="{attribute(link["url"])}" class="black-buttons"><i class="{attribute(link["icon"])} fa-2x"></i></a>'
         for link in info['links']
+        if link.get('visible', True)
     ])
 
     personal_info_html = f'''
@@ -80,11 +81,11 @@ def generate_publications_html(publications):
         ])
 
         featured_html += f'''
-        <div class="row align-items-center publication-row">
-            <div class="col-md-3">
+        <div class="publication-row publication-item">
+            <div class="publication-preview">
                 <img class="img-fluid publication-image" src="{attribute(paper["image"])}" alt="Preview for {attribute(paper['title'])}" loading="lazy">
             </div>
-            <div class="col-md-9 content-column">
+            <div class="publication-details content-column">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -119,11 +120,11 @@ def generate_publications_html(publications):
         ])
 
         other_html += f'''
-        <div class="row align-items-center publication-row">
-            <div class="col-md-3">
+        <div class="publication-row publication-item">
+            <div class="publication-preview">
                 <img class="img-fluid publication-image" src="{attribute(paper["image"])}" alt="Preview for {attribute(paper['title'])}" loading="lazy">
             </div>
-            <div class="col-md-9 content-column">
+            <div class="publication-details content-column">
                 <span class="text-group">
                     <b>{paper["title"]}</b>
                 </span>
@@ -179,7 +180,7 @@ def generate_projects_html(projects):
         else:
             media_html = f'<img src="{attribute(project["image"])}" class="img-fluid project-image" alt="Preview for {attribute(project["title"])}" loading="lazy">'
         projects_html += f'''
-            <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+            <div class="col-6 col-lg-3 mb-4 project-card">
                 <div class="text-center">
                     {media_html}
                     <div>
@@ -215,7 +216,7 @@ def generate_articles_html(articles):
             col_width = "col-md-12"
 
         articles_html += f'''
-        <div class="row align-items-center publication-row">
+        <div class="row align-items-center article-row">
             {image_html}
             <div class="{col_width} content-column">
                 <span class="text-group">
@@ -296,7 +297,7 @@ def generate_updates_html(updates, visible_count=3):
     return updates_html
 
 def generate_reading_list_html(reading_list):
-    if not reading_list:
+    if not reading_list or not reading_list.get('visible', True):
         return ''
     
     preamble = reading_list.get('preamble', '')
@@ -366,7 +367,7 @@ def generate_html_page(data):
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-        <link rel="stylesheet" type="text/css" href="static/css/site.css">
+        <link rel="stylesheet" type="text/css" href="static/css/site.css?v=4">
         <link rel="icon" type="image/x-icon" href="favicon.ico">
     </head>
     <body>
