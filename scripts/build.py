@@ -152,7 +152,6 @@ def generate_publications_html(publications):
         </button>
         <div class="collapse" id="otherPublications">
             <div class="card card-body" style="border: none; padding: 0; text-align: left;">
-                <h5 style="text-align: left;"><b>Additional Publications</b></h5>
                 {other_html}
             </div>
         </div>
