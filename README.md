@@ -8,7 +8,7 @@ pages that share a common stylesheet.
 
 - `content/site.json`: homepage content and publication metadata.
 - `articles/`: article content fragments published under `/articles/<slug>/`.
-- `static/`: deployable styles, images, documents, and optimized project previews.
+- `static/`: deployable styles, images, documents, and static project posters.
 - `media-src/`: source media that should not be copied into the public site.
 - `scripts/build.py`: builds the deployable `_site/` directory.
 - `scripts/sync_projects.py`: refreshes personal-site project cards from the
@@ -51,6 +51,6 @@ uv run python scripts/sync_projects.py
 GitHub Pages. The repository's Pages source must be set to **GitHub Actions** in
 the repository settings before enabling the workflow.
 
-The legacy article paths are emitted as redirects. `2025_zora_bday.mp4` is also
-copied to its historical root URL because that standalone public link may have
-been shared externally.
+The legacy article paths are emitted as redirects. Project cards use static
+poster images from shared metadata; preview videos and the standalone birthday
+video are no longer published.

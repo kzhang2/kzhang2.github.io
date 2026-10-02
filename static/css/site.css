@@ -2,7 +2,7 @@
 body {
   font-family: "Inter", sans-serif;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.45;
 }
 
 h1 {
@@ -175,8 +175,8 @@ hr {
 
 .text-group {
   display:inline-block; 
-  line-height: 1.6;
-  padding-bottom: 10px;
+  line-height: 1.45;
+  padding-bottom: 6px;
 }
 
 #gratitude a {
@@ -208,18 +208,19 @@ hr {
 }
 
 .dropdown-container {
+  margin: 12px 0;
   text-align: center;
 }
 
 /* Section spacing overrides */
 section {
   margin-bottom: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
 }
 
 header {
   margin-bottom: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
 }
 
 /* Publication and Article Images */
@@ -245,8 +246,10 @@ header {
 }
 
 .updates-row {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 12px;
+  margin: 6px 0;
   text-align: left;
 }
 
@@ -337,4 +340,12 @@ header {
     grid-template-columns: 64px minmax(0, 1fr);
     gap: 10px;
   }
+}
+
+.updates-row .text-group {
+  padding-bottom: 0;
+}
+
+.update-date {
+  white-space: nowrap;
 }

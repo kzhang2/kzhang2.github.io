@@ -146,7 +146,7 @@ def generate_publications_html(publications):
     dropdown_html = f'''
     {featured_html}
     
-    <div class="dropdown-container" style="margin-top: 30px; margin-bottom: 20px;">
+    <div class="dropdown-container">
         <button class="btn btn-outline-secondary" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
             Show Additional Publications
         </button>
@@ -169,16 +169,14 @@ def generate_projects_html(projects):
     # Generate HTML for projects using grid layout
     projects_html = f'''
     <span class="text-group">{preamble}</span>
-    <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+    <div class="card card-body" style="border: none; padding: 10px 0 0 0;">
         <div class="row">
     '''
     
     for project in project_items:
-        if project["image"].endswith((".mp4", ".webm")):
-            poster = f' poster="{attribute(project["poster"])}"' if project.get("poster") else ""
-            media_html = f'<video src="{attribute(project["image"])}" class="img-fluid project-image" autoplay loop muted playsinline preload="metadata"{poster}></video>'
-        else:
-            media_html = f'<img src="{attribute(project["image"])}" class="img-fluid project-image" alt="Preview for {attribute(project["title"])}" loading="lazy">'
+        # Use static posters so project previews do not require video downloads.
+        preview = project.get("poster") or project["image"]
+        media_html = f'<img src="{attribute(preview)}" class="img-fluid project-image" alt="Preview for {attribute(project["title"])}" loading="lazy">'
         projects_html += f'''
             <div class="col-6 col-lg-3 mb-4 project-card">
                 <div class="text-center">
@@ -252,13 +250,13 @@ def generate_update_row_html(update):
         formatted_date = ""
 
     return f'''
-    <div class="row no-gutters align-items-start updates-row">
-        <div class="col-md-2 content-column">
+    <div class="updates-row">
+        <div class="update-date content-column">
             <span class="text-group">
                 <small>{formatted_date}</small>
             </span>
         </div>
-        <div class="col-md-10 content-column">
+        <div class="update-description content-column">
             <span class="text-group">
                 {update["description"]}
             </span>
@@ -284,7 +282,7 @@ def generate_updates_html(updates, visible_count=3):
             older_html += generate_update_row_html(update)
 
         updates_html += f'''
-        <div class="dropdown-container" style="margin-top: 10px; margin-bottom: 20px;">
+        <div class="dropdown-container">
             <button class="btn btn-outline-secondary" type="button" id="otherUpdatesButton" data-toggle="collapse" data-target="#otherUpdates" aria-expanded="false" aria-controls="otherUpdates">
                 Show Older Updates
             </button>
@@ -309,7 +307,7 @@ def generate_reading_list_html(reading_list):
     
     # Generate HTML for themes using grid layout similar to projects
     reading_list_html += f'''
-    <div class="card card-body" style="border: none; padding: 20px 0 0 0;">
+    <div class="card card-body" style="border: none; padding: 10px 0 0 0;">
         <div class="row">
     '''
     
@@ -367,7 +365,7 @@ def generate_html_page(data):
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-        <link rel="stylesheet" type="text/css" href="static/css/site.css?v=4">
+        <link rel="stylesheet" type="text/css" href="static/css/site.css?v=5">
         <link rel="icon" type="image/x-icon" href="favicon.ico">
     </head>
     <body>
@@ -390,7 +388,7 @@ def generate_html_page(data):
         {publications_html}
     </section>
     <section>
-        <div class="dropdown-container" style="margin-bottom: 20px;">
+        <div class="dropdown-container">
             <button class="btn btn-outline-secondary" type="button" id="funSectionButton" data-toggle="collapse" data-target="#funSection" aria-expanded="false" aria-controls="funSection">
                 Show Fun
             </button>
@@ -552,11 +550,6 @@ def build(output_path):
     )
     shutil.copy2(ROOT / "CNAME", output_path / "CNAME")
     shutil.copy2(STATIC_PATH / "icons" / "favicon.ico", output_path / "favicon.ico")
-
-    # Preserve the intentionally public standalone video at its existing URL.
-    birthday_video = ROOT / "2025_zora_bday.mp4"
-    if birthday_video.exists():
-        shutil.copy2(birthday_video, output_path / birthday_video.name)
 
     (output_path / ".nojekyll").write_text("", encoding="utf-8")
     data = load_metadata(CONTENT_PATH)
