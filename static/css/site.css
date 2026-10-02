@@ -196,20 +196,52 @@ hr {
   justify-content: center;
 }
 
-/* Dropdown button styles */
-#otherPublicationsButton, #projectsButton {
-  display: block;
-  margin: 0 auto;
-  transition: all 0.3s ease;
-}
-
-#otherPublicationsButton:hover, #projectsButton:hover {
-  background-color: #f0f0f0;
-}
-
+/* Text disclosures keep secondary content in the page's reading flow. */
 .dropdown-container {
-  margin: 12px 0;
-  text-align: center;
+  margin: 8px 0;
+  text-align: left;
+}
+
+.disclosure-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  padding: 7px 0;
+  background: transparent;
+  color: #495057;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.disclosure-toggle::before {
+  content: "▸";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.disclosure-toggle[aria-expanded="true"]::before {
+  transform: rotate(90deg);
+}
+
+.disclosure-toggle:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.disclosure-toggle:focus-visible, .project-link:focus-visible {
+  outline: 2px solid #0056b3;
+  outline-offset: 3px;
+}
+
+.project-link {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 0;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 /* Section spacing overrides */
@@ -311,14 +343,6 @@ header {
     border-radius: 6px;
   }
 
-  .project-card .btn {
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    line-height: 1.35;
-    padding: 6px 8px;
-  }
-
   .publication-item {
     grid-template-columns: 80px minmax(0, 1fr);
     gap: 12px;
@@ -348,4 +372,19 @@ header {
 
 .update-date {
   white-space: nowrap;
+}
+
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 15px;
+}
+
+.profile-links .black-buttons {
+  margin-right: 0;
+}
+
+.explore-header h1 {
+  margin-top: 16px;
 }

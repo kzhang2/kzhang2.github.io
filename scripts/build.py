@@ -45,7 +45,7 @@ def generate_personal_info_html(info):
                     {info["bio"]}
                 </span>
                 <div style="margin-top: 10px;">
-                    <div class="p2">{links_html} <a href="{attribute(info["cv_url"])}" class="black-buttons"><i class="ai ai-cv fa-2x"></i></a></div>
+                    <div class="profile-links">{links_html} <a href="{attribute(info["cv_url"])}" class="black-buttons"><i class="ai ai-cv fa-2x"></i></a> <a href="/explore.html" class="black-buttons" aria-label="Articles and side projects" title="Articles &amp; side projects"><i class="fa-regular fa-lightbulb fa-2x" aria-hidden="true"></i></a></div>
                 </div>
             </div>
         </div>
@@ -147,8 +147,8 @@ def generate_publications_html(publications):
     {featured_html}
     
     <div class="dropdown-container">
-        <button class="btn btn-outline-secondary" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
-            Show Additional Publications
+        <button class="disclosure-toggle" type="button" id="otherPublicationsButton" data-toggle="collapse" data-target="#otherPublications" aria-expanded="false" aria-controls="otherPublications">
+            Additional publications
         </button>
         <div class="collapse" id="otherPublications">
             <div class="card card-body" style="border: none; padding: 0; text-align: left;">
@@ -182,7 +182,7 @@ def generate_projects_html(projects):
                 <div class="text-center">
                     {media_html}
                     <div>
-                        <a class="btn btn-secondary btn-sm" href="{attribute(project["url"])}">{project["title"]}</a>
+                        <a class="project-link" href="{attribute(project["url"])}">{project["title"]}</a>
                     </div>
                 </div>
             </div>
@@ -283,8 +283,8 @@ def generate_updates_html(updates, visible_count=3):
 
         updates_html += f'''
         <div class="dropdown-container">
-            <button class="btn btn-outline-secondary" type="button" id="otherUpdatesButton" data-toggle="collapse" data-target="#otherUpdates" aria-expanded="false" aria-controls="otherUpdates">
-                Show Older Updates
+            <button class="disclosure-toggle" type="button" id="otherUpdatesButton" data-toggle="collapse" data-target="#otherUpdates" aria-expanded="false" aria-controls="otherUpdates">
+                Older updates
             </button>
             <div class="collapse" id="otherUpdates">
                 {older_html}
@@ -351,7 +351,7 @@ def generate_gratitude_html(gratitude):
 
 
 # Generate the full HTML page
-def generate_html_page(data):
+def generate_html_page(data, explore=False):
     html_header = '''
     <!DOCTYPE html>
     <html lang="en">
@@ -365,7 +365,7 @@ def generate_html_page(data):
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-        <link rel="stylesheet" type="text/css" href="static/css/site.css?v=5">
+        <link rel="stylesheet" type="text/css" href="static/css/site.css?v=8">
         <link rel="icon" type="image/x-icon" href="favicon.ico">
     </head>
     <body>
@@ -387,22 +387,27 @@ def generate_html_page(data):
         <h4><b>Publications</b> (* indicates equal contribution)</h4>
         {publications_html}
     </section>
-    <section>
-        <div class="dropdown-container">
-            <button class="btn btn-outline-secondary" type="button" id="funSectionButton" data-toggle="collapse" data-target="#funSection" aria-expanded="false" aria-controls="funSection">
-                Show Fun
-            </button>
-        </div>
-        <div class="collapse" id="funSection">
-    {articles_html and f'<section>{articles_html}</section>' or ''}
-    <section>
-        <h4><b>Side Projects</b></h4>
-        {projects_html}
-    </section>
-    {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
-        </div>
-    </section>
     {gratitude_html}
+    '''
+
+    if explore:
+        html_header = html_header.replace(
+            '<title>Kevin W. Zhang</title>',
+            '<title>Articles &amp; Side Projects — Kevin W. Zhang</title>',
+        )
+        html_body = f'''
+    <header class="explore-header">
+        <a href="/">← Kevin W. Zhang</a>
+        <h1>Articles &amp; Side Projects</h1>
+    </header>
+    <main>
+        {articles_html and f'<section>{articles_html}</section>' or ''}
+        <section>
+            <h4><b>Side Projects</b></h4>
+            {projects_html}
+        </section>
+        {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
+    </main>
     '''
 
     html_footer = '''
@@ -410,39 +415,7 @@ def generate_html_page(data):
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-        <script>
-            // Add event listener to change button text when dropdowns are toggled
-            $(document).ready(function() {
-                // Initialize button text
-                $('#otherPublicationsButton').text('Show Additional Publications');
-                
-                $('#otherPublicationsButton').click(function() {
-                    if($(this).attr('aria-expanded') === 'false') {
-                        $(this).text('Hide Additional Publications');
-                    } else {
-                        $(this).text('Show Additional Publications');
-                    }
-                });
 
-                $('#funSectionButton').text('Show Fun');
-                $('#funSectionButton').click(function() {
-                    if($(this).attr('aria-expanded') === 'false') {
-                        $(this).text('Hide Fun');
-                    } else {
-                        $(this).text('Show Fun');
-                    }
-                });
-
-                $('#otherUpdatesButton').text('Show Older Updates');
-                $('#otherUpdatesButton').click(function() {
-                    if($(this).attr('aria-expanded') === 'false') {
-                        $(this).text('Hide Older Updates');
-                    } else {
-                        $(this).text('Show Older Updates');
-                    }
-                });
-            });
-        </script>
     </body>
     </html>
     '''
@@ -554,6 +527,7 @@ def build(output_path):
     (output_path / ".nojekyll").write_text("", encoding="utf-8")
     data = load_metadata(CONTENT_PATH)
     (output_path / "index.html").write_text(generate_html_page(data), encoding="utf-8")
+    (output_path / "explore.html").write_text(generate_html_page(data, explore=True), encoding="utf-8")
     build_articles(data.get("articles", []), output_path)
 
     for old_path, destination in LEGACY_REDIRECTS.items():
