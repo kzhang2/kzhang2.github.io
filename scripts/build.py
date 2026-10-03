@@ -386,7 +386,6 @@ def generate_html_page(data, explore=False):
         <h4><b>Publications</b> (* indicates equal contribution)</h4>
         {publications_html}
     </section>
-    {gratitude_html}
     '''
 
     if explore:
@@ -406,6 +405,7 @@ def generate_html_page(data, explore=False):
             {projects_html}
         </section>
         {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
+        {gratitude_html}
     </main>
     '''
 
@@ -442,7 +442,7 @@ def generate_article_page(article, body):
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-    <nav><a href="/">← Kevin W. Zhang</a></nav>
+    <nav><a href="/explore.html">← Articles &amp; Side Projects</a></nav>
     <main class="content">
 {body.strip()}
     </main>
