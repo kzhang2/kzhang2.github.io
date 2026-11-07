@@ -530,55 +530,55 @@
                 "title": "3D Scissors Congruence",
                 "image": "static/projects/3d-scissors-congruence/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/3d-scissors-congruence/demo/index.html",
-                "poster": "static/projects/3d-scissors-congruence/poster.png"
+                "poster": "static/projects/3d-scissors-congruence/poster.png?v=e11ab217d910"
             },
             {
                 "title": "Smoke on Manifolds",
                 "image": "static/projects/cs184-smoke-simulator/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/cs184-smoke-simulator/demo/index.html",
-                "poster": "static/projects/cs184-smoke-simulator/poster.jpg"
+                "poster": "static/projects/cs184-smoke-simulator/poster.jpg?v=a1e0088adfde"
             },
             {
                 "title": "Tangram Generator",
                 "image": "static/projects/dissect/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/dissect/demo/index.html",
-                "poster": "static/projects/dissect/poster.jpg"
+                "poster": "static/projects/dissect/poster.jpg?v=8234f0133579"
             },
             {
                 "title": "Life Simulator",
                 "image": "static/projects/genetic/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/genetic/demo/index.html",
-                "poster": "static/projects/genetic/poster.jpg"
+                "poster": "static/projects/genetic/poster.jpg?v=41499f4fa5f5"
             },
             {
                 "title": "Halftone Display",
                 "image": "static/projects/halftone-display/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/halftone-display/demo/index.html",
-                "poster": "static/projects/halftone-display/poster.jpg"
+                "poster": "static/projects/halftone-display/poster.jpg?v=24a30b4a3688"
             },
             {
                 "title": "Optical Mosaic",
                 "image": "static/projects/interactive-infinite-zoom-photo-mosaic/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/interactive-infinite-zoom-photo-mosaic/demo/index.html",
-                "poster": "static/projects/interactive-infinite-zoom-photo-mosaic/poster.png"
+                "poster": "static/projects/interactive-infinite-zoom-photo-mosaic/poster.png?v=aa666de34829"
             },
             {
                 "title": "Raindrop Display",
                 "image": "static/projects/raindrop-display/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/raindrop-display/demo/index.html",
-                "poster": "static/projects/raindrop-display/poster.png"
+                "poster": "static/projects/raindrop-display/poster.png?v=b7549e9da64f"
             },
             {
                 "title": "Wide Angle Lens Visualizations",
                 "image": "static/projects/wide-angle-lens-vis/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/wide-angle-lens-vis/demo/index.html",
-                "poster": "static/projects/wide-angle-lens-vis/poster.jpg"
+                "poster": "static/projects/wide-angle-lens-vis/poster.jpg?v=666539c63cae"
             },
             {
                 "title": "Neural World Model",
                 "image": "static/projects/world-model/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/world-model/demo/index.html",
-                "poster": "static/projects/world-model/poster.jpg"
+                "poster": "static/projects/world-model/poster.jpg?v=0fda99d4d19b"
             }
         ]
     },
