@@ -557,12 +557,6 @@
                 "poster": "static/projects/halftone-display/poster.jpg?v=24a30b4a3688"
             },
             {
-                "title": "Optical Mosaic",
-                "image": "static/projects/interactive-infinite-zoom-photo-mosaic/preview.mp4",
-                "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/interactive-infinite-zoom-photo-mosaic/demo/index.html",
-                "poster": "static/projects/interactive-infinite-zoom-photo-mosaic/poster.png?v=aa666de34829"
-            },
-            {
                 "title": "Raindrop Display",
                 "image": "static/projects/raindrop-display/preview.mp4",
                 "url": "https://sideprojects--wondrous-brigadeiros-fd4d90.netlify.app/projects/raindrop-display/demo/index.html",
