@@ -330,25 +330,6 @@ def generate_reading_list_html(reading_list):
     
     return reading_list_html
 
-def generate_gratitude_html(gratitude):
-    people = gratitude.get("people", [])
-    if not people:
-        return ''
-    links = [
-        f'<a href="{attribute(person["url"])}">{escape(person["name"])}</a>'
-        for person in people
-    ]
-    if len(links) > 2:
-        names = ', '.join(links[:-1]) + ', and ' + links[-1]
-    else:
-        names = ' and '.join(links)
-    preamble = escape(gratitude.get("preamble", "I'm extremely grateful for the following friends"))
-    return f'''<section id="gratitude">
-        <h4><b>Gratitude</b></h4>
-        <p class="text-group">{preamble} - {names}.</p>
-    </section>'''
-
-
 # Generate the full HTML page
 def generate_html_page(data, explore=False):
     html_header = '''
@@ -377,7 +358,6 @@ def generate_html_page(data, explore=False):
     articles_html = generate_articles_html(data.get('articles', []))
     projects_html = generate_projects_html(data['projects'])
     reading_list_html = generate_reading_list_html(data.get('reading_list', {}))
-    gratitude_html = generate_gratitude_html(data.get('gratitude', {}))
 
     html_body = f'''
     {personal_info_html}
@@ -405,7 +385,6 @@ def generate_html_page(data, explore=False):
             {projects_html}
         </section>
         {reading_list_html and f'<section>{reading_list_html}</section>' or ''}
-        {gratitude_html}
     </main>
     '''
 
